@@ -1,6 +1,8 @@
 package com.microservice_ecommerce.auth.service;
 
 import com.microservice_ecommerce.auth.DTOs.AuthResponse;
+import com.microservice_ecommerce.auth.DTOs.ForgotPasswordRequest;
+import com.microservice_ecommerce.auth.DTOs.ResetPasswordRequest;
 import com.microservice_ecommerce.auth.DTOs.SignInRequest;
 import com.microservice_ecommerce.auth.DTOs.SignUpRequest;
 import com.microservice_ecommerce.auth.model.User;
@@ -11,4 +13,8 @@ public interface UserService {
     User createUser(SignUpRequest signUpRequest);
 
     AuthResponse signin(SignInRequest signInRequest);
+
+    void forgotPassword(ForgotPasswordRequest forgotPasswordRequest);
+
+    void resetPassword(ResetPasswordRequest resetPasswordRequest);
 }

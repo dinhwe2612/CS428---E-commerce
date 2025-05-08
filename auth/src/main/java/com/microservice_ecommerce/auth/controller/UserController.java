@@ -2,6 +2,8 @@ package com.microservice_ecommerce.auth.controller;
 
 import com.microservice_ecommerce.auth.DTOs.ApiResponse;
 import com.microservice_ecommerce.auth.DTOs.AuthResponse;
+import com.microservice_ecommerce.auth.DTOs.ForgotPasswordRequest;
+import com.microservice_ecommerce.auth.DTOs.ResetPasswordRequest;
 import com.microservice_ecommerce.auth.DTOs.SignInRequest;
 import com.microservice_ecommerce.auth.DTOs.SignUpRequest;
 import com.microservice_ecommerce.auth.model.User;
@@ -33,6 +35,20 @@ public class UserController {
     public ResponseEntity<ApiResponse<AuthResponse>> signin(@RequestBody SignInRequest signInRequest) {
         AuthResponse authResponse = userService.signin(signInRequest);
         ApiResponse<AuthResponse> response = new ApiResponse<>(true, "Sign in successful", authResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        userService.forgotPassword(forgotPasswordRequest);
+        ApiResponse<String> response = new ApiResponse<>(true, "Password reset link sent to email", null);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        userService.resetPassword(resetPasswordRequest);
+        ApiResponse<String> response = new ApiResponse<>(true, "Password reset successfully", null);
         return ResponseEntity.ok(response);
     }
 
