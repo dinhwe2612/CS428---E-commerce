@@ -8,6 +8,8 @@ import com.microservice_ecommerce.auth.exception.UserAlreadyExistsException;
 import com.microservice_ecommerce.auth.model.User;
 import com.microservice_ecommerce.auth.repository.UserRepository;
 import com.microservice_ecommerce.auth.service.UserService;
+import com.microservice_ecommerce.auth.util.PasswordEncoder;
+
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,10 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private UserRepository userRepository;
+
+    private PasswordEncoder passwordEncoder;
+
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
     private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
@@ -37,7 +41,8 @@ public class UserServiceImpl implements UserService {
         String email = signUpRequest.getEmail();
         String password = signUpRequest.getPassword();
         String confirmPassword = signUpRequest.getConfirmPassword();
-        // validate email and poassword format tooo
+        String encodedPassword = passwordEncoder.encodePassword(password);
+
         if (!password.equals(confirmPassword)) {
             throw new ConfirmPasswordDoesNotMatch("Password and confirm password do not match");
         }
@@ -57,7 +62,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(encodedPassword);
 
         return userRepository.save(user);
 
