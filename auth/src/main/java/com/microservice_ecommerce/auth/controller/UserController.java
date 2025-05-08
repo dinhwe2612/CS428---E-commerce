@@ -6,6 +6,8 @@ import com.microservice_ecommerce.auth.DTOs.SignInRequest;
 import com.microservice_ecommerce.auth.DTOs.SignUpRequest;
 import com.microservice_ecommerce.auth.model.User;
 import com.microservice_ecommerce.auth.service.UserService;
+import com.rabbitmq.client.RpcClient.Response;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +33,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<AuthResponse>> signin(@RequestBody SignInRequest signInRequest) {
         AuthResponse authResponse = userService.signin(signInRequest);
         ApiResponse<AuthResponse> response = new ApiResponse<>(true, "Sign in successful", authResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<ApiResponse<String>> testProtectedEndpoint() {
+        ApiResponse<String> response = new ApiResponse<>(true, "Protected endpoint accessed successfully",
+                "This is a protected endpoint");
         return ResponseEntity.ok(response);
     }
 }

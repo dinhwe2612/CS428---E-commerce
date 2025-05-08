@@ -1,5 +1,6 @@
 package com.microservice_ecommerce.auth.service;
 
+import com.microservice_ecommerce.auth.exception.InvalidTokenException;
 import com.microservice_ecommerce.auth.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -52,25 +53,47 @@ public class JWTService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String email = extractUsername(token);
-        User user = (User) userDetails;
-        return (email.equals(user.getEmail())) && !isTokenExpired(token);
+        try {
+            final String email = extractUsername(token);
+            User user = (User) userDetails;
+
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+
+            return (email.equals(user.getEmail())) && !isTokenExpired(token);
+        } catch (Exception e) {
+            throw new InvalidTokenException("Invalid token: " + e.getMessage());
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (Exception e) {
+            throw new InvalidTokenException("Token expired or invalid: " + e.getMessage());
+        }
     }
 
     private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        try {
+            return extractClaim(token, Claims::getExpiration);
+        } catch (Exception e) {
+            throw new InvalidTokenException("Failed to extract token expiration: " + e.getMessage());
+        }
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            throw new InvalidTokenException("Failed to parse token: " + e.getMessage());
+        }
     }
 
     private Key getSigningKey() {
