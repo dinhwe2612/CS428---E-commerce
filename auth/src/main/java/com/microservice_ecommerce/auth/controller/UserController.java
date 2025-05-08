@@ -1,5 +1,6 @@
 package com.microservice_ecommerce.auth.controller;
 
+import com.microservice_ecommerce.auth.DTOs.ApiResponse;
 import com.microservice_ecommerce.auth.DTOs.SignUpRequest;
 import com.microservice_ecommerce.auth.model.User;
 import com.microservice_ecommerce.auth.service.UserService;
@@ -18,9 +19,10 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<ApiResponse<User>> signup(@RequestBody SignUpRequest signUpRequest) {
         User user = userService.createUser(signUpRequest);
-        return ResponseEntity.ok(user);
+        ApiResponse<User> response = new ApiResponse<>(true, "User registered successfully", user);
+        return ResponseEntity.ok(response);
     }
 
 }
