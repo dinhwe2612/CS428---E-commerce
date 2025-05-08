@@ -1,6 +1,8 @@
 package com.microservice_ecommerce.auth.controller;
 
 import com.microservice_ecommerce.auth.DTOs.ApiResponse;
+import com.microservice_ecommerce.auth.DTOs.AuthResponse;
+import com.microservice_ecommerce.auth.DTOs.SignInRequest;
 import com.microservice_ecommerce.auth.DTOs.SignUpRequest;
 import com.microservice_ecommerce.auth.model.User;
 import com.microservice_ecommerce.auth.service.UserService;
@@ -25,4 +27,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/signin")
+    public ResponseEntity<ApiResponse<AuthResponse>> signin(@RequestBody SignInRequest signInRequest) {
+        AuthResponse authResponse = userService.signin(signInRequest);
+        ApiResponse<AuthResponse> response = new ApiResponse<>(true, "Sign in successful", authResponse);
+        return ResponseEntity.ok(response);
+    }
 }
