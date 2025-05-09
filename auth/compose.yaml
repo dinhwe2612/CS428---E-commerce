@@ -3,20 +3,10 @@ services:
     build: .
     container_name: auth-service
     ports:
-      - "8081:8081"
-    environment:
-      - SPRING_APPLICATION_NAME=auth
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/nguhac
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=12345678
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_JPA_SHOW_SQL=true
-      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
-      - SPRING_DOCKER_COMPOSE_ENABLED=false
-      - SERVER_PORT=8081
-      - JWT_SECRET=dadawdwaijdmiada41854185
-      - JWT_EXPIRATION=86400000
+      - "8080:8080"
+   
+    volumes:
+      - ./src/main/resources/application.properties:/app/auth-service/application.properties:ro
     restart: on-failure
     depends_on:
       mysql:
