@@ -64,59 +64,55 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(SignUpRequest signUpRequest) {
-        try {
-            String username = signUpRequest.getUsername();
-            String email = signUpRequest.getEmail();
-            String password = signUpRequest.getPassword();
-            String confirmPassword = signUpRequest.getConfirmPassword();
+        String username = signUpRequest.getUsername();
+        String email = signUpRequest.getEmail();
+        String password = signUpRequest.getPassword();
+        String confirmPassword = signUpRequest.getConfirmPassword();
 
-            if (username == null || username.trim().isEmpty()) {
-                throw new IllegalArgumentException("Username cannot be empty");
-            }
-
-            if (email == null || email.trim().isEmpty()) {
-                throw new IllegalArgumentException("Email cannot be empty");
-            }
-
-            if (password == null || password.trim().isEmpty()) {
-                throw new IllegalArgumentException("Password cannot be empty");
-            }
-
-            if (!password.equals(confirmPassword)) {
-                throw new ConfirmPasswordDoesNotMatch("Password and confirm password do not match");
-            }
-
-            if (userRepository.findByUsername(username).isPresent()) {
-                throw new UserAlreadyExistsException("Username already exists");
-            }
-
-            if (userRepository.findByEmail(email).isPresent()) {
-                throw new UserAlreadyExistsException("Email already exists");
-            }
-
-            if (!isValidEmail(email)) {
-                throw new InvalidEmailException("Invalid email format");
-            }
-
-            if (!isValidPassword(password)) {
-                throw new InvalidPasswordException(
-                        "Password must be at least 8 characters long and contain at least one digit, one uppercase letter, one lowercase letter, and one special character");
-            }
-
-            User user = new User();
-            user.setUsername(username);
-            user.setEmail(email);
-            user.setPassword(passwordEncoder.encode(password));
-            user.setRole(Role.USER);
-            user.setFull_name(username);
-            user.setAvatar_url("");
-            user.setPhone_number("");
-            user.setAddress("");
-
-            return userRepository.save(user);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating user: " + e.getMessage(), e);
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
         }
+
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+
+        if (!password.equals(confirmPassword)) {
+            throw new ConfirmPasswordDoesNotMatch("Password and confirm password do not match");
+        }
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new UserAlreadyExistsException("Username already exists");
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new UserAlreadyExistsException("Email already exists");
+        }
+
+        if (!isValidEmail(email)) {
+            throw new InvalidEmailException("Invalid email format");
+        }
+
+        if (!isValidPassword(password)) {
+            throw new InvalidPasswordException(
+                    "Password must be at least 8 characters long and contain at least one digit, one uppercase letter, one lowercase letter, and one special character");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(Role.USER);
+        user.setFull_name(username);
+        user.setAvatar_url("");
+        user.setPhone_number("");
+        user.setAddress("");
+
+        return userRepository.save(user);
     }
 
     @Override
@@ -190,7 +186,7 @@ public class UserServiceImpl implements UserService {
             throw new InvalidPasswordException(
                     "Password must be at least 8 characters long and contain at least one digit, one uppercase letter, one lowercase letter, and one special character");
         }
-        
+
         String email = jwtService.extractUsername(token);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
