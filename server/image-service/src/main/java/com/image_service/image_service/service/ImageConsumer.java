@@ -34,19 +34,20 @@ public class ImageConsumer {
             Map uploadResult = cloudinary.uploader().upload(request.getTempFilePath(), ObjectUtils.emptyMap());
             System.out.println("Uploaded image to Cloudinary: " + uploadResult);
 
-            saveImageToDatabase(uploadResult);
+            // Save to database
+            images savedImage = saveImageToDatabase(uploadResult);
+            System.out.println("Saved image to database: " + savedImage);
+
         } catch (Exception e) {
             System.out.println("Error uploading image to Cloudinary: " + e.getMessage());
         }
     }
 
-    private void saveImageToDatabase(Map uploadResult) {
+    private images saveImageToDatabase(Map uploadResult) {
         System.out.println("Saving image to database: " + uploadResult);
         images image = new images();
         image.setUrl(uploadResult.get("url").toString());
         image.setPublicId(uploadResult.get("public_id").toString());
-        imageRepository.save(image);
-
-        System.out.println("Image saved to database: " + image);
+        return imageRepository.save(image);
     }
 }

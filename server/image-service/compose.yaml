@@ -1,0 +1,59 @@
+services:
+  auth:
+    build: .
+    container_name: image-service
+    ports:
+      - "8087:8087"
+    env_file:
+      - .env
+    volumes:
+      - ./src/main/resources/application.properties:/app/image-service/application.properties:ro
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      - auth-network
+
+  mysql:
+    image: 'mysql:latest'
+    container_name: image-mysql
+    environment:
+      - 'MYSQL_DATABASE=imagesvc'
+      - 'MYSQL_ROOT_PASSWORD=12345678'
+    ports:
+      - '127.0.0.1:3307:3307'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p12345678"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  rabbitmq:
+    image: 'rabbitmq:latest'
+    container_name: image-rabbitmq
+    environment:
+      - 'RABBITMQ_DEFAULT_PASS=guest'
+      - 'RABBITMQ_DEFAULT_USER=guest'
+    ports:
+      - '127.0.0.1:5673:5672'
+      - '127.0.0.1:15673:15672'
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - auth-network
+
+volumes:
+  mysql-data:
+  rabbitmq-data:
+
+networks:
+  auth-network:
+    driver: bridge
