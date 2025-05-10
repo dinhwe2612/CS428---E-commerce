@@ -32,12 +32,16 @@ public class ImageController {
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Long>> uploadImage(@RequestBody ImageUploadRequest request) {
+        // Generate a unique request ID
+        Long requestId = System.currentTimeMillis();
+
+        // Send to RabbitMQ and return immediately
         rabbitTemplate.convertAndSend(
                 RabbitConfig.EXCHANGE,
                 RabbitConfig.ROUTING_KEY,
                 request);
 
-        Long requestId = System.currentTimeMillis();
+        // Return the request ID immediately
         return ResponseEntity.ok(Map.of("requestId", requestId));
     }
 
