@@ -34,7 +34,7 @@ eureka:
     lease-expiration-duration-in-seconds: 10
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET}
 
 logging:
   level:
@@ -55,14 +55,3 @@ management:
       enabled: true
     health:
       show-details: always
-
-springdoc:
-  swagger-ui:
-    urls:
-      - name: gateway
-        url: /v3/api-docs
-    config-url: /v3/api-docs/swagger-config
-    urls-primary-name: gateway
-  api-docs:
-    enabled: true
-    path: /v3/api-docs 

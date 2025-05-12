@@ -5,21 +5,22 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:mysql://mysql:3306/auth_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+  reset-password:
+    url: ${RESET_PASSWORD_URL:http://localhost:8085/reset-password}
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
 eureka:
   client:
     service-url:
@@ -29,10 +30,11 @@ eureka:
   instance:
     prefer-ip-address: true
     hostname: auth-service
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000  
+  expiration: 86400000
 
 springdoc:
   api-docs:

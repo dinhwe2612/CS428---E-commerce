@@ -31,27 +31,4 @@ eureka:
     prefer-ip-address: true
     hostname: api-gateway
     lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 10
-
-jwt:
-  secret: ${JWT_SECRET}
-
-logging:
-  level:
-    org.springframework.cloud.gateway: INFO
-    reactor.netty: INFO
-    org.springframework.web: INFO
-    com.microservice_ecommerce.gateway: INFO
-    com.netflix.discovery: INFO
-    org.springframework.cloud.netflix: INFO
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,gateway
-  endpoint:
-    gateway:
-      enabled: true
-    health:
-      show-details: always
+    lease-expiration-duration-in-seconds: 10 
