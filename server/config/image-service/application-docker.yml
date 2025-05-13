@@ -1,0 +1,29 @@
+server:
+  port: 8087
+  servlet:
+    context-path: /api/images
+
+spring:
+  application:
+    name: image-service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    preferIpAddress: true
+    hostname: image-service
+
+storage:
+  location: /app/storage
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info 
