@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +22,14 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
     private final JwtUtil jwtUtil;
     private final Cache<String, Claims> tokenCache;
+    private final List<String> openApiEndpoints = Arrays.asList(
+            "/api/v1/auth/signin",
+            "/api/v1/auth/signup",
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password",
+            "/api/images/upload",
+            "/api/images/get"
+    );
 
     public AuthenticationFilter(JwtUtil jwtUtil) {
         super(Config.class);
@@ -35,6 +44,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+            String path = request.getPath().toString();
+
+            if (isOpenEndpoint(path)) {
+                return chain.filter(exchange);
+            }
 
             if (config.isSecured) {
                 if (!request.getHeaders().containsKey("Authorization")) {
@@ -77,6 +91,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             
             return chain.filter(exchange);
         };
+    }
+
+    private boolean isOpenEndpoint(String path) {
+        return openApiEndpoints.stream().anyMatch(path::startsWith);
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String message, HttpStatus status) {

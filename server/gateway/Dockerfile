@@ -10,5 +10,5 @@ FROM amazoncorretto:17-alpine
 WORKDIR /app
 RUN apk add --no-cache curl
 COPY --from=build /app/gateway/target/*.jar app.jar
-EXPOSE 8080
+EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"] 
