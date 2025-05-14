@@ -1,4 +1,4 @@
-package com.image_service.image_service;
+package com.server.user_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class ImageServiceApplication {
+public class UserServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ImageServiceApplication.class, args);
+		SpringApplication.run(UserServiceApplication.class, args);
 	}
 
 }

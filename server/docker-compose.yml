@@ -97,6 +97,30 @@ services:
     networks:
       - microservice-network
 
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8088:8088"
+    env_file:
+      - ./user-service/.env
+    volumes:
+      - ./config/user-service/application-docker.yml:/app/config/application-docker.yml
+      - ./user-service/src:/app/user-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
+
   redis:
     image: redis:latest
     container_name: redis-cache
