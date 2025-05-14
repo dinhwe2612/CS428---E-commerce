@@ -1,9 +1,13 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
+
 COPY pom.xml ./
 COPY image-service/pom.xml ./image-service/
+
+RUN mvn -f image-service/pom.xml dependency:go-offline
+
 COPY image-service/src ./image-service/src/
-WORKDIR /app
+
 RUN mvn -f image-service/pom.xml clean package -DskipTests
 
 FROM amazoncorretto:17-alpine

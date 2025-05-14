@@ -1,9 +1,13 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
+
 COPY pom.xml ./
 COPY auth-service/pom.xml ./auth-service/
+
+RUN mvn -f auth-service/pom.xml dependency:go-offline
+
 COPY auth-service/src ./auth-service/src/
-WORKDIR /app
+
 RUN mvn -f auth-service/pom.xml clean package -DskipTests
 
 FROM amazoncorretto:17-alpine

@@ -12,6 +12,11 @@ services:
       - ./eureka-server/.env
     volumes:
       - ./config/eureka/application-docker.yml:/app/config/application-docker.yml
+      - ./eureka-server/src:/app/eureka-server/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
     networks:
       - microservice-network
     healthcheck:
@@ -32,6 +37,11 @@ services:
       - ./gateway/.env
     volumes:
       - ./config/gateway/application-docker.yml:/app/config/application-docker.yml
+      - ./gateway/src:/app/gateway/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -51,6 +61,11 @@ services:
       - ./auth-service/.env
     volumes:
       - ./config/auth/application-docker.yml:/app/config/application-docker.yml
+      - ./auth-service/src:/app/auth-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -69,6 +84,11 @@ services:
     volumes:
       - ./config/image-service/application-docker.yml:/app/config/application-docker.yml
       - image-storage:/app/storage
+      - ./image-service/src:/app/image-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -106,6 +126,7 @@ services:
 
 volumes:
   image-storage:
+  maven-repo:
 
 networks:
   microservice-network:

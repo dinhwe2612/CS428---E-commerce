@@ -6,45 +6,31 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.image_service.image_service.DTOs.ImageUploadRequest;
-import com.image_service.image_service.model.images;
-import com.image_service.image_service.repository.ImageRepository;
+import com.image_service.image_service.DTOs.ImageResponse;
+import com.image_service.image_service.config.RabbitConfig;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Slf4j
+@RequiredArgsConstructor
 public class ImageConsumer {
-    @Autowired
-    private S3Service s3Service;
-    @Autowired
-    private ImageRepository imageRepository;
 
-    @RabbitListener(queues = "image.upload.queue")
-    public void receiveMessage(ImageUploadRequest request) {
-        System.out.println("Received message: " + request);
+    private final ImageService imageService;
+
+    @RabbitListener(queues = RabbitConfig.UPLOAD_QUEUE)
+    public void processImageMessage(Map<String, Object> imageData) {
         try {
-            Map<String, String> uploadResult = s3Service.uploadFile(request.getTempFilePath());
-            System.out.println("Uploaded image to S3: " + uploadResult);
-
-            // Save to database
-            images savedImage = saveImageToDatabase(uploadResult);
-            System.out.println("Saved image to database: " + savedImage);
-
+            String requestId = (String) imageData.get("requestId");
+            log.info("Processing image message: requestId={}", requestId);
+            
+            ImageResponse savedImage = imageService.saveImageToDatabase(imageData);
+            
+            log.info("Image saved to database: id={}, url={}, publicId={}", 
+                    savedImage.getId(), savedImage.getUrl(), savedImage.getPublicId());
         } catch (Exception e) {
-            System.out.println("Error uploading image to S3: " + e.getMessage());
+            log.error("Error processing image message: {}", e.getMessage(), e);
         }
-    }
-
-    private images saveImageToDatabase(Map<String, String> uploadResult) {
-        System.out.println("Saving image to database: " + uploadResult);
-        images image = new images();
-        image.setUrl(uploadResult.get("url"));
-        image.setPublicId(uploadResult.get("public_id"));
-        return imageRepository.save(image);
     }
 }

@@ -1,7 +1,5 @@
 server:
   port: ${SERVER_PORT}
-  servlet:
-    context-path: /api/images
 
 spring:
   application:

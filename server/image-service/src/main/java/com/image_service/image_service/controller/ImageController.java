@@ -1,54 +1,55 @@
 package com.image_service.image_service.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.image_service.image_service.model.images;
-import com.image_service.image_service.repository.ImageRepository;
-import com.image_service.image_service.service.ImageProducer;
-import com.image_service.image_service.DTOs.ImageUploadRequest;
-import com.image_service.image_service.config.RabbitConfig;
+import com.image_service.image_service.DTOs.ImageRequest;
+import com.image_service.image_service.DTOs.ImageResponse;
+import com.image_service.image_service.service.ImageService;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/images")
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class ImageController {
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private final ImageService imageService;
 
-    @Autowired
-    private ImageRepository imageRepository;
-
-    @PostMapping("/upload")
-    public ResponseEntity<Map<String, Long>> uploadImage(@RequestBody ImageUploadRequest request) {
-        // Generate a unique request ID
-        Long requestId = System.currentTimeMillis();
-
-        // Send to RabbitMQ and return immediately
-        rabbitTemplate.convertAndSend(
-                RabbitConfig.EXCHANGE,
-                RabbitConfig.ROUTING_KEY,
-                request);
-
-        // Return the request ID immediately
-        return ResponseEntity.ok(Map.of("requestId", requestId));
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImage(@ModelAttribute ImageRequest request) {
+        try {
+            MultipartFile file = request.getFile();
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "File cannot be empty"));
+            }
+            
+            ImageResponse response = imageService.uploadImage(file);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("message", "Successfully uploaded image");
+            result.put("url", response.getUrl());
+            result.put("publicId", response.getPublicId());
+            
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> getImage(@PathVariable Long id) {
-        images image = imageRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
-        return ResponseEntity.ok(image.getUrl());
+    public ResponseEntity<?> getImage(@PathVariable Long publicId) {
+        return imageService.getImage(publicId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

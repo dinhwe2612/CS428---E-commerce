@@ -1,9 +1,13 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
+
 COPY pom.xml ./
 COPY gateway/pom.xml ./gateway/
+
+RUN mvn -f gateway/pom.xml dependency:go-offline
+
 COPY gateway/src ./gateway/src/
-WORKDIR /app
+
 RUN mvn -f gateway/pom.xml clean package -DskipTests
 
 FROM amazoncorretto:17-alpine

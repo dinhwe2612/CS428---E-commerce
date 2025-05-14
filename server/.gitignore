@@ -1,2 +1,4 @@
 .idea
 **/.env
+DEVELOPMENT.md
+dev-rebuild.sh

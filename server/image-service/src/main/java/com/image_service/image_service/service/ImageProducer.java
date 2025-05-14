@@ -1,27 +1,27 @@
 package com.image_service.image_service.service;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.image_service.image_service.DTOs.ImageUploadRequest;
 import com.image_service.image_service.config.RabbitConfig;
 
-import java.nio.file.Path;
+import java.util.Map;
 
 @Service
 public class ImageProducer {
-  private final RabbitTemplate template;
-
-  public ImageProducer(RabbitTemplate template) {
-    this.template = template;
+  
+  private final RabbitTemplate rabbitTemplate;
+  
+  @Autowired
+  public ImageProducer(RabbitTemplate rabbitTemplate) {
+    this.rabbitTemplate = rabbitTemplate;
   }
-
-  public void sendUploadRequest(Path tempFile) {
-    ImageUploadRequest msg = new ImageUploadRequest();
-    msg.setTempFilePath(tempFile.toString());
-
-    template.convertAndSend(RabbitConfig.EXCHANGE,
+  
+  public void sendImageToQueue(Map<String, Object> imageData) {
+    rabbitTemplate.convertAndSend(
+        RabbitConfig.EXCHANGE,
         RabbitConfig.ROUTING_KEY,
-        msg);
+        imageData);
   }
 }
