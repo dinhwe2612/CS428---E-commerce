@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity 
+@Entity
 public class images {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,10 +15,6 @@ public class images {
 
   private String url;
 
-  private String publicId;
-  
- 
-  
-  
+  private Long publicId;
 
 }
