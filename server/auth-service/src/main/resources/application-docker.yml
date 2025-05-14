@@ -5,9 +5,9 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:mysql://mysql:3306/auth_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${GL_DB_URL}
+    username: ${GL_DB_USERNAME}
+    password: ${GL_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   mail:
     host: smtp.gmail.com
@@ -32,10 +32,10 @@ eureka:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000  
+  expiration: 86400000
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html 
+    path: /swagger-ui.html
