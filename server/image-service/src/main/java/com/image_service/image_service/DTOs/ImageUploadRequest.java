@@ -10,6 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImageRequest {
+public class ImageUploadRequest {
     private MultipartFile file;
 } 

@@ -12,9 +12,6 @@ public class images {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
   private String url;
-
-  private Long publicId;
-
+  private String publicId;
 }
