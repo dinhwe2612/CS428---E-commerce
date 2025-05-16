@@ -1,10 +1,9 @@
 package com.server.user_service.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.user_service.filter.JwtAuthenticationFilter;
-import com.server.user_service.service.CustomUserDetailsService;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -23,9 +22,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.server.user_service.filter.JwtAuthenticationFilter;
+import com.server.user_service.service.CustomUserDetailsService;
+
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -41,7 +43,7 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(user -> user
-                        .requestMatchers("/api/v1/users/test", "/actuator/**").permitAll()
+                        .requestMatchers( "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
