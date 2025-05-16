@@ -1,38 +1,38 @@
 package com.microservice_ecommerce.auth.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.microservice_ecommerce.auth.DTOs.AuthResponse;
 import com.microservice_ecommerce.auth.DTOs.ForgotPasswordRequest;
 import com.microservice_ecommerce.auth.DTOs.ResetPasswordRequest;
 import com.microservice_ecommerce.auth.DTOs.SignInRequest;
 import com.microservice_ecommerce.auth.DTOs.SignUpRequest;
+import com.microservice_ecommerce.auth.DTOs.UserCreatedMessage;
 import com.microservice_ecommerce.auth.exception.ConfirmPasswordDoesNotMatch;
 import com.microservice_ecommerce.auth.exception.InvalidEmailException;
 import com.microservice_ecommerce.auth.exception.InvalidPasswordException;
 import com.microservice_ecommerce.auth.exception.UserAlreadyExistsException;
 import com.microservice_ecommerce.auth.model.Role;
 import com.microservice_ecommerce.auth.model.User;
+import com.microservice_ecommerce.auth.publisher.UserCreatedPublisher;
 import com.microservice_ecommerce.auth.repository.UserRepository;
 import com.microservice_ecommerce.auth.service.JWTService;
 import com.microservice_ecommerce.auth.service.UserService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.task.TaskExecutionProperties.Simple;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+
+
+
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -44,6 +44,18 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
 
     private final JavaMailSender mailSender;
+
+    private final UserCreatedPublisher userCreatedPublisher;
+
+   @Autowired
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, AuthenticationManager authenticationManager, JavaMailSender mailSender, UserCreatedPublisher userCreatedPublisher) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+        this.mailSender = mailSender;
+        this.userCreatedPublisher = userCreatedPublisher;
+    }
 
     @Value("${spring.reset-password.url}")
     private String resetPasswordUrl;
@@ -112,7 +124,15 @@ public class UserServiceImpl implements UserService {
         user.setPhone_number("");
         user.setAddress("");
 
-        return userRepository.save(user);
+        userRepository.save(user);
+        UserCreatedMessage userCreatedMessage = new UserCreatedMessage();
+        userCreatedMessage.setId(user.getId());
+        userCreatedMessage.setUsername(user.getUsername());
+        userCreatedMessage.setEmail(user.getEmail());
+        userCreatedMessage.setRole(user.getRole().name());
+        userCreatedPublisher.publishUserCreated(userCreatedMessage);
+
+        return user;
     }
 
     @Override
