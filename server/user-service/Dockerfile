@@ -13,5 +13,5 @@ RUN mvn -f user-service/pom.xml clean package -DskipTests
 FROM amazoncorretto:17-alpine
 WORKDIR /app
 COPY --from=build /app/user-service/target/*.jar app.jar
-EXPOSE 8087
+EXPOSE 8088
 ENTRYPOINT ["java", "-jar", "app.jar"] 
