@@ -151,4 +151,12 @@ public class ProductServiceImpl implements ProductService {
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());
     }
-} 
+    @Override
+     public List<ProductDTO> getAll(){
+        List<product> products = productRepository.findAll();
+        return products.stream()
+                .map(entityMapper::toProductDTO)
+                .collect(Collectors.toList());
+    }
+
+}

@@ -120,6 +120,29 @@ services:
         condition: service_started
     networks:
       - microservice-network
+  catalog-service:
+    build:
+      context: .
+      dockerfile: catalog-service/Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8089:8089"
+    env_file:
+      - ./catalog-service/.env
+    volumes:
+      - ./config/catalog-service/application-docker.yml:/app/config/application-docker.yml
+      - ./catalog-service/src:/app/catalog-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
   redis:
     image: redis:latest
