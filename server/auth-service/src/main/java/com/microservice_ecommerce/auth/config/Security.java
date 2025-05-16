@@ -21,6 +21,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.microservice_ecommerce.auth.filter.JwtAuthenticationFilter;
 import com.microservice_ecommerce.auth.service.CustomUserDetailsService;
+
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import java.util.Map;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+
 public class Security {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
