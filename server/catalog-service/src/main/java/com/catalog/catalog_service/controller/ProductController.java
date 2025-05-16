@@ -24,7 +24,7 @@ import com.catalog.catalog_service.dto.request.UpdateProductRequest;
 import com.catalog.catalog_service.service.ProductService;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;

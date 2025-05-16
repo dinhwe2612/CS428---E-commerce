@@ -26,6 +26,9 @@ public class GatewayConfig {
                                                 .uri("lb://auth-service"))
                                 .route("image_service_all", r -> r.path("/api/v1/images/**")
                                                 .uri("lb://image-service"))
+                                .route("catalog_service_all", r -> r.path("/api/v1/catalog/**")
+                                                .filters(f -> f.stripPrefix(3))
+                                                .uri("lb://catalog-service"))
                                 .build();
         }
 

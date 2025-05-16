@@ -19,7 +19,7 @@ import com.catalog.catalog_service.dto.request.UpdateInventoryRequest;
 import com.catalog.catalog_service.service.InventoryService;
 
 @RestController
-@RequestMapping("/api/inventories")
+@RequestMapping("/api/v1/inventories")
 public class InventoryController {
 
     private final InventoryService inventoryService;

@@ -19,7 +19,7 @@ import com.catalog.catalog_service.dto.request.UpdateCategoryRequest;
 import com.catalog.catalog_service.service.CategoryService;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/v1/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;

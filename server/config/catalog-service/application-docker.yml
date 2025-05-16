@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: catalog-service
   datasource:
     url: ${GL_DB_URL}
     username: ${GL_DB_USERNAME}
