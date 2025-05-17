@@ -20,6 +20,17 @@ spring:
           auth: true
           starttls:
             enable: true
+  rabbitmq:
+    host: image-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
 eureka:
   client:
     service-url:

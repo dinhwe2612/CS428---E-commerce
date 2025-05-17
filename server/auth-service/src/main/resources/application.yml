@@ -12,3 +12,15 @@ eureka:
     hostname: localhost
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
+
+  rabbitmq:
+    host: image-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
