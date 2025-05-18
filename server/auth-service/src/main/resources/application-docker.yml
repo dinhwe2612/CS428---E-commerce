@@ -30,6 +30,17 @@ spring:
     compatibility-verifier:
       enabled: false
 
+  rabbitmq:
+    host: image-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
 eureka:
   client:
     service-url:
