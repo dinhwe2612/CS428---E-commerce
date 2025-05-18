@@ -1,17 +1,12 @@
 package com.microservice_ecommerce.gateway.config;
 
-import com.microservice_ecommerce.gateway.filter.AuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.cloud.gateway.filter.factory.SpringCloudCircuitBreakerFilterFactory;
-import org.springframework.cloud.gateway.filter.factory.SpringCloudCircuitBreakerResilience4JFilterFactory;
-import org.springframework.http.HttpMethod;
-import org.springframework.cloud.gateway.discovery.DiscoveryClientRouteDefinitionLocator;
-import org.springframework.cloud.gateway.discovery.DiscoveryLocatorProperties;
+
+import com.microservice_ecommerce.gateway.filter.AuthenticationFilter;
 
 @Configuration
 public class GatewayConfig {
@@ -31,6 +26,8 @@ public class GatewayConfig {
                                                 .uri("lb://catalog-service"))
                                 .route("cart_service_all", r -> r.path("/api/v1/cart/**")
                                                 .uri("lb://cart-service"))
+                                .route("order_service_all", r -> r.path("/api/v1/orders/**")
+                                                .uri("lb://order-service"))
                                 .build();
         }
 

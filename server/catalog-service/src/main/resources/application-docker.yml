@@ -26,6 +26,18 @@ eureka:
   instance:
     preferIpAddress: true
     hostname: user-service
+rabbitmq:
+    host: image-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+
 
 management:
   endpoints:
