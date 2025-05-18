@@ -18,14 +18,7 @@ public class OrderMessageListener {
 
     @RabbitListener(queues = "product.outofstock.queue")
     public void handleOutOfStockEvent(OutOfStockEvent event) {
-        log.info("Received out-of-stock event for order: {}", event.getOrderId());
-        try {
-         
-           orderService.updateOrderStatus(event.getOrderId(), "CANCELLED");
-
-        } catch (Exception e) {
-            log.error("Failed to abort order: {}", event.getOrderId(), e);
-            throw e; 
-        }
+        log.info("Received out-of-stock event: {}", event.getOrderId());
+        orderService.updateOrderStatus(event.getOrderId(), "CANCELLED");
     }
 } 

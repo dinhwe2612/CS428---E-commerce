@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.catalog.catalog_service.RabbitMessage.OrderCreatedMessage;
 import com.catalog.catalog_service.RabbitMessage.OrderItemResponseDTO;
 import com.catalog.catalog_service.dto.request.UpdateInventoryRequest;
+import com.catalog.catalog_service.event.OutOfStockEvent;
 import com.catalog.catalog_service.producer.RabbitProducer;
 import com.catalog.catalog_service.service.InventoryService;
 import com.catalog.catalog_service.service.ProductService;
@@ -21,9 +22,20 @@ public class ProductListener {
     private final ProductService productService;
     private final RabbitProducer rabbitProducer;
 
+  
+
+ 
+        
+
     @RabbitListener(queues = "order.created.queue")
     public void handleOrderCreated(OrderCreatedMessage orderCreatedMessage) {
         log.info("Received order created event: {}", orderCreatedMessage);
+
+        //print the orderCreatedMessage.orderItems IT IS A LIST OF ORDER ITEMS
+       
+        System.out.println("orderCreatedMessage.orderItems: " + orderCreatedMessage.getOrderItems());
+
+
 
         for (OrderItemResponseDTO orderItem : orderCreatedMessage.getOrderItems()) {
             try {
@@ -33,18 +45,28 @@ public class ProductListener {
                 // Get current inventory state
                 Long productId = Long.parseLong(orderItem.getProductId());
                 var currentInventory = inventoryService.getInventoryByProductId(productId);
-                
+                //print the currentInventory
+                System.out.println("currentInventory: " + currentInventory);
                 // Calculate new values
                 int newAvailableStock = currentInventory.getAvailableStock() - orderItem.getQuantity();
+                //print the newAvailableStock
+                System.out.println("newAvailableStock: " + newAvailableStock);
                 int newReservedQuantity = currentInventory.getReservedQuantity() + orderItem.getQuantity();
                 if(newAvailableStock < 0){
                    
-                    rabbitProducer.sendProductOutOfStockMessage(orderItem.getProductId());
-                  
+                    rabbitProducer.sendProductOutOfStockMessage(
+                        new OutOfStockEvent(
+                            orderCreatedMessage.getId(),
+                            orderItem.getProductId(),
+                            "Product out of stock"
+                        )
+
+                    );
+                 System.out.println("product out of stock");
                     return;
                 }
 
-                // Set update values
+                
                 updateRequest.setAvailableStock(newAvailableStock);
                 updateRequest.setReservedQuantity(newReservedQuantity);
                 updateRequest.setCurrentStock(currentInventory.getCurrentStock());

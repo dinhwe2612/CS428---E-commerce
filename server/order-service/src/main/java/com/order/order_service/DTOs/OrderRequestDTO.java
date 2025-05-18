@@ -2,6 +2,8 @@ package com.order.order_service.DTOs;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,16 +12,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequestDTO {
+    @JsonProperty("user_id")
     private String userId;
-    private String shippingAddress;
-    private String paymentMethod;
-    private List<OrderItemRequestDTO> orderItems;
-}
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class OrderItemRequestDTO {
-    private String productId;
-    private Integer quantity;
+    @JsonProperty("shipping_address")
+    private String shippingAddress;
+
+    @JsonProperty("payment_method")
+    private String paymentMethod;
+
+    @JsonProperty("total_amount")
+    private Double totalAmount;
+
+    @JsonProperty("order_items")
+    private List<OrderItemRequestDTO> orderItems;
 } 

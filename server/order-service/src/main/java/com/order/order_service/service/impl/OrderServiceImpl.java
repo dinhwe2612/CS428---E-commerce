@@ -34,13 +34,32 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingAddress(orderRequest.getShippingAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setStatus("PENDING");
+        order.setTotalAmount(orderRequest.getTotalAmount());
         
- 
+        // Create and set order items
+        List<OrderItem> orderItems = orderRequest.getOrderItems().stream()
+                .map(item -> {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setProductId(item.getProductId());
+                    orderItem.setQuantity(item.getQuantity());
+                    // These fields should be populated from product service
+                    orderItem.setProductName("Product " + item.getProductId()); // Temporary, should be fetched from product service
+                    orderItem.setUnitPrice(0.0); // Should be fetched from product service
+                    orderItem.setSubtotal(item.getQuantity() * 0.0); // Should be calculated based on unit price
+                    return orderItem;
+                })
+                .collect(Collectors.toList());
         
+        order.setOrderItems(orderItems);
+        
+        // Save the order with items
         Order savedOrder = orderRepository.save(order);
+        
+        // Convert to DTO
         OrderResponseDTO orderResponse = convertToDTO(savedOrder);
         
-       
+        // Send event
         messageProducer.sendOrderCreatedEvent(orderResponse);
         
         return orderResponse;
