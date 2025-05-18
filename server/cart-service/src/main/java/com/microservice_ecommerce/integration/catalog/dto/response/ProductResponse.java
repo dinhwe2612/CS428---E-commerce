@@ -1,5 +1,6 @@
 package com.microservice_ecommerce.integration.catalog.dto.response;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -18,4 +19,5 @@ public class ProductResponse {
     private Long categoryId;
     private List<Long> imageIds;
     private List<String> imageUrls;
+    private BigDecimal price;
 } 

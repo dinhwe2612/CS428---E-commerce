@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class AddItemRequestDTO {
     private Long productId;
     private int quantity;
+
 } 

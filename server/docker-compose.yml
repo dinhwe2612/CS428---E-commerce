@@ -197,6 +197,32 @@ services:
     networks:
       - microservice-network
 
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    container_name: order-service
+    ports:
+      - "8091:8091"
+    env_file:
+      - ./order-service/.env
+    volumes:
+      - ./config/order-service/application-docker.yml:/app/config/application-docker.yml
+      - ./order-service/src:/app/order-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
+      
+
 volumes:
   image-storage:
   maven-repo:
