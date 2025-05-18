@@ -136,6 +136,7 @@ services:
     environment:
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
       - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -170,6 +171,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: cart-service/Dockerfile
+    container_name: cart-service
+    ports:
+      - "8090:8090"
+    env_file:
+      - ./cart-service/.env
+    volumes:
+      - ./config/cart-service/application-docker.yml:/app/config/application-docker.yml
+      - ./cart-service/src:/app/cart-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - microservice-network
 
 volumes:
   image-storage:

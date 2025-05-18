@@ -22,6 +22,7 @@
         <module>image-service</module>
         <module>eureka-server</module>
         <module>gateway</module>
+        <module>cart-service</module>
         <module>user-service</module>
     </modules>
 

@@ -29,6 +29,8 @@ public class GatewayConfig {
                                 .route("catalog_service_all", r -> r.path("/api/v1/catalog/**")
                                                 .filters(f -> f.stripPrefix(3))
                                                 .uri("lb://catalog-service"))
+                                .route("cart_service_all", r -> r.path("/api/v1/cart/**")
+                                                .uri("lb://cart-service"))
                                 .build();
         }
 

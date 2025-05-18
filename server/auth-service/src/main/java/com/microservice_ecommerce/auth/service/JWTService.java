@@ -43,6 +43,10 @@ public class JWTService {
         if (user.getRole() == null) {
             throw new IllegalStateException("User role cannot be null");
         }
+        
+        extraClaims.put("userId", user.getId().toString());
+        extraClaims.put("role", user.getRole().name());
+
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getEmail())

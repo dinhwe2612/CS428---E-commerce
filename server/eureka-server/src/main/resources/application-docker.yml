@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: eureka-server
+  freemarker:
+    template-loader-path: classpath:/templates/
+    prefer-file-system-access: false
 
 eureka:
   instance:
@@ -12,14 +15,8 @@ eureka:
   client:
     registerWithEureka: false
     fetchRegistry: false
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always 
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+    enable-self-preservation: false 

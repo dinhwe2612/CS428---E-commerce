@@ -1,0 +1,7 @@
+package com.microservice_ecommerce.cart.domain.exception;
+
+public class CartNotFoundException extends RuntimeException {
+    public CartNotFoundException(String message) {
+        super(message);
+    }
+} 
