@@ -18,15 +18,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
-  instance:
-    preferIpAddress: true
-    hostname: user-service
-rabbitmq:
+  rabbitmq:
     host: image-rabbitmq
     port: 5672
     username: guest
@@ -37,6 +29,15 @@ rabbitmq:
           enabled: true
           initial-interval: 1000
           max-attempts: 3
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+  instance:
+    preferIpAddress: true
+    hostname: user-service
+
 
 
 management:

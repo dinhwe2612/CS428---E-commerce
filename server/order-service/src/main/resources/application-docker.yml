@@ -18,6 +18,17 @@ spring:
   cloud:
     compatibility-verifier:
       enabled: false
+  rabbitmq:
+    host: image-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
 
 eureka:
   client:
@@ -30,20 +41,10 @@ eureka:
     hostname: order-service
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
-rabbitmq:
-    host: image-rabbitmq
-    port: 5672
-    username: guest
-    password: guest
-    listener:
-      simple:
-        retry:
-          enabled: true
-          initial-interval: 1000
-          max-attempts: 3
+
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   expiration: 86400000
 
 springdoc:

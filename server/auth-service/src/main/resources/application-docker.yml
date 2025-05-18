@@ -54,6 +54,7 @@ eureka:
     lease-expiration-duration-in-seconds: 10
 
 jwt:
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 springdoc:

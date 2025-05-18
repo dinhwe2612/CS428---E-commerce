@@ -32,7 +32,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/orders/**").authenticated()
+                        .requestMatchers("/api/v1/orders/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session

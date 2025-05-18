@@ -32,6 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
+            String path = request.getRequestURI();
+if (path.startsWith("/api/v1/orders/")) {
+    filterChain.doFilter(request, response); // skip JWT validation
+    return;
+}
             final String authHeader = request.getHeader("Authorization");
             final String jwt;
             final String userEmail;
