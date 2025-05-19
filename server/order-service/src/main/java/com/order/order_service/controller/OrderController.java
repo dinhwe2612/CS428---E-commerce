@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.order.order_service.DTOs.ApiResponse;
 import com.order.order_service.DTOs.OrderRequestDTO;
 import com.order.order_service.DTOs.OrderResponseDTO;
 import com.order.order_service.service.OrderService;
@@ -26,35 +27,40 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequest) {
-        return ResponseEntity.ok(orderService.createOrder(orderRequest));
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> createOrder(@RequestBody OrderRequestDTO orderRequest) {
+        OrderResponseDTO orderResponse = orderService.createOrder(orderRequest);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Order processing", orderResponse));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderById(id));
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> getOrderById(@PathVariable Long id) {
+        OrderResponseDTO orderResponse = orderService.getOrderById(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Order details", orderResponse));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrderResponseDTO>> getOrdersByUserId(@PathVariable String userId) {
-        return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getOrdersByUserId(@PathVariable String userId) {
+        List<OrderResponseDTO> orderResponses = orderService.getOrdersByUserId(userId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Orders by user ID", orderResponses));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<OrderResponseDTO>> getOrdersByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(orderService.getOrdersByStatus(status));
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getOrdersByStatus(@PathVariable String status) {
+        List<OrderResponseDTO> orderResponses = orderService.getOrdersByStatus(status);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Orders by status", orderResponses));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> updateOrderStatus(
             @PathVariable Long id,
             @RequestParam String status) {
-        return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
+        OrderResponseDTO orderResponse = orderService.updateOrderStatus(id, status);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Order status updated", orderResponse));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Order deleted", null));
     }
 } 

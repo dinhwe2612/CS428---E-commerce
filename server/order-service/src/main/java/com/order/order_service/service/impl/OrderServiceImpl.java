@@ -53,10 +53,9 @@ public class OrderServiceImpl implements OrderService {
         
         order.setOrderItems(orderItems);
         
-        // Save the order with items
+ 
         Order savedOrder = orderRepository.save(order);
-        
-        // Convert to DTO
+    
         OrderResponseDTO orderResponse = convertToDTO(savedOrder);
         
         // Send event
