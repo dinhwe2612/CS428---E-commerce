@@ -1,11 +1,20 @@
 package com.catalog.catalog_service.model;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "inventories")
@@ -20,6 +29,9 @@ public class inventory {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
     private product product;  // Bidirectional relationship with product
+    
+    @Version
+    private Long version;
     
     private int currentStock;  // Total physical stock available in the warehouse
     private int availableStock;  // Stock available for sale (currentStock - reservedQuantity)

@@ -11,16 +11,20 @@ import com.catalog.catalog_service.producer.RabbitProducer;
 import com.catalog.catalog_service.service.InventoryService;
 import com.catalog.catalog_service.service.ProductService;
 
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional
+@AllArgsConstructor
 public class ProductListener {
-    private final InventoryService inventoryService;
-    private final ProductService productService;
-    private final RabbitProducer rabbitProducer;
+    private  InventoryService inventoryService;
+    private  ProductService productService;
+    private  RabbitProducer rabbitProducer;
 
   
 
@@ -29,8 +33,7 @@ public class ProductListener {
 
     @RabbitListener(queues = "order.created.queue")
     public void handleOrderCreated(OrderCreatedMessage orderCreatedMessage) {
-        log.info("Received order created event: {}", orderCreatedMessage);
-
+        
         //print the orderCreatedMessage.orderItems IT IS A LIST OF ORDER ITEMS
        
         System.out.println("orderCreatedMessage.orderItems: " + orderCreatedMessage.getOrderItems());
@@ -80,12 +83,9 @@ public class ProductListener {
 
                 // Update inventory
                 inventoryService.updateInventory(productId, updateRequest);
-                
-                log.info("Successfully updated inventory for product {} with quantity {}", 
-                    productId, orderItem.getQuantity());
+             
             } catch (Exception e) {
-                log.error("Error processing inventory update for product {}: {}", 
-                    orderItem.getProductId(), e.getMessage());
+            
                 
             }
         }
