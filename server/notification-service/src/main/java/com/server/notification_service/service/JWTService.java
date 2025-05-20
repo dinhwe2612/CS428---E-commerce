@@ -74,16 +74,8 @@ public class JWTService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public List<String> extractRoles(String token) {
+    public String extractRole(String token) {
         Claims claims = extractAllClaims(token);
-        Object rolesClaim = claims.get("roles");
-
-        if (rolesClaim instanceof List<?>) {
-            return ((List<?>) rolesClaim).stream()
-                    .map(Object::toString)
-                    .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList(); // fallback if roles are missing
+        return claims.get("role", String.class);
     }
 }

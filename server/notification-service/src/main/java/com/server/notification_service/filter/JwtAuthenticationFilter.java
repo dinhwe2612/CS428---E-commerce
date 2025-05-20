@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,14 +53,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (jwtService.isTokenValid(jwt)) {
-                    var roles = jwtService.extractRoles(jwt);
-                    var authorities = roles.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .toList();
+                    var role = jwtService.extractRole(jwt);
+                    // log role
+                    log.info("Role: {}", role);
+                    var authorities = new SimpleGrantedAuthority(role);
                     var userDetails = new User(
                             username,
                             "",
-                            authorities
+                            Collections.singleton(authorities)
                     );
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
