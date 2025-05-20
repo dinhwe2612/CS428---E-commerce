@@ -221,6 +221,31 @@ services:
         condition: service_started
     networks:
       - microservice-network
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    ports:
+      - "8095:8095"
+    env_file:
+      - ./notification-service/src/main/resources/.env
+    volumes:
+      - ./config/notification-service/application-docker.yml:/app/config/application-docker.yml
+      - ./notification-service/src:/app/notification-service/src
+      - maven-repo:/root/m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
       
 
 volumes:
