@@ -78,4 +78,9 @@ public class JWTService {
         Claims claims = extractAllClaims(token);
         return claims.get("role", String.class);
     }
+
+    public String extracctUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", String.class);
+    }
 }

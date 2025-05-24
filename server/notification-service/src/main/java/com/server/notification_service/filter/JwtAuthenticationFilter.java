@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -39,38 +40,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
-            final String authHeader = request.getHeader("Authorization");
-            final String jwt;
-            final String username;
-
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
+            String role = request.getHeader("X-User-Role");
+            String username = request.getHeader("X-User-Name");
+            if (role != null && username != null) {
+                UserDetails userDetails = User.withUsername(username)
+                        .password("")
+                        .authorities(Collections.singleton(() -> role))
+                        .build();
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
-
-            jwt = authHeader.substring(7);
-            username = jwtService.extractUsername(jwt);
-
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (jwtService.isTokenValid(jwt)) {
-                    var role = jwtService.extractRole(jwt);
-                    // log role
-                    log.info("Role: {}", role);
-                    var authorities = new SimpleGrantedAuthority(role);
-                    var userDetails = new User(
-                            username,
-                            "",
-                            Collections.singleton(authorities)
-                    );
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities());
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-            }
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            log.info("User: " + username + " with role: " + role + " authenticated");
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             handleAuthenticationError(response, e);
