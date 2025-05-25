@@ -17,7 +17,11 @@ public class NotificationListener {
 
     @RabbitListener(queues = "notification.queue")
     public void receiveMessage(NotificationMessage message) {
-        simpMessagingTemplate.convertAndSend("/topic/notification", message);
+        simpMessagingTemplate.convertAndSendToUser(
+                message.getUserName(),
+                "/queue/notification",
+                message
+        );
         notificationService.save(message);
     }
 }

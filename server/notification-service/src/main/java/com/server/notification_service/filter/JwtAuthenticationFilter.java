@@ -1,7 +1,6 @@
 package com.server.notification_service.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.notification_service.service.JWTService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,7 +29,6 @@ import java.util.Map;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -55,7 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             log.info("User: " + username + " with role: " + role + " authenticated");
             filterChain.doFilter(request, response);
         } catch (Exception e) {

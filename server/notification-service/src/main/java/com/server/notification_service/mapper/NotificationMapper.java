@@ -9,7 +9,7 @@ public class NotificationMapper {
 
     public Notification mapToNotification(NotificationMessage notificationMessage) {
         return Notification.builder()
-                .userId(notificationMessage.getUserId())
+                .userName(notificationMessage.getUserName())
                 .title(notificationMessage.getTitle())
                 .content(notificationMessage.getContent())
                 .link(notificationMessage.getLink())
