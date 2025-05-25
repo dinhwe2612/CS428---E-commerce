@@ -25,10 +25,13 @@ public class GatewayConfig {
                                                 .filters(f -> f.stripPrefix(3))
                                                 .uri("lb://catalog-service"))
                                 .route("cart_service_all", r -> r.path("/api/v1/cart/**")
+                                                .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://cart-service"))
                                 .route("order_service_all", r -> r.path("/api/v1/orders/**")
+                                                .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://order-service"))
                                 .route("notification_service_all", r -> r.path("/api/v1/notification/**")
+                                                .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://notification-service"))
                                 .build();
         }
