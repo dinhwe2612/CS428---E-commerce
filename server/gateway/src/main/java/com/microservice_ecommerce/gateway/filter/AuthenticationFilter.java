@@ -78,7 +78,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     String role = claims.get("role", String.class);
                     String username = claims.get("username", String.class);
 
-                    System.out.println("User ID: " + userId + ", Role: " + role);
+                    System.out.println("User ID: " + userId + ", Role: " + role + ", Username: " + username);
                     
                     if (userId == null) {
                         return onError(exchange, "User ID not found in token", HttpStatus.UNAUTHORIZED);
