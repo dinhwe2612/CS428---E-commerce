@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.microservice_ecommerce.gateway.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Slf4j
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
     private final JwtUtil jwtUtil;
@@ -42,14 +44,15 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
     @Override
     public GatewayFilter apply(Config config) {
+        log.info("Authentication filter is enabled: {}", config.isSecured);
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getPath().toString();
-
+            System.out.println("Path1: " + path);
             if (isOpenEndpoint(path)) {
                 return chain.filter(exchange);
             }
-
+            System.out.println("Path2: " + path);
             if (config.isSecured) {
                 if (!request.getHeaders().containsKey("Authorization")) {
                     return onError(exchange, "No Authorization header", HttpStatus.UNAUTHORIZED);
@@ -73,6 +76,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
                     String userId = claims.get("userId", String.class);
                     String role = claims.get("role", String.class);
+                    String username = claims.get("username", String.class);
+
+                    System.out.println("User ID: " + userId + ", Role: " + role + ", Username: " + username);
                     
                     if (userId == null) {
                         return onError(exchange, "User ID not found in token", HttpStatus.UNAUTHORIZED);
@@ -81,6 +87,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     ServerHttpRequest modifiedRequest = request.mutate()
                             .header("X-User-ID", userId)
                             .header("X-User-Role", role != null ? role : "")
+                            .header("X-User-Name", username != null ? username : "")
                             .build();
 
                     return chain.filter(exchange.mutate().request(modifiedRequest).build());
