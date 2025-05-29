@@ -12,7 +12,7 @@ spring:
           lower-case-service-id: true
           filters:
             - PreserveHostHeader
-          include-expression: "true"
+          include-expression: true
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin
         - AddResponseHeader=Access-Control-Allow-Origin, *

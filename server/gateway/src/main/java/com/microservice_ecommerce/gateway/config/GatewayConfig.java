@@ -30,6 +30,14 @@ public class GatewayConfig {
                                 .route("order_service_all", r -> r.path("/api/v1/orders/**")
                                                 .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://order-service"))
+                                .route("notification_ws", r -> r
+                                        .order(-1)
+                                        .path("/api/v1/notification/ws/**")
+                                        .and().header("Upgrade", "websocket")
+                                        .filters(f -> f
+                                                .stripPrefix(3)
+                                        )
+                                        .uri("lb:ws://notification-service"))
                                 .route("notification_service_all", r -> r.path("/api/v1/notification/**")
                                                 .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://notification-service"))
