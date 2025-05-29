@@ -1,10 +1,9 @@
 package com.catalog.catalog_service.dto;
 
-import java.util.List;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
