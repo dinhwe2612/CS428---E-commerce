@@ -57,5 +57,7 @@ services:
   order-service:
     base-url: http://order-service:8091
     timeout: 5000
-
+  catalog:
+    base-url: http://catalog-service:8089
+    timeout: 5000
 INTERNAL_API_KEY: ${INTERNAL_API_KEY} 

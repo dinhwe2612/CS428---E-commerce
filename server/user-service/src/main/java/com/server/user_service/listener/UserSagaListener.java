@@ -25,6 +25,7 @@ public class UserSagaListener {
         try {
             log.info("Received user created event: {}", userCreatedMessage);
             Role role = Role.valueOf(userCreatedMessage.getRole());
+            //role here is the name of the enum
             User user = new User();
             user.setId(userCreatedMessage.getId());
             user.setUsername(userCreatedMessage.getUsername());

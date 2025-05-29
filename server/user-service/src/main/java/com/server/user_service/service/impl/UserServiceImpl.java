@@ -51,8 +51,10 @@ public class UserServiceImpl implements UserService {
         userResponse.setUsername(user.getUsername());
         return userResponse;
     }
-    @Override
-    public void createUser(User user) {
-        userRepository.save(user);
-    }
+        @Override
+        public void createUser(User user) {
+            //log the user
+            System.out.println("Creating user: " + user);
+            userRepository.save(user);
+        }
 }
