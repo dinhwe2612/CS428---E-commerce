@@ -1,0 +1,53 @@
+server:
+  port: 8071
+
+spring:
+  application:
+    name: voucher-service
+  datasource:
+    url: ${GL_DB_URL}
+    username: ${GL_DB_USERNAME}
+    password: ${GL_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: false
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: voucher-service
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B62506453}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+services:
+  catalog:
+    base-url: http://catalog-service
+    timeout: 5000
+
+INTERNAL_API_KEY: ${INTERNAL_API_KEY} 

@@ -247,6 +247,27 @@ services:
     networks:
       - microservice-network
       
+  voucher-service:
+    build:
+      context: .
+      dockerfile: voucher-service/Dockerfile
+    container_name: voucher-service
+    ports:
+      - "8071:8071"
+    env_file:
+      - ./voucher-service/.env
+    volumes:
+      - ./voucher-service/src:/app/voucher-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - microservice-network
+      
 
 volumes:
   image-storage:
