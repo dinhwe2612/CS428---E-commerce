@@ -1,9 +1,9 @@
 package com.order.order_service.service;
 
+import java.util.List;
+
 import com.order.order_service.DTOs.OrderRequestDTO;
 import com.order.order_service.DTOs.OrderResponseDTO;
-
-import java.util.List;
 
 public interface OrderService {
     OrderResponseDTO createOrder(OrderRequestDTO orderRequest);
@@ -12,4 +12,5 @@ public interface OrderService {
     List<OrderResponseDTO> getOrdersByStatus(String status);
     OrderResponseDTO updateOrderStatus(Long id, String status);
     void deleteOrder(Long id);
+    OrderResponseDTO updateOrderMessage(Long id, String message);
 } 

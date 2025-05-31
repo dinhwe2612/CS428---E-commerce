@@ -82,7 +82,7 @@ public class ProductListener {
                 updateRequest.setSupplierId(currentInventory.getSupplierId());
 
                 // Update inventory
-                inventoryService.updateInventory(productId, updateRequest);
+                inventoryService.updateInventory(currentInventory.getId(), updateRequest);
              
             } catch (Exception e) {
             

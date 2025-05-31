@@ -20,5 +20,7 @@ public class OrderMessageListener {
     public void handleOutOfStockEvent(OutOfStockEvent event) {
         log.info("Received out-of-stock event: {}", event.getOrderId());
         orderService.updateOrderStatus(event.getOrderId(), "CANCELLED");
+        orderService.updateOrderMessage(event.getOrderId(), "Product is out of stock or not available");
+        
     }
 } 

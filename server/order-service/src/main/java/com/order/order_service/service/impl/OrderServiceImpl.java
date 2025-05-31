@@ -142,4 +142,14 @@ public class OrderServiceImpl implements OrderService {
         dto.setSubtotal(orderItem.getSubtotal());
         return dto;
     }
+
+    @Override
+    @Transactional
+    public OrderResponseDTO updateOrderMessage(Long id, String message) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new OrderNotFoundException(id));
+        order.setMessage(message);
+        Order updatedOrder = orderRepository.save(order);
+        return convertToDTO(updatedOrder);
+    }
 } 
