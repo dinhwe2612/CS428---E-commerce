@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.catalog.catalog_service.dto.AutocompleteResponse;
 import com.catalog.catalog_service.dto.PageDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.request.CreateProductRequest;
@@ -22,8 +23,10 @@ import com.catalog.catalog_service.model.category;
 import com.catalog.catalog_service.model.product;
 import com.catalog.catalog_service.repository.CategoryRepository;
 import com.catalog.catalog_service.repository.ProductRepository;
+import com.catalog.catalog_service.repository.ProductSearchRepository;
 import com.catalog.catalog_service.service.ProductService;
 import com.catalog.catalog_service.specification.ProductSpecification;
+import com.catalog.catalog_service.model.ProductDocument;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -32,14 +35,17 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final EntityMapper entityMapper;
+    private final ProductSearchRepository productSearchRepository;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, 
                             CategoryRepository categoryRepository,
-                            EntityMapper entityMapper) {
+                            EntityMapper entityMapper,
+                            ProductSearchRepository productSearchRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.entityMapper = entityMapper;
+        this.productSearchRepository = productSearchRepository;
     }
 
     @Override
@@ -92,6 +98,18 @@ public class ProductServiceImpl implements ProductService {
 
             logger.debug("Saving product: {}", product);
             product savedProduct = productRepository.save(product);
+            
+            // Index in Elasticsearch
+            ProductDocument document = ProductDocument.builder()
+                .id(savedProduct.getId())
+                .name(savedProduct.getName())
+                .description(savedProduct.getDescription())
+                .price(savedProduct.getPrice())
+                .categoryId(category.getId())
+                .categoryName(category.getName())
+                .build();
+            productSearchRepository.save(document);
+            
             logger.debug("Product saved successfully with id: {}", savedProduct.getId());
             
             return entityMapper.toProductDTO(savedProduct);
@@ -165,5 +183,23 @@ public class ProductServiceImpl implements ProductService {
         return products.stream()
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public AutocompleteResponse getAutocompleteSuggestions(String query, int limit) {
+        if (query == null || query.trim().isEmpty()) {
+            return new AutocompleteResponse(List.of());
+        }
+
+        String searchQuery = query.trim().toLowerCase();
+        List<String> suggestions = productSearchRepository
+            .findByNameContainingOrDescriptionContaining(searchQuery, searchQuery)
+            .stream()
+            .map(ProductDocument::getName)
+            .distinct()
+            .limit(limit)
+            .collect(Collectors.toList());
+
+        return new AutocompleteResponse(suggestions);
     }
 }

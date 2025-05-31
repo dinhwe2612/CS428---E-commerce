@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.catalog.catalog_service.dto.AutocompleteResponse;
 import com.catalog.catalog_service.dto.PageDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.request.CreateProductRequest;
@@ -87,5 +88,12 @@ public class ProductController {
     @GetMapping("/all")
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.getAll());
+    }
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<AutocompleteResponse> getAutocompleteSuggestions(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(productService.getAutocompleteSuggestions(query, limit));
     }
 } 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
+import com.catalog.catalog_service.dto.AutocompleteResponse;
 import com.catalog.catalog_service.dto.PageDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.request.CreateProductRequest;
@@ -26,4 +27,6 @@ public interface ProductService {
     List<ProductDTO> getAll();
 
     List<ProductDTO> getProductsByIds(List<Long> ids);
+
+    AutocompleteResponse getAutocompleteSuggestions(String query, int limit);
 }
