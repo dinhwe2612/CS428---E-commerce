@@ -88,7 +88,13 @@ public class CategoryServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(sampleCategoryDTO, result.get(0));
+        CategoryDTO returnedCategory = result.get(0);
+        assertEquals(sampleCategoryDTO.getId(), returnedCategory.getId());
+        assertEquals(sampleCategoryDTO.getName(), returnedCategory.getName());
+        assertEquals(sampleCategoryDTO.getDescription(), returnedCategory.getDescription());
+        assertEquals(sampleCategoryDTO.getImageId(), returnedCategory.getImageId());
+        assertEquals(sampleCategoryDTO.getImageUrl(), returnedCategory.getImageUrl());
+        assertEquals(sampleCategoryDTO.getStatus(), returnedCategory.getStatus());
     }
 
     @Test
@@ -102,7 +108,12 @@ public class CategoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleCategoryDTO, result);
+        assertEquals(sampleCategoryDTO.getId(), result.getId());
+        assertEquals(sampleCategoryDTO.getName(), result.getName());
+        assertEquals(sampleCategoryDTO.getDescription(), result.getDescription());
+        assertEquals(sampleCategoryDTO.getImageId(), result.getImageId());
+        assertEquals(sampleCategoryDTO.getImageUrl(), result.getImageUrl());
+        assertEquals(sampleCategoryDTO.getStatus(), result.getStatus());
     }
 
     @Test
@@ -125,7 +136,12 @@ public class CategoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleCategoryDTO, result);
+        assertEquals(sampleCategoryDTO.getId(), result.getId());
+        assertEquals(sampleCategoryDTO.getName(), result.getName());
+        assertEquals(sampleCategoryDTO.getDescription(), result.getDescription());
+        assertEquals(sampleCategoryDTO.getImageId(), result.getImageId());
+        assertEquals(sampleCategoryDTO.getImageUrl(), result.getImageUrl());
+        assertEquals(sampleCategoryDTO.getStatus(), result.getStatus());
         verify(categoryRepository).save(any(category.class));
     }
 
@@ -141,7 +157,12 @@ public class CategoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleCategoryDTO, result);
+        assertEquals(sampleCategoryDTO.getId(), result.getId());
+        assertEquals(sampleCategoryDTO.getName(), result.getName());
+        assertEquals(sampleCategoryDTO.getDescription(), result.getDescription());
+        assertEquals(sampleCategoryDTO.getImageId(), result.getImageId());
+        assertEquals(sampleCategoryDTO.getImageUrl(), result.getImageUrl());
+        assertEquals(sampleCategoryDTO.getStatus(), result.getStatus());
         verify(categoryRepository).save(any(category.class));
     }
 

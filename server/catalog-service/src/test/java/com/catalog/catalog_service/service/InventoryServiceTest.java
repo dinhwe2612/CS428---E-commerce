@@ -122,7 +122,19 @@ public class InventoryServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(sampleInventoryDTO, result.get(0));
+        InventoryDTO returnedInventory = result.get(0);
+        assertEquals(sampleInventoryDTO.getId(), returnedInventory.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), returnedInventory.getProductId());
+        assertEquals(sampleInventoryDTO.getCurrentStock(), returnedInventory.getCurrentStock());
+        assertEquals(sampleInventoryDTO.getAvailableStock(), returnedInventory.getAvailableStock());
+        assertEquals(sampleInventoryDTO.getReservedQuantity(), returnedInventory.getReservedQuantity());
+        assertEquals(sampleInventoryDTO.getReorderLevel(), returnedInventory.getReorderLevel());
+        assertEquals(sampleInventoryDTO.getReorderQuantity(), returnedInventory.getReorderQuantity());
+        assertEquals(sampleInventoryDTO.getLowStockThreshold(), returnedInventory.getLowStockThreshold());
+        assertEquals(sampleInventoryDTO.getUnitCost(), returnedInventory.getUnitCost());
+        assertEquals(sampleInventoryDTO.getLocation(), returnedInventory.getLocation());
+        assertEquals(sampleInventoryDTO.getStatus(), returnedInventory.getStatus());
+        assertEquals(sampleInventoryDTO.getSupplierId(), returnedInventory.getSupplierId());
     }
 
     @Test
@@ -136,7 +148,18 @@ public class InventoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleInventoryDTO, result);
+        assertEquals(sampleInventoryDTO.getId(), result.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
+        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
+        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
+        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
+        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
+        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
+        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
+        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
+        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
+        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
+        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
     }
 
     @Test
@@ -160,7 +183,18 @@ public class InventoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleInventoryDTO, result);
+        assertEquals(sampleInventoryDTO.getId(), result.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
+        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
+        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
+        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
+        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
+        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
+        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
+        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
+        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
+        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
+        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
         verify(inventoryRepository).save(any(inventory.class));
     }
 
@@ -185,7 +219,18 @@ public class InventoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleInventoryDTO, result);
+        assertEquals(sampleInventoryDTO.getId(), result.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
+        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
+        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
+        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
+        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
+        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
+        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
+        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
+        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
+        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
+        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
         verify(inventoryRepository).save(any(inventory.class));
     }
 
@@ -231,7 +276,18 @@ public class InventoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(sampleInventoryDTO, result);
+        assertEquals(sampleInventoryDTO.getId(), result.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
+        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
+        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
+        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
+        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
+        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
+        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
+        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
+        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
+        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
+        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
     }
 
     @Test

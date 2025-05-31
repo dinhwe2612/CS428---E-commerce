@@ -80,8 +80,12 @@ public class CategoryControllerTest {
         mockMvc.perform(get("/categories")
                 .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Test Category"));
+                .andExpect(jsonPath("$[0].id").value(sampleCategory.getId()))
+                .andExpect(jsonPath("$[0].name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$[0].description").value(sampleCategory.getDescription()))
+                .andExpect(jsonPath("$[0].imageId").value(sampleCategory.getImageId()))
+                .andExpect(jsonPath("$[0].imageUrl").value(sampleCategory.getImageUrl()))
+                .andExpect(jsonPath("$[0].status").value(sampleCategory.getStatus()));
     }
 
     @Test
@@ -92,8 +96,12 @@ public class CategoryControllerTest {
         mockMvc.perform(get("/categories/1")
                 .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Test Category"));
+                .andExpect(jsonPath("$.id").value(sampleCategory.getId()))
+                .andExpect(jsonPath("$.name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$.description").value(sampleCategory.getDescription()))
+                .andExpect(jsonPath("$.imageId").value(sampleCategory.getImageId()))
+                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()))
+                .andExpect(jsonPath("$.status").value(sampleCategory.getStatus()));
     }
 
     @Test
@@ -107,8 +115,12 @@ public class CategoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Test Category"));
+                .andExpect(jsonPath("$.id").value(sampleCategory.getId()))
+                .andExpect(jsonPath("$.name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$.description").value(sampleCategory.getDescription()))
+                .andExpect(jsonPath("$.imageId").value(sampleCategory.getImageId()))
+                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()))
+                .andExpect(jsonPath("$.status").value(sampleCategory.getStatus()));
     }
 
     @Test
@@ -122,8 +134,12 @@ public class CategoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Test Category"));
+                .andExpect(jsonPath("$.id").value(sampleCategory.getId()))
+                .andExpect(jsonPath("$.name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$.description").value(sampleCategory.getDescription()))
+                .andExpect(jsonPath("$.imageId").value(sampleCategory.getImageId()))
+                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()))
+                .andExpect(jsonPath("$.status").value(sampleCategory.getStatus()));
     }
 
     @Test
