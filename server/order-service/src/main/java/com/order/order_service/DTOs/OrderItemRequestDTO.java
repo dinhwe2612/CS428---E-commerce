@@ -14,4 +14,7 @@ public class OrderItemRequestDTO {
     private String productId;
     
     private Integer quantity;
+
+    @JsonProperty("inventory_id")
+    private String inventoryId;
 } 

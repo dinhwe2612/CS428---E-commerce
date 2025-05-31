@@ -40,8 +40,8 @@ public class InventoryController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<InventoryDTO> getInventoryByProductId(@PathVariable Long productId) {
-        return ResponseEntity.ok(inventoryService.getInventoryByProductId(productId));
+    public ResponseEntity<List<InventoryDTO>> getInventoryByProductId(@PathVariable Long productId) {
+        return ResponseEntity.ok(inventoryService.getInventoriesByProductId(productId));
     }
 
     @PostMapping

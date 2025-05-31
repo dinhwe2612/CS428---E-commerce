@@ -17,6 +17,6 @@ public class OrderItemResponseDTO {
     private Integer quantity;
     private Double unitPrice;
     private Double subtotal;
-
+    private String inventoryId;
 
 }

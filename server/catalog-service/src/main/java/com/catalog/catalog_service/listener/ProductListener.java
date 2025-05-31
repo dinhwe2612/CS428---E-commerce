@@ -23,22 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class ProductListener {
     private  InventoryService inventoryService;
-    private  ProductService productService;
     private  RabbitProducer rabbitProducer;
-
-  
-
- 
-        
 
     @RabbitListener(queues = "order.created.queue")
     public void handleOrderCreated(OrderCreatedMessage orderCreatedMessage) {
         
         //print the orderCreatedMessage.orderItems IT IS A LIST OF ORDER ITEMS
-       
         System.out.println("orderCreatedMessage.orderItems: " + orderCreatedMessage.getOrderItems());
-
-
 
         for (OrderItemResponseDTO orderItem : orderCreatedMessage.getOrderItems()) {
             try {
@@ -46,8 +37,8 @@ public class ProductListener {
                 UpdateInventoryRequest updateRequest = new UpdateInventoryRequest();
                 
                 // Get current inventory state
-                Long productId = Long.parseLong(orderItem.getProductId());
-                var currentInventory = inventoryService.getInventoryByProductId(productId);
+                Long inventoryId = Long.parseLong(orderItem.getInventoryId());
+                var currentInventory = inventoryService.getInventoryById(inventoryId);
                 //print the currentInventory
                 System.out.println("currentInventory: " + currentInventory);
                 // Calculate new values
@@ -69,7 +60,6 @@ public class ProductListener {
                     return;
                 }
 
-                
                 updateRequest.setAvailableStock(newAvailableStock);
                 updateRequest.setReservedQuantity(newReservedQuantity);
                 updateRequest.setCurrentStock(currentInventory.getCurrentStock());
@@ -85,8 +75,7 @@ public class ProductListener {
                 inventoryService.updateInventory(currentInventory.getId(), updateRequest);
              
             } catch (Exception e) {
-            
-                
+
             }
         }
     }

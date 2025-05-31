@@ -44,13 +44,10 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setStatus("PENDING");
         order.setTotalAmount(orderRequest.getTotalAmount());
-  //create a hashset of product ids
-  Set<Long> productIds = new HashSet<>();
+        //create a hashset of product ids
+        Set<Long> productIds = new HashSet<>();
 
-        
         //validate productids optimizelyy
-     
-        
         List<OrderItem> orderItems = orderRequest.getOrderItems().stream()
                 .map(item -> {
                     OrderItem orderItem = new OrderItem();
@@ -60,26 +57,23 @@ public class OrderServiceImpl implements OrderService {
                     orderItem.setProductName("Product " + item.getProductId()); // Temporary, should be fetched from product service
                     orderItem.setUnitPrice(0.0); // Should be fetched from product service
                     orderItem.setSubtotal(item.getQuantity() * 0.0); // Should be calculated based on unit price
+                    orderItem.setInventoryId(item.getInventoryId());
                     productIds.add(Long.parseLong(item.getProductId()));
                     return orderItem;
                 })
                 .collect(Collectors.toList());
-List<ProductDTO> productresp =catalogServiceClient.getProductsByIds(productIds.stream().collect(Collectors.toList()));
-//check if the product ids are valid
-if(productresp.size() != productIds.size()){
- 
-    throw new ProductIDNotFoundException("Invalid product ids");
-   
-}
-else{
-    for(int i = 0; i < productresp.size(); i++){
-        if(!productIds.contains(productresp.get(i).getId())){
+        List<ProductDTO> productresp =catalogServiceClient.getProductsByIds(productIds.stream().collect(Collectors.toList()));
+        //check if the product ids are valid
+        if(productresp.size() != productIds.size()){
             throw new ProductIDNotFoundException("Invalid product ids");
+        } else {
+            for (ProductDTO productDTO : productresp) {
+                if (!productIds.contains(productDTO.getId())) {
+                    throw new ProductIDNotFoundException("Invalid product ids");
+                }
+            }
         }
-    }
-}
 
-            
         order.setOrderItems(orderItems);
         
  
@@ -169,6 +163,7 @@ else{
         dto.setQuantity(orderItem.getQuantity());
         dto.setUnitPrice(orderItem.getUnitPrice());
         dto.setSubtotal(orderItem.getSubtotal());
+        dto.setInventoryId(orderItem.getInventoryId());
         return dto;
     }
 
@@ -186,4 +181,4 @@ else{
     public List<ProductDTO> getProductsByIds(List<Long> ids) {
         return catalogServiceClient.getProductsByIds(ids);
     }
-} 
+}

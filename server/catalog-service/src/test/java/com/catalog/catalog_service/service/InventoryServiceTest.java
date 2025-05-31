@@ -272,22 +272,24 @@ public class InventoryServiceTest {
         when(entityMapper.toInventoryDTO(sampleInventory)).thenReturn(sampleInventoryDTO);
 
         // Act
-        InventoryDTO result = inventoryService.getInventoryByProductId(1L);
+        List<InventoryDTO> results = inventoryService.getInventoriesByProductId(1L);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(sampleInventoryDTO.getId(), result.getId());
-        assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
-        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
-        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
-        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
-        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
-        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
-        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
-        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
-        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
-        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
-        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
+        results.forEach(result -> {
+            assertNotNull(result);
+            assertEquals(sampleInventoryDTO.getId(), result.getId());
+            assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
+            assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
+            assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
+            assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
+            assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
+            assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
+            assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
+            assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
+            assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
+            assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
+            assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
+        });
     }
 
     @Test
@@ -296,7 +298,7 @@ public class InventoryServiceTest {
         when(productRepository.existsById(1L)).thenReturn(false);
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> inventoryService.getInventoryByProductId(1L));
+        assertThrows(ResourceNotFoundException.class, () -> inventoryService.getInventoriesByProductId(1L));
     }
 
     @Test
@@ -306,6 +308,6 @@ public class InventoryServiceTest {
         when(inventoryRepository.findAll()).thenReturn(Arrays.asList());
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> inventoryService.getInventoryByProductId(1L));
+        assertThrows(ResourceNotFoundException.class, () -> inventoryService.getInventoriesByProductId(1L));
     }
 } 

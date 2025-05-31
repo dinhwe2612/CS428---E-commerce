@@ -24,8 +24,8 @@ public class product {
     @JoinColumn(name = "category_id", nullable = false)
     private category category;
     
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private inventory inventory;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<inventory> inventory;
     
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(

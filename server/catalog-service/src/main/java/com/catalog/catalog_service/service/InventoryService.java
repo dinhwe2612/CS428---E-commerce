@@ -11,5 +11,5 @@ public interface InventoryService {
     InventoryDTO createInventory(CreateInventoryRequest request);
     InventoryDTO updateInventory(Long id, UpdateInventoryRequest request);
     void deleteInventory(Long id);
-    InventoryDTO getInventoryByProductId(Long productId);
+    List<InventoryDTO> getInventoriesByProductId(Long productId);
 } 

@@ -121,14 +121,12 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public InventoryDTO getInventoryByProductId(Long productId) {
+    public List<InventoryDTO> getInventoriesByProductId(Long productId) {
         if (!productRepository.existsById(productId)) {
             throw new ResourceNotFoundException("Product not found with id: " + productId);
         }
-        return inventoryRepository.findAll().stream()
-                .filter(i -> i.getProduct().getId().equals(productId))
-                .findFirst()
+        return inventoryRepository.findinventoriesByProductId(productId).stream()
                 .map(entityMapper::toInventoryDTO)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product id: " + productId));
+                .collect(Collectors.toList());
     }
 } 
