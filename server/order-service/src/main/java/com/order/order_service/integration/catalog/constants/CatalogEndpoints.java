@@ -1,5 +1,8 @@
 package com.order.order_service.integration.catalog.constants;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public final class CatalogEndpoints {
     public static final String API_PATH = "/api/v1/internal";
     
@@ -9,7 +12,9 @@ public final class CatalogEndpoints {
         return PRODUCTS_PATH + "/" + productId;
     }
     
-    
+    public static String getProductsByIds(List<Long> ids) {
+        return PRODUCTS_PATH + "/list?ids=" + ids.stream().map(String::valueOf).collect(Collectors.joining(","));
+    }
     private CatalogEndpoints() {
         throw new AssertionError("Utility class should not be instantiated");
     }
