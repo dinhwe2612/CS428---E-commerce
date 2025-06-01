@@ -51,6 +51,15 @@ public class Order {
     @Column
     private LocalDateTime updatedAt;
 
+    @Column
+    private String message;
+
+    @Column
+    private String transactionId;
+
+    @Column
+    private String paymentUrl;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -60,5 +69,4 @@ public class Order {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-    private String message;
 } 

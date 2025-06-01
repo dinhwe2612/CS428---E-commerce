@@ -9,6 +9,13 @@ spring:
     username: ${GL_DB_USERNAME}
     password: ${GL_DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 3
+      minimum-idle: 1
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
   jpa:
     hibernate:
       ddl-auto: update

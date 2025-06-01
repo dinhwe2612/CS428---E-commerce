@@ -28,6 +28,7 @@
         <module>catalog-service</module>
         <module>order-service</module>
         <module>voucher-service</module>
+        <module>payment-service</module>
     </modules>
 
     <properties>

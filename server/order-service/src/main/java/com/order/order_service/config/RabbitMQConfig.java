@@ -21,9 +21,22 @@ public class RabbitMQConfig {
     public static final String ORDER_CREATED_ROUTING_KEY = "order.created";
     public static final String ORDER_STATUS_UPDATED_ROUTING_KEY = "order.status.updated";
 
+    public static final String PAYMENT_EXCHANGE = "payment.exchange";
+    public static final String PAYMENT_CREATED_QUEUE = "payment.created.queue";
+    public static final String ORDER_PAYMENT_QUEUE = "order.payment.queue";
+    public static final String PAYMENT_CREATED_ROUTING_KEY = "payment.created";
+    public static final String ORDER_PAYMENT_ROUTING_KEY = "order.payment";
+
+    public static final String PRODUCT_OUTOFSTOCK_QUEUE = "product.outofstock.queue";
+
     @Bean
     public DirectExchange orderExchange() {
         return new DirectExchange(ORDER_EXCHANGE);
+    }
+
+    @Bean
+    public DirectExchange paymentExchange() {
+        return new DirectExchange(PAYMENT_EXCHANGE);
     }
 
     @Bean
@@ -34,6 +47,22 @@ public class RabbitMQConfig {
     @Bean
     public Queue orderStatusUpdatedQueue() {
         return new Queue(ORDER_STATUS_UPDATED_QUEUE);
+    }
+
+    @Bean
+    public Queue paymentCreatedQueue() {
+        return new Queue(PAYMENT_CREATED_QUEUE);
+    }
+
+    @Bean
+    public Queue orderPaymentQueue() {
+        return new Queue(ORDER_PAYMENT_QUEUE);
+    }
+
+    // Declare the product out of stock queue to prevent startup failures
+    @Bean
+    public Queue productOutOfStockQueue() {
+        return new Queue(PRODUCT_OUTOFSTOCK_QUEUE, true); // durable
     }
 
     @Bean
@@ -50,6 +79,22 @@ public class RabbitMQConfig {
                 .bind(orderStatusUpdatedQueue())
                 .to(orderExchange())
                 .with(ORDER_STATUS_UPDATED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding paymentCreatedBinding() {
+        return BindingBuilder
+                .bind(paymentCreatedQueue())
+                .to(paymentExchange())
+                .with(PAYMENT_CREATED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding orderPaymentBinding() {
+        return BindingBuilder
+                .bind(orderPaymentQueue())
+                .to(paymentExchange())
+                .with(ORDER_PAYMENT_ROUTING_KEY);
     }
 
     @Bean

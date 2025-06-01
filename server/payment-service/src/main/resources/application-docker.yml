@@ -1,9 +1,9 @@
 server:
-  port: 8091
+  port: 8092
 
 spring:
   application:
-    name: order-service
+    name: payment-service
   datasource:
     url: ${GL_DB_URL}
     username: ${GL_DB_USERNAME}
@@ -22,9 +22,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-  cloud:
-    compatibility-verifier:
-      enabled: false
   rabbitmq:
     host: image-rabbitmq
     port: 5672
@@ -37,6 +34,15 @@ spring:
           initial-interval: 1000
           max-attempts: 3
 
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+payos:
+  client-id: ${PAYOS_CLIENT_ID}
+  api-key: ${PAYOS_API_KEY}
+  checksum-key: ${PAYOS_CHECKSUM_KEY}
+
 eureka:
   client:
     service-url:
@@ -45,30 +51,14 @@ eureka:
     register-with-eureka: true
   instance:
     prefer-ip-address: true
-    hostname: order-service
+    hostname: payment-service
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
 
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000
-
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html 
-
-services:
-  catalog:
-    base-url: http://catalog-service
-    timeout: 5000
-  order-service:
-    base-url: http://order-service
-    timeout: 5000
-  payment:
-    service:
-      url: http://payment-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
 INTERNAL_API_KEY: ${INTERNAL_API_KEY} 

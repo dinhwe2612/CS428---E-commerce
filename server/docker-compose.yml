@@ -138,7 +138,6 @@ services:
     environment:
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
       - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -190,7 +189,6 @@ services:
     environment:
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
       - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -247,17 +245,18 @@ services:
     networks:
       - microservice-network
       
-  voucher-service:
+  payment-service:
     build:
       context: .
-      dockerfile: voucher-service/Dockerfile
-    container_name: voucher-service
+      dockerfile: payment-service/Dockerfile
+    container_name: payment-service
     ports:
-      - "8071:8071"
+      - "8092:8092"
     env_file:
-      - ./voucher-service/.env
+      - ./payment-service/.env
     volumes:
-      - ./voucher-service/src:/app/voucher-service/src
+      - ./config/payment-service/application-docker.yml:/app/config/application-docker.yml
+      - ./payment-service/src:/app/payment-service/src
       - maven-repo:/root/.m2
     environment:
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
@@ -265,9 +264,10 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
     networks:
       - microservice-network
-      
 
 volumes:
   image-storage:
