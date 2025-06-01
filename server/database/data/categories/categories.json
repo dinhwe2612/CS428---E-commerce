@@ -1,0 +1,106 @@
+[
+    {
+        "name": "Anemones",
+        "relative_path": "/anemones",
+        "full_url": "https://bouqs.com/flowers/anemones",
+        "header": "Anemone Flower Bouquets",
+        "description": "Anemones are sure to be a standout addition to any arrangement. Shop our selection of anemone flower bouquets perfect for any occasion.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjMvMDEvMDQvMTcvMjkvMzQvNjNhNjg2MDctY2Y4MC00MDI3LWExOGEtYzkyYjQxMWY5YjgwL0NhdGFsb2cgQmFubmVyX1RTX1VuaXF1ZSBTdGVtcy5qcGciXSxbInAiLCJvcHRpbSJdXQ/CatalogBanner_TS_UniqueStems.jpg?sha=eae5e5446f02424a"
+    },
+    {
+        "name": "Dried Flowers",
+        "relative_path": "/dried",
+        "full_url": "https://bouqs.com/flowers/dried",
+        "header": "Dried Flower Bouquets",
+        "description": "Our long-lasting dried flower arrangements make for great gifts, and can help elevate your decor. Order from The Bouqs Co.'s dried flower collection today.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjEvMDgvMTUvMjMvMTIvMTIvZWY3N2YxZjUtNjhkMC00NDcwLTgyZDQtNGE4N2EzYTBlYTVjLzA4MTZfQ2F0YWxvZ1BhZ2VfRHJpZWRDb2xsZWN0aW9uXzIuanBnIl0sWyJwIiwib3B0aW0iXV0/0816_CatalogPage_DriedCollection_2.jpg?sha=b0ee376fbf058adf"
+    },
+    {
+        "name": "Hydrangeas",
+        "relative_path": "/hydrangeas",
+        "full_url": "https://bouqs.com/flowers/hydrangeas",
+        "header": "Hydrangeas",
+        "description": "These friendly blooms feature big clusters of ruffled petals for a fresh and enduring look. Find all the charm you need in a hydrangea bouquet.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjMvMDQvMTQvMTcvMTQvNDYvNGRkMDVlYWYtYmZlOS00OWI4LWJlYzQtOTJlMDdjOGE2MWUxL01PTTIzX0NhdGVnb3J5QmFubmVyc19DbG91ZE5pbmUuanBnIl0sWyJwIiwib3B0aW0iXV0/MOM23_CategoryBanners_CloudNine.jpg?sha=28bf0e0e3b43c343"
+    },
+    {
+        "name": "Lilies",
+        "relative_path": "/lilies",
+        "full_url": "https://bouqs.com/flowers/lilies",
+        "header": "Lily Bouquets and Arrangements",
+        "description": "Symbolic. Refined. Sincere. A lily flower bouquet makes for the perfect gift to convey just what you mean to say. Order lilies for any occasion today.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjMvMDQvMTEvMTcvMDEvMDIvNDgxNmJkY2YtODBjMi00ZjEwLWI5MzgtNmY0NjYxMmI4NTVkLzA0MTFfQ2F0YWxvZ0Jhbm5lcl9MaWxpZXMuanBnIl0sWyJwIiwib3B0aW0iXV0/0411_CatalogBanner_Lilies.jpg?sha=ed9a7c5d0f427b8c"
+    },
+    {
+        "name": "Orchids",
+        "relative_path": "/orchids",
+        "full_url": "https://bouqs.com/flowers/orchids",
+        "header": "Orchid Delivery",
+        "description": "Give these orchid flowers enough love, and they'll stick around for weeks (or months!) Enjoy easy orchid delivery on these sweet-smelling blooms.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjEvMDMvMTAvMTgvMzAvMTkvNDEwZDM0MWYtMjRhMy00NWE3LWFhMzItNjgyMmQ4OTU5MjY5L09yY2hpZHNfQURBLmpwZyJdLFsicCIsIm9wdGltIl1d/Orchids_ADA.jpg?sha=d851702a2392f713"
+    },
+    {
+        "name": "Peonies",
+        "relative_path": "/peonies",
+        "full_url": "https://bouqs.com/flowers/peonies",
+        "header": "Peony Bouquets and Arrangements",
+        "description": "Order one of our beautiful peony bouquets while you can! Peonies bloom for a limited time, so order today!",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjAvMTIvMTgvMTYvNTAvMjQvY2Q0Nzc0YWQtZDQwOS00MDZmLWI2MjQtNWIxNDhiZTczMDU0L1Blb25pZXNfQi5qcGciXSxbInAiLCJvcHRpbSJdXQ/Peonies_B.jpg?sha=6995c0d3a81a2cb3"
+    },
+    {
+        "name": "Ranunculus",
+        "relative_path": "/ranunculus",
+        "full_url": "https://bouqs.com/flowers/ranunculus",
+        "header": "Ranunculus Bouquets and Arrangements",
+        "description": "Order a ranunculus bouquet for delivery with The Bouqs Co. This springtime favorite is perfect for any occasion.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjMvMDQvMjUvMTgvMzgvMDgvY2VhYWUzM2UtNGJlZS00Y2Y1LTk4NTUtMDljODM5ZjM5OWQwLzA0MjVfQ2F0YWxvZ0Jhbm5lcl9SdW51bmN1bHVzLmpwZyJdLFsicCIsIm9wdGltIl1d/0425_CatalogBanner_Rununculus.jpg?sha=893239421d9a135e"
+    },
+    {
+        "name": "Roses",
+        "relative_path": "/roses",
+        "full_url": "https://bouqs.com/flowers/roses",
+        "header": "Rose Bouquet Delivery",
+        "description": "Can you picture a more classic flower than the rose? Order rose delivery for any occasion and choose from fragrant garden roses to premium Fair Trade blooms.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjQvMDEvMTQvMTUvMjMvMjgvM2M3ODNkMmQtNWFkMC00NGUxLWEwNTItY2NhM2RkY2ZhOWNjL1ZBTDI0X0NhdGFsb2dCYW5uZXJfTHV4dXJ5Rmxvd2Vycy5qcGciXSxbInAiLCJvcHRpbSJdXQ/VAL24_CatalogBanner_LuxuryFlowers.jpg?sha=c5ac879196c22b3c"
+    },
+    {
+        "name": "Succulents",
+        "relative_path": "/succulents",
+        "full_url": "https://bouqs.com/flowers/succulents",
+        "header": "Succulent Bouquets and Plants",
+        "description": "The gift that keeps on giving! Besides offering a soothing Southwestern vibe, the succulent plants in our bouquets can be replanted to keep the love going.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjAvMTIvMTgvMTYvNTAvMjAvMzc1ZWUzYTEtNGJiYi00ZjI1LTgwYzctMjIwNWIzZmM2YWEyL05leHQgRGF5X0IuanBnIl0sWyJwIiwib3B0aW0iXV0/NextDay_B.jpg?sha=ea641bafbba84139"
+    },
+    {
+        "name": "Sunflowers",
+        "relative_path": "/sunflowers",
+        "full_url": "https://bouqs.com/flowers/sunflowers",
+        "header": "Bouquet of Sunflowers",
+        "description": "The Bouqs Co. simplifies sunflower delivery for any occasion. Order an expertly designed bouquet of sunflowers and brighten your recipient’s day.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjMvMDMvMDkvMTMvMzIvMzUvNzk0NjQxYjItNjk0ZS00M2EzLWE4MGQtNGRkMGI4MmQyODViLzAzMzFfTWRheV9CYW5uZXJzX3dhcm1lcl9NZGF5LmpwZyJdLFsicCIsIm9wdGltIl1d/0331_Mday_Banners_warmer_Mday.jpg?sha=bbcb3a02b2da8038"
+    },
+    {
+        "name": "Tropical",
+        "relative_path": "/tropical",
+        "full_url": "https://bouqs.com/flowers/tropical",
+        "header": "Tropical Flower Arrangements",
+        "description": "Lush palm leaves, bright ginger, mini pineapples –– these exotic Bouqs will have you calling your home your “cabana” in no time.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjIvMDMvMDQvMjAvNTYvMTcvMjYxN2Y2NTEtOGYxZi00MTk0LWI2NWItYzIyNGUwZGFkYTU4LzAzMDdfQ2F0ZWdvcnlIZWFkZXJfV29tZW5zQ29sbGVjdGlvbi5qcGciXSxbInAiLCJvcHRpbSJdXQ/0307_CategoryHeader_WomensCollection.jpg?sha=c280c334b39a7171"
+    },
+    {
+        "name": "Tulips",
+        "relative_path": "/tulips",
+        "full_url": "https://bouqs.com/flowers/tulips",
+        "header": "Tulip Bouquets and Arrangements",
+        "description": "Great for countless occasions, tulip bouquets are packed full of color and convey a variety of meanings. Order tulip delivery with The Bouqs Co. today!",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjEvMDEvMDgvMTcvMjcvNTEvMzQyYzNiNmQtYTk2MS00MjMxLWFhMzUtM2E3MjgxMDc3NTVhL0NhdGFsb2dQYWdlX0Jhbm5lcl9WZGF5X1R1bGlwcy5qcGciXSxbInAiLCJvcHRpbSJdXQ/CatalogPage_Banner_Vday_Tulips.jpg?sha=76fd9de8a32e620c"
+    },
+    {
+        "name": "Unique Stems",
+        "relative_path": "/unique-stems",
+        "full_url": "https://bouqs.com/flowers/unique-stems",
+        "header": "Unique Flower Arrangements",
+        "description": "Our selection of unique bouquets feature one-of-a-kind stems. Order unique flower delivery and send something truly special.",
+        "image_url": "https://bouqs.com/media/W1siZiIsIjIwMjQvMDEvMTQvMTUvMjMvMzIvMDkxNzc3YWMtYzhhZC00YTAwLWFmNjEtZTczMTZhMzZjN2I1L1ZBTDI0X0NhdGFsb2dCYW5uZXJfVW5pcXVlU3RlbXMuanBnIl0sWyJwIiwib3B0aW0iXV0/VAL24_CatalogBanner_UniqueStems.jpg?sha=17cee28ca2027439"
+    }
+]

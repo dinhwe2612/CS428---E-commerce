@@ -1,3 +1,4 @@
 server/.env
 server/.idea
 server/**/target
+/server/database/__pycache__
