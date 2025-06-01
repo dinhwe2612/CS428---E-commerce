@@ -337,4 +337,104 @@ public class PaymentServiceImpl implements PaymentService {
     private String generateTransactionId() {
         return "TXN_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
+
+    @Override
+    @Transactional
+    public String processReturnUrl(String code, String id, Long orderCode, String status, boolean isSuccess) {
+        try {
+            log.info("Processing return URL - code: {}, id: {}, orderCode: {}, status: {}, isSuccess: {}", 
+                    code, id, orderCode, status, isSuccess);
+
+            Payment payment = paymentRepository.findByGatewayTransactionId(orderCode.toString())
+                    .orElseThrow(() -> new PaymentNotFoundException("Payment not found for order code: " + orderCode));
+
+            PaymentStatus currentStatus = payment.getStatus();
+            
+            if (currentStatus == PaymentStatus.COMPLETED) {
+                log.info("Payment already completed for order: {}", orderCode);
+                return "Payment already completed";
+            }
+            
+            if (currentStatus == PaymentStatus.CANCELLED || currentStatus == PaymentStatus.FAILED) {
+                log.info("Payment already finalized with status {} for order: {}", currentStatus, orderCode);
+                return "Payment already " + currentStatus.toString().toLowerCase();
+            }
+
+            if (currentStatus == PaymentStatus.PENDING) {
+                log.warn("Possible attempt to manipulate pending payment for order: {}. Current status: {}", 
+                        orderCode, currentStatus);
+                throw new PaymentProcessingException("Cannot process return URL for pending payment. Use proper payment flow.");
+            }
+
+            try {
+                log.info("Verifying payment status with PayOS for order: {}", orderCode);
+                vn.payos.type.PaymentLinkData payosPayment = payOS.getPaymentLinkInformation(orderCode);
+                
+                if (payosPayment == null) {
+                    log.error("PayOS payment not found for order: {}", orderCode);
+                    throw new PaymentProcessingException("Payment not found in PayOS system");
+                }
+                
+                String payosStatus = payosPayment.getStatus();
+                log.info("PayOS status for order {}: {}", orderCode, payosStatus);
+                
+                if (isSuccess && "00".equals(code)) {
+                    if (!"PAID".equals(payosStatus)) {
+                        log.warn("Attempted success fraud detected. PayOS status: {}, Order: {}", payosStatus, orderCode);
+                        throw new PaymentProcessingException("Payment not actually completed in PayOS. Status: " + payosStatus);
+                    }
+                } else {
+                    if ("PAID".equals(payosStatus)) {
+                        log.warn("Attempted cancel fraud detected. PayOS shows payment completed for order: {}", orderCode);
+                        payment.setStatus(PaymentStatus.COMPLETED);
+                        payment.setCompletedAt(LocalDateTime.now());
+                        payment.setGatewayResponse("Auto-corrected: PayOS shows PAID status");
+                        payment = paymentRepository.save(payment);
+                        
+                        PaymentResponseDTO response = convertToDTO(payment);
+                        messageProducer.sendPaymentStatusUpdatedEvent(response, currentStatus);
+                        
+                        return "Payment actually completed (corrected from PayOS)";
+                    }
+                }
+                
+            } catch (Exception payosException) {
+                log.error("Error verifying with PayOS for order {}: {}", orderCode, payosException.getMessage());
+                throw new PaymentProcessingException("Failed to verify payment status with PayOS: " + payosException.getMessage());
+            }
+
+            PaymentStatus newStatus;
+            PaymentStatus oldStatus = payment.getStatus();
+            
+            if (isSuccess && "00".equals(code)) {
+                if (currentStatus != PaymentStatus.PROCESSING) {
+                    log.warn("Invalid status transition for success. Current: {}, Order: {}", currentStatus, orderCode);
+                    throw new PaymentProcessingException("Invalid payment status for success callback");
+                }
+                newStatus = PaymentStatus.COMPLETED;
+                payment.setCompletedAt(LocalDateTime.now());
+                log.info("Payment marked as completed for order: {}", orderCode);
+            } else {
+                if (currentStatus != PaymentStatus.PROCESSING) {
+                    log.warn("Invalid status transition for cancel. Current: {}, Order: {}", currentStatus, orderCode);
+                    throw new PaymentProcessingException("Invalid payment status for cancel callback");
+                }
+                newStatus = "01".equals(code) ? PaymentStatus.CANCELLED : PaymentStatus.FAILED;
+                log.info("Payment marked as {} for order: {}", newStatus, orderCode);
+            }
+            
+            payment.setStatus(newStatus);
+            payment.setGatewayResponse("Return URL processed with code: " + code + " (PayOS verified)");
+            payment = paymentRepository.save(payment);
+
+            PaymentResponseDTO response = convertToDTO(payment);
+            messageProducer.sendPaymentStatusUpdatedEvent(response, oldStatus);
+            
+            return "Payment " + newStatus.toString().toLowerCase();
+            
+        } catch (Exception e) {
+            log.error("Error processing return URL: {}", e.getMessage(), e);
+            throw new PaymentProcessingException("Failed to process return URL: " + e.getMessage());
+        }
+    }
 } 

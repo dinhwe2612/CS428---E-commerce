@@ -121,6 +121,47 @@ public class PaymentController {
         }
     }
 
+    @GetMapping("/success")
+    public ResponseEntity<ApiResponse<String>> handlePaymentSuccess(
+            @RequestParam String code,
+            @RequestParam String id, 
+            @RequestParam Long orderCode,
+            @RequestParam(required = false) String status) {
+        try {
+            log.info("Received payment success callback - code: {}, id: {}, orderCode: {}, status: {}", 
+                    code, id, orderCode, status);
+            
+            String result = paymentService.processReturnUrl(code, id, orderCode, status, true);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Payment processed successfully", result));
+            
+        } catch (Exception e) {
+            log.error("Error processing success callback: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, "Error processing payment: " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/cancel")
+    public ResponseEntity<ApiResponse<String>> handlePaymentCancel(
+            @RequestParam String code,
+            @RequestParam String id,
+            @RequestParam Long orderCode,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "false") boolean cancel) {
+        try {
+            log.info("Received payment cancel callback - code: {}, id: {}, orderCode: {}, status: {}, cancel: {}", 
+                    code, id, orderCode, status, cancel);
+            
+            String result = paymentService.processReturnUrl(code, id, orderCode, status, false);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Payment cancellation processed successfully", result));
+            
+        } catch (Exception e) {
+            log.error("Error processing cancel callback: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, "Error processing payment cancellation: " + e.getMessage(), null));
+        }
+    }
+
     private String extractUserIdFromAuthentication(Authentication authentication) {
         if (authentication.getPrincipal() instanceof UserDetailsWithUserId userDetails) {
             return userDetails.getUserId();

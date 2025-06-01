@@ -28,4 +28,6 @@ public interface PaymentService {
     PaymentResponseDTO cancelPayment(String transactionId);
     
     PaymentResponseDTO refundPayment(String transactionId, String reason);
+    
+    String processReturnUrl(String code, String id, Long orderCode, String status, boolean isSuccess);
 } 

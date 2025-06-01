@@ -23,6 +23,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/payments/webhook/**").permitAll()
+                .requestMatchers("/api/v1/payments/success").permitAll()
+                .requestMatchers("/api/v1/payments/cancel").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated())
             .sessionManagement(session -> session
