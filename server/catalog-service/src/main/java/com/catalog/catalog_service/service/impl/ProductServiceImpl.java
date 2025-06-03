@@ -1,8 +1,13 @@
 package com.catalog.catalog_service.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.catalog.catalog_service.model.Category;
+import com.catalog.catalog_service.model.Product;
+import com.catalog.catalog_service.model.ProductImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +24,9 @@ import com.catalog.catalog_service.dto.request.CreateProductRequest;
 import com.catalog.catalog_service.dto.request.UpdateProductRequest;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
-import com.catalog.catalog_service.model.category;
-import com.catalog.catalog_service.model.product;
-import com.catalog.catalog_service.repository.CategoryRepository;
-import com.catalog.catalog_service.repository.ProductRepository;
-import com.catalog.catalog_service.repository.ProductSearchRepository;
+import com.catalog.catalog_service.repository.jpa.CategoryRepository;
+import com.catalog.catalog_service.repository.jpa.ProductRepository;
+import com.catalog.catalog_service.repository.es.ProductSearchRepository;
 import com.catalog.catalog_service.service.ProductService;
 import com.catalog.catalog_service.specification.ProductSpecification;
 import com.catalog.catalog_service.model.ProductDocument;
@@ -50,8 +53,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageDTO<ProductDTO> getAllProducts(Pageable pageable, String name, Double minPrice, Double maxPrice, Long categoryId) {
-        Specification<product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
-        Page<product> productPage = productRepository.findAll(spec, pageable);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
         List<ProductDTO> productDTOs = productPage.getContent().stream()
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());
@@ -69,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO getProductById(Long id) {
-        product product = productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return entityMapper.toProductDTO(product);
     }
@@ -78,33 +81,41 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDTO createProduct(CreateProductRequest request) {
         try {
-            logger.debug("Creating product with request: {}", request);
-            
-            category category = categoryRepository.findById(request.getCategoryId())
+            // check if category is existed
+            Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> {
                         logger.error("Category not found with id: {}", request.getCategoryId());
                         return new ResourceNotFoundException("Category not found with id: " + request.getCategoryId());
                     });
 
-            logger.debug("Found category: {}", category);
-
-            product product = new product();
+            // set product fields
+            Product product = new Product();
             product.setName(request.getName());
-            product.setDescription(request.getDescription());
+            product.setProductPath(request.getProductPath());
+            product.setDescriptionHtml(request.getDescriptionHtml());
+            product.setDescriptionText(request.getDescriptionText());
             product.setPrice(request.getPrice());
             product.setCategory(category);
-            product.setImageIds(request.getImageIds());
-            product.setImageUrls(request.getImageUrls());
+            List<String> imageUrls = request.getImageUrls();
+            if (imageUrls != null) {
+                AtomicInteger counter = new AtomicInteger(1);
+                imageUrls.forEach(imageUrl -> {
+                    ProductImage productImage = new ProductImage();
+                    productImage.setImageUrl(imageUrl);
+                    productImage.setImageOrder(counter.getAndIncrement());
+                    product.addImage(productImage);
+                });
+            }
 
-            logger.debug("Saving product: {}", product);
-            product savedProduct = productRepository.save(product);
+            // save product
+            Product savedProduct = productRepository.save(product);
             
             // Index in Elasticsearch
             ProductDocument document = ProductDocument.builder()
                 .id(savedProduct.getId())
                 .name(savedProduct.getName())
-                .description(savedProduct.getDescription())
-                .price(savedProduct.getPrice())
+                .description(savedProduct.getDescriptionText())
+                .price(Double.valueOf(savedProduct.getPrice()))
                 .categoryId(category.getId())
                 .categoryName(category.getName())
                 .build();
@@ -122,31 +133,44 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO updateProduct(Long id, UpdateProductRequest request) {
-        product product = productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         if (request.getName() != null) {
             product.setName(request.getName());
         }
-        if (request.getDescription() != null) {
-            product.setDescription(request.getDescription());
+        if (request.getProductPath() != null) {
+            product.setProductPath(request.getProductPath());
+        }
+        if (request.getDescriptionHtml() != null) {
+            product.setDescriptionHtml(request.getDescriptionHtml());
+        }
+        if (request.getDescriptionText() != null) {
+            product.setDescriptionText(request.getDescriptionText());
         }
         if (request.getPrice() != null) {
             product.setPrice(request.getPrice());
         }
         if (request.getCategoryId() != null) {
-            category category = categoryRepository.findById(request.getCategoryId())
+            Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
             product.setCategory(category);
         }
-        if (request.getImageIds() != null) {
-            product.setImageIds(request.getImageIds());
-        }
-        if (request.getImageUrls() != null) {
-            product.setImageUrls(request.getImageUrls());
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null) {
+            AtomicInteger counter = new AtomicInteger(1);
+            List<ProductImage> productImages = imageUrls.stream()
+                    .map(imageUrl -> {
+                        ProductImage productImage = new ProductImage();
+                        productImage.setImageUrl(imageUrl);
+                        productImage.setImageOrder(counter.getAndIncrement());
+                        return productImage;
+                    })
+                    .toList();
+            product.setImages(productImages);
         }
 
-        product updatedProduct = productRepository.save(product);
+        Product updatedProduct = productRepository.save(product);
         return entityMapper.toProductDTO(updatedProduct);
     }
 
@@ -171,7 +195,7 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
      public List<ProductDTO> getAll(){
-        List<product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAll();
         return products.stream()
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());
@@ -179,7 +203,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> getProductsByIds(List<Long> ids) {
-        List<product> products = productRepository.findByIdIn(ids);
+        List<Product> products = productRepository.findByIdIn(ids);
         return products.stream()
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());

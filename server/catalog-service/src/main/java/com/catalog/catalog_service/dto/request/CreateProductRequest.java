@@ -14,26 +14,26 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor  
+@NoArgsConstructor
 public class CreateProductRequest {
-    @NotBlank(message = "Product name is required")
-    @Size(min = 2, max = 100, message = "Product name must be between 2 and 100 characters")
-    private String name;
-
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
-    private String description;
-
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be greater than 0")
-    private Double price;
-
     @NotNull(message = "Category ID is required")
-    @JsonProperty("category_id")
     private Long categoryId;
 
-    @JsonProperty("image_ids")
-    private List<Long> imageIds;
+    @NotBlank(message = "Product path is required")
+    private String productPath;
 
-    @JsonProperty("image_urls")
-    private List<String> imageUrls;
-} 
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @NotBlank(message = "Price is required")
+    @Positive(message = "Price must be greater than 0")
+    private String price;
+
+    @Size(max = 100000, message = "Description HTML must be less than 100000 characters")
+    private String descriptionHtml;
+
+    @Size(max = 1000, message = "Description text must be less than 1000 characters")
+    private String descriptionText;
+
+    private List<@NotBlank(message = "Image URL cannot be blank") String> imageUrls;
+}

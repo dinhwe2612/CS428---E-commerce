@@ -1,10 +1,8 @@
 package com.catalog.catalog_service.dto.request;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,36 +11,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateInventoryRequest {
+
     @NotNull(message = "Product ID is required")
     private Long productId;
 
-    @NotNull(message = "Current stock is required")
-    @PositiveOrZero(message = "Current stock cannot be negative")
-    private Integer currentStock;
+    @NotNull(message = "Quantity is required")
+    @Min(value = 1, message = "Quantity must be at least 1")
+    private Integer quantity;
 
-    @NotNull(message = "Available stock is required")
-    @PositiveOrZero(message = "Available stock cannot be negative")
-    private Integer availableStock;
+    @NotNull(message = "Arrival date is required")
+    private LocalDateTime arrivalDate;
 
-    @PositiveOrZero(message = "Reserved quantity cannot be negative")
-    private Integer reservedQuantity;
-
-    @NotNull(message = "Reorder level is required")
-    @PositiveOrZero(message = "Reorder level cannot be negative")
-    private Integer reorderLevel;
-
-    @NotNull(message = "Reorder quantity is required")
-    @Positive(message = "Reorder quantity must be greater than 0")
-    private Integer reorderQuantity;
-
-    @NotNull(message = "Low stock threshold is required")
-    @PositiveOrZero(message = "Low stock threshold cannot be negative")
-    private Integer lowStockThreshold;
-
-    @Positive(message = "Unit cost must be greater than 0")
-    private BigDecimal unitCost;
-
-    private String location;
-    private String status;
-    private Long supplierId;
-} 
+    @Size(max = 255, message = "Description must be less than 255 characters")
+    private String description;
+}

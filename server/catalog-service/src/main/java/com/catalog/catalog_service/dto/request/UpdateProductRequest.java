@@ -1,5 +1,7 @@
 package com.catalog.catalog_service.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -12,16 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateProductRequest {
-    @Size(min = 2, max = 100, message = "Product name must be between 2 and 100 characters")
-    private String name;
-
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
-    private String description;
-
-    @Positive(message = "Price must be greater than 0")
-    private Double price;
-
     private Long categoryId;
-    private List<Long> imageIds;
+    private String productPath;
+    private String name;
+    private String price;
+    private String descriptionHtml;
+    private String descriptionText;
     private List<String> imageUrls;
-} 
+}

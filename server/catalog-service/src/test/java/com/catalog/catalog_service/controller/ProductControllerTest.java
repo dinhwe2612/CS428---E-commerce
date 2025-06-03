@@ -1,10 +1,12 @@
 package com.catalog.catalog_service.controller;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -52,37 +54,48 @@ public class ProductControllerTest {
     void setUp() {
         sampleProduct = new ProductDTO();
         sampleProduct.setId(1L);
-        sampleProduct.setName("Test Product");
-        sampleProduct.setDescription("Test Description");
-        sampleProduct.setPrice(99.99);
         sampleProduct.setCategoryId(1L);
-        sampleProduct.setImageIds(Arrays.asList(1L, 2L));
-        sampleProduct.setImageUrls(Arrays.asList("http://example.com/image1.jpg", "http://example.com/image2.jpg"));
+        sampleProduct.setProductPath("/test-product");
+        sampleProduct.setName("Test Product");
+        sampleProduct.setPrice("99.99");
+        sampleProduct.setDescriptionHtml("<p>Test Description</p>");
+        sampleProduct.setDescriptionText("Test Description");
+        sampleProduct.setImageUrls(Arrays.asList(
+                "http://example.com/image1.jpg",
+                "http://example.com/image2.jpg"
+        ));
 
         createRequest = new CreateProductRequest();
-        createRequest.setName("New Product");
-        createRequest.setDescription("New Description");
-        createRequest.setPrice(149.99);
         createRequest.setCategoryId(1L);
-        createRequest.setImageIds(Arrays.asList(3L, 4L));
-        createRequest.setImageUrls(Arrays.asList("http://example.com/image3.jpg", "http://example.com/image4.jpg"));
+        createRequest.setProductPath("/new-product");
+        createRequest.setName("New Product");
+        createRequest.setPrice("149.99");
+        createRequest.setDescriptionHtml("<p>New Description</p>");
+        createRequest.setDescriptionText("New Description");
+        createRequest.setImageUrls(Arrays.asList(
+                "http://example.com/image3.jpg",
+                "http://example.com/image4.jpg"
+        ));
 
         updateRequest = new UpdateProductRequest();
-        updateRequest.setName("Updated Product");
-        updateRequest.setDescription("Updated Description");
-        updateRequest.setPrice(199.99);
         updateRequest.setCategoryId(2L);
-        updateRequest.setImageIds(Arrays.asList(5L, 6L));
-        updateRequest.setImageUrls(Arrays.asList("http://example.com/image5.jpg", "http://example.com/image6.jpg"));
+        updateRequest.setName("Updated Product");
+        updateRequest.setPrice("199.99");
+        updateRequest.setDescriptionHtml("<p>Updated Description</p>");
+        updateRequest.setDescriptionText("Updated Description");
+        updateRequest.setImageUrls(Arrays.asList(
+                "http://example.com/image5.jpg",
+                "http://example.com/image6.jpg"
+        ));
 
         pageDTO = new PageDTO<>(
-            Arrays.asList(sampleProduct),
-            0,
-            10,
-            1,
-            1,
-            true,
-            true
+                List.of(sampleProduct),
+                0,      // current page
+                10,     // size
+                1,      // total pages
+                1,      // total elements
+                true,   // has next
+                true    // has previous
         );
     }
 
@@ -90,22 +103,22 @@ public class ProductControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getAllProducts_ShouldReturnListOfProducts() throws Exception {
         when(productService.getAllProducts(any(Pageable.class), any(), any(), any(), any()))
-            .thenReturn(pageDTO);
+                .thenReturn(pageDTO);
 
         mockMvc.perform(get("/products")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .param("page", "0")
-                .param("size", "10")
-                .param("sortBy", "name")
-                .param("sortDirection", "asc"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sortBy", "name")
+                        .param("sortDirection", "asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(sampleProduct.getId()))
+                .andExpect(jsonPath("$.content[0].productPath").value(sampleProduct.getProductPath()))
                 .andExpect(jsonPath("$.content[0].name").value(sampleProduct.getName()))
-                .andExpect(jsonPath("$.content[0].description").value(sampleProduct.getDescription()))
                 .andExpect(jsonPath("$.content[0].price").value(sampleProduct.getPrice()))
                 .andExpect(jsonPath("$.content[0].categoryId").value(sampleProduct.getCategoryId()))
-                .andExpect(jsonPath("$.content[0].imageIds[0]").value(sampleProduct.getImageIds().get(0)))
-                .andExpect(jsonPath("$.content[0].imageIds[1]").value(sampleProduct.getImageIds().get(1)))
+                .andExpect(jsonPath("$.content[0].descriptionHtml").value(sampleProduct.getDescriptionHtml()))
+                .andExpect(jsonPath("$.content[0].descriptionText").value(sampleProduct.getDescriptionText()))
                 .andExpect(jsonPath("$.content[0].imageUrls[0]").value(sampleProduct.getImageUrls().get(0)))
                 .andExpect(jsonPath("$.content[0].imageUrls[1]").value(sampleProduct.getImageUrls().get(1)));
     }
@@ -116,15 +129,15 @@ public class ProductControllerTest {
         when(productService.getProductById(1L)).thenReturn(sampleProduct);
 
         mockMvc.perform(get("/products/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleProduct.getId()))
+                .andExpect(jsonPath("$.productPath").value(sampleProduct.getProductPath()))
                 .andExpect(jsonPath("$.name").value(sampleProduct.getName()))
-                .andExpect(jsonPath("$.description").value(sampleProduct.getDescription()))
                 .andExpect(jsonPath("$.price").value(sampleProduct.getPrice()))
                 .andExpect(jsonPath("$.categoryId").value(sampleProduct.getCategoryId()))
-                .andExpect(jsonPath("$.imageIds[0]").value(sampleProduct.getImageIds().get(0)))
-                .andExpect(jsonPath("$.imageIds[1]").value(sampleProduct.getImageIds().get(1)))
+                .andExpect(jsonPath("$.descriptionHtml").value(sampleProduct.getDescriptionHtml()))
+                .andExpect(jsonPath("$.descriptionText").value(sampleProduct.getDescriptionText()))
                 .andExpect(jsonPath("$.imageUrls[0]").value(sampleProduct.getImageUrls().get(0)))
                 .andExpect(jsonPath("$.imageUrls[1]").value(sampleProduct.getImageUrls().get(1)));
     }
@@ -133,20 +146,20 @@ public class ProductControllerTest {
     @WithMockUser(roles = "ADMIN")
     void createProduct_ShouldReturnCreatedProduct() throws Exception {
         when(productService.createProduct(any(CreateProductRequest.class)))
-            .thenReturn(sampleProduct);
+                .thenReturn(sampleProduct);
 
         mockMvc.perform(post("/products")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleProduct.getId()))
+                .andExpect(jsonPath("$.productPath").value(sampleProduct.getProductPath()))
                 .andExpect(jsonPath("$.name").value(sampleProduct.getName()))
-                .andExpect(jsonPath("$.description").value(sampleProduct.getDescription()))
                 .andExpect(jsonPath("$.price").value(sampleProduct.getPrice()))
                 .andExpect(jsonPath("$.categoryId").value(sampleProduct.getCategoryId()))
-                .andExpect(jsonPath("$.imageIds[0]").value(sampleProduct.getImageIds().get(0)))
-                .andExpect(jsonPath("$.imageIds[1]").value(sampleProduct.getImageIds().get(1)))
+                .andExpect(jsonPath("$.descriptionHtml").value(sampleProduct.getDescriptionHtml()))
+                .andExpect(jsonPath("$.descriptionText").value(sampleProduct.getDescriptionText()))
                 .andExpect(jsonPath("$.imageUrls[0]").value(sampleProduct.getImageUrls().get(0)))
                 .andExpect(jsonPath("$.imageUrls[1]").value(sampleProduct.getImageUrls().get(1)));
     }
@@ -154,21 +167,21 @@ public class ProductControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateProduct_ShouldReturnUpdatedProduct() throws Exception {
-        when(productService.updateProduct(any(Long.class), any(UpdateProductRequest.class)))
-            .thenReturn(sampleProduct);
+        when(productService.updateProduct(anyLong(), any(UpdateProductRequest.class)))
+                .thenReturn(sampleProduct);
 
         mockMvc.perform(put("/products/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleProduct.getId()))
+                .andExpect(jsonPath("$.productPath").value(sampleProduct.getProductPath()))
                 .andExpect(jsonPath("$.name").value(sampleProduct.getName()))
-                .andExpect(jsonPath("$.description").value(sampleProduct.getDescription()))
                 .andExpect(jsonPath("$.price").value(sampleProduct.getPrice()))
                 .andExpect(jsonPath("$.categoryId").value(sampleProduct.getCategoryId()))
-                .andExpect(jsonPath("$.imageIds[0]").value(sampleProduct.getImageIds().get(0)))
-                .andExpect(jsonPath("$.imageIds[1]").value(sampleProduct.getImageIds().get(1)))
+                .andExpect(jsonPath("$.descriptionHtml").value(sampleProduct.getDescriptionHtml()))
+                .andExpect(jsonPath("$.descriptionText").value(sampleProduct.getDescriptionText()))
                 .andExpect(jsonPath("$.imageUrls[0]").value(sampleProduct.getImageUrls().get(0)))
                 .andExpect(jsonPath("$.imageUrls[1]").value(sampleProduct.getImageUrls().get(1)));
     }
@@ -177,7 +190,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = "ADMIN")
     void deleteProduct_ShouldReturnNoContent() throws Exception {
         mockMvc.perform(delete("/products/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -185,20 +198,20 @@ public class ProductControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getProductsByCategory_ShouldReturnListOfProducts() throws Exception {
         when(productService.getAllProducts(any(Pageable.class), any(), any(), any(), any()))
-            .thenReturn(pageDTO);
+                .thenReturn(pageDTO);
 
         mockMvc.perform(get("/products/category/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .param("page", "0")
-                .param("size", "10"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(sampleProduct.getId()))
+                .andExpect(jsonPath("$.content[0].productPath").value(sampleProduct.getProductPath()))
                 .andExpect(jsonPath("$.content[0].name").value(sampleProduct.getName()))
-                .andExpect(jsonPath("$.content[0].description").value(sampleProduct.getDescription()))
                 .andExpect(jsonPath("$.content[0].price").value(sampleProduct.getPrice()))
                 .andExpect(jsonPath("$.content[0].categoryId").value(sampleProduct.getCategoryId()))
-                .andExpect(jsonPath("$.content[0].imageIds[0]").value(sampleProduct.getImageIds().get(0)))
-                .andExpect(jsonPath("$.content[0].imageIds[1]").value(sampleProduct.getImageIds().get(1)))
+                .andExpect(jsonPath("$.content[0].descriptionHtml").value(sampleProduct.getDescriptionHtml()))
+                .andExpect(jsonPath("$.content[0].descriptionText").value(sampleProduct.getDescriptionText()))
                 .andExpect(jsonPath("$.content[0].imageUrls[0]").value(sampleProduct.getImageUrls().get(0)))
                 .andExpect(jsonPath("$.content[0].imageUrls[1]").value(sampleProduct.getImageUrls().get(1)));
     }
@@ -209,16 +222,16 @@ public class ProductControllerTest {
         when(productService.getAll()).thenReturn(Arrays.asList(sampleProduct));
 
         mockMvc.perform(get("/products/all")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(sampleProduct.getId()))
+                .andExpect(jsonPath("$[0].productPath").value(sampleProduct.getProductPath()))
                 .andExpect(jsonPath("$[0].name").value(sampleProduct.getName()))
-                .andExpect(jsonPath("$[0].description").value(sampleProduct.getDescription()))
                 .andExpect(jsonPath("$[0].price").value(sampleProduct.getPrice()))
                 .andExpect(jsonPath("$[0].categoryId").value(sampleProduct.getCategoryId()))
-                .andExpect(jsonPath("$[0].imageIds[0]").value(sampleProduct.getImageIds().get(0)))
-                .andExpect(jsonPath("$[0].imageIds[1]").value(sampleProduct.getImageIds().get(1)))
+                .andExpect(jsonPath("$[0].descriptionHtml").value(sampleProduct.getDescriptionHtml()))
+                .andExpect(jsonPath("$[0].descriptionText").value(sampleProduct.getDescriptionText()))
                 .andExpect(jsonPath("$[0].imageUrls[0]").value(sampleProduct.getImageUrls().get(0)))
                 .andExpect(jsonPath("$[0].imageUrls[1]").value(sampleProduct.getImageUrls().get(1)));
     }
-} 
+}

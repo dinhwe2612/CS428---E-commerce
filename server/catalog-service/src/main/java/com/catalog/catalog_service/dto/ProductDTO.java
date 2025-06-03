@@ -10,10 +10,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductDTO {
     private Long id;
-    private String name;
-    private String description;
-    private double price;
     private Long categoryId;
-    private List<Long> imageIds;
+    private String productPath;
+    private String name;
+    private String price;
+    private String descriptionHtml;
+    private String descriptionText;
     private List<String> imageUrls;
-} 
+}

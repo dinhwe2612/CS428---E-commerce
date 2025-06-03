@@ -3,109 +3,163 @@ package com.catalog.catalog_service.mapper;
 import com.catalog.catalog_service.dto.CategoryDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.InventoryDTO;
-import com.catalog.catalog_service.model.category;
-import com.catalog.catalog_service.model.product;
-import com.catalog.catalog_service.model.inventory;
+import com.catalog.catalog_service.dto.ProductImageDTO;
+import com.catalog.catalog_service.dto.request.CreateCategoryRequest;
+import com.catalog.catalog_service.dto.request.CreateProductImageRequest;
+import com.catalog.catalog_service.model.Category;
+import com.catalog.catalog_service.model.Inventory;
+import com.catalog.catalog_service.model.Product;
+import com.catalog.catalog_service.model.ProductImage;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EntityMapper {
 
-    public CategoryDTO toCategoryDTO(category category) {
+    public CategoryDTO toCategoryDTO(Category category) {
         if (category == null) return null;
         
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
-        dto.setImageId(category.getImageId());
+        dto.setTitle(category.getTitle());
+        dto.setCategoryPath(category.getCategoryPath());
         dto.setImageUrl(category.getImageUrl());
-        dto.setStatus(category.getStatus());
         return dto;
     }
 
-    public category toCategory(CategoryDTO dto) {
+    public Category toCategory(CategoryDTO dto) {
         if (dto == null) return null;
-        
-        category category = new category();
+
+        Category category = new Category();
         category.setId(dto.getId());
         category.setName(dto.getName());
         category.setDescription(dto.getDescription());
-        category.setImageId(dto.getImageId());
+        category.setTitle(dto.getTitle());
+        category.setCategoryPath(dto.getCategoryPath());
         category.setImageUrl(dto.getImageUrl());
-        category.setStatus(dto.getStatus());
         return category;
     }
 
-    public ProductDTO toProductDTO(product product) {
-        if (product == null) return null;
-        
+    public Category toCategory(CreateCategoryRequest request) {
+        Category category = new Category();
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        category.setTitle(request.getTitle());
+        category.setCategoryPath(request.getCategoryPath());
+        category.setImageUrl(request.getImageUrl());
+        return category;
+    }
+
+    public ProductDTO toProductDTO(Product product) {
+        if (product == null) {
+            return null;
+        }
+
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId());
+        dto.setCategoryId(product.getCategory().getId());
+        dto.setProductPath(product.getProductPath());
         dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
-        dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
-        dto.setImageIds(product.getImageIds());
-        dto.setImageUrls(product.getImageUrls());
+        dto.setDescriptionHtml(product.getDescriptionHtml());
+        dto.setDescriptionText(product.getDescriptionText());
+
+        List<String> urls = new ArrayList<>();
+        if (product.getImages() != null) {
+            for (ProductImage img : product.getImages()) {
+                urls.add(img.getImageUrl());
+            }
+        }
+        dto.setImageUrls(urls);
+
         return dto;
     }
 
-    public product toProduct(ProductDTO dto) {
-        if (dto == null) return null;
-        
-        product product = new product();
+    public Product toProduct(ProductDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Product product = new Product();
         product.setId(dto.getId());
+
+        // Associate the category by ID only; full Category object will be managed by JPA
+        Category category = new Category();
+        category.setId(dto.getCategoryId());
+        product.setCategory(category);
+
+        product.setProductPath(dto.getProductPath());
         product.setName(dto.getName());
-        product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
-        // Note: Category needs to be set separately as it requires a category entity
-        product.setImageIds(dto.getImageIds());
-        product.setImageUrls(dto.getImageUrls());
+        product.setDescriptionHtml(dto.getDescriptionHtml());
+        product.setDescriptionText(dto.getDescriptionText());
+
+        // Map image URLs into ProductImage entities
+        List<ProductImage> images = new ArrayList<>();
+        if (dto.getImageUrls() != null) {
+            for (int i = 0; i < dto.getImageUrls().size(); i++) {
+                String url = dto.getImageUrls().get(i);
+                ProductImage img = new ProductImage();
+                img.setImageUrl(url);
+                img.setImageOrder(i);
+                img.setProduct(product);
+                images.add(img);
+            }
+        }
+        product.setImages(images);
+
         return product;
     }
 
-    public InventoryDTO toInventoryDTO(inventory inventory) {
-        if (inventory == null) return null;
-        
+    public InventoryDTO toInventoryDTO(Inventory inventory) {
+        if (inventory == null) {
+            return null;
+        }
+
         InventoryDTO dto = new InventoryDTO();
         dto.setId(inventory.getId());
-        dto.setProductId(inventory.getProduct() != null ? inventory.getProduct().getId() : null);
-        dto.setCurrentStock(inventory.getCurrentStock());
-        dto.setAvailableStock(inventory.getAvailableStock());
-        dto.setReservedQuantity(inventory.getReservedQuantity());
-        dto.setReorderLevel(inventory.getReorderLevel());
-        dto.setReorderQuantity(inventory.getReorderQuantity());
-        dto.setLowStockThreshold(inventory.getLowStockThreshold());
-        dto.setUnitCost(inventory.getUnitCost());
-        dto.setLocation(inventory.getLocation());
-        dto.setStatus(inventory.getStatus());
-        dto.setLastStockMovement(inventory.getLastStockMovement());
-        dto.setLastMovementType(inventory.getLastMovementType());
-        dto.setLastMovementQuantity(inventory.getLastMovementQuantity());
-        dto.setSupplierId(inventory.getSupplierId());
+        dto.setProductId(inventory.getProduct().getId());
+        dto.setQuantity(inventory.getQuantity());
+        dto.setArrivalDate(inventory.getArrivalDate());
+        dto.setDescription(inventory.getDescription());
+        dto.setVersion(inventory.getVersion());
         return dto;
     }
 
-    public inventory toInventory(InventoryDTO dto) {
-        if (dto == null) return null;
-        
-        inventory inventory = new inventory();
+    public Inventory toInventory(InventoryDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Inventory inventory = new Inventory();
         inventory.setId(dto.getId());
-        // Note: Product needs to be set separately as it requires a product entity
-        inventory.setCurrentStock(dto.getCurrentStock());
-        inventory.setAvailableStock(dto.getAvailableStock());
-        inventory.setReservedQuantity(dto.getReservedQuantity());
-        inventory.setReorderLevel(dto.getReorderLevel());
-        inventory.setReorderQuantity(dto.getReorderQuantity());
-        inventory.setLowStockThreshold(dto.getLowStockThreshold());
-        inventory.setUnitCost(dto.getUnitCost());
-        inventory.setLocation(dto.getLocation());
-        inventory.setStatus(dto.getStatus());
-        inventory.setLastStockMovement(dto.getLastStockMovement());
-        inventory.setLastMovementType(dto.getLastMovementType());
-        inventory.setLastMovementQuantity(dto.getLastMovementQuantity());
-        inventory.setSupplierId(dto.getSupplierId());
+
+        // Associate the product by ID only; JPA will manage the relationship
+        Product product = new Product();
+        product.setId(dto.getProductId());
+        inventory.setProduct(product);
+
+        inventory.setQuantity(dto.getQuantity());
+        inventory.setArrivalDate(dto.getArrivalDate());
+        inventory.setDescription(dto.getDescription());
+        // Do not set version manually; JPA will handle it on persistence
+
         return inventory;
     }
-} 
+
+    public ProductImageDTO toProductImageDTO(ProductImage productImage) {
+        if (productImage == null) {
+            return null;
+        }
+        ProductImageDTO dto = new ProductImageDTO();
+        dto.setId(productImage.getId());
+        dto.setImageUrl(productImage.getImageUrl());
+        dto.setImageOrder(productImage.getImageOrder());
+        dto.setProductId(productImage.getProduct().getId());
+        return dto;
+    }
+}

@@ -34,6 +34,11 @@ spring:
           initial-interval: 1000
           max-attempts: 3
 
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+
 eureka:
   client:
     serviceUrl:
@@ -41,8 +46,6 @@ eureka:
   instance:
     preferIpAddress: true
     hostname: user-service
-
-
 
 management:
   endpoints:

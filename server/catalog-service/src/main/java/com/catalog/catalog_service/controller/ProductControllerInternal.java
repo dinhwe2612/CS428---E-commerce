@@ -2,7 +2,7 @@ package com.catalog.catalog_service.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,15 +14,11 @@ import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.service.ProductService;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/internal/products")
 public class ProductControllerInternal {
 
     private final ProductService productService;
-
-    @Autowired
-    public ProductControllerInternal(ProductService productService) {
-        this.productService = productService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {

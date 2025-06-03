@@ -1,4 +1,4 @@
-package com.catalog.catalog_service.repository;
+package com.catalog.catalog_service.repository.es;
 
 import java.util.List;
 

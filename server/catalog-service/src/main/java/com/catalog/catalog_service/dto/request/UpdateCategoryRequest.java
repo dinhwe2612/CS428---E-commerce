@@ -1,7 +1,8 @@
 package com.catalog.catalog_service.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -9,13 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateCategoryRequest {
-    @Size(min = 2, max = 100, message = "Category name must be between 2 and 100 characters")
     private String name;
-
-    @Size(max = 500, message = "Description cannot exceed 500 characters")
+    private String categoryPath;
+    private String title;
     private String description;
-
-    private String imageId;
     private String imageUrl;
-    private String status;
-} 
+}

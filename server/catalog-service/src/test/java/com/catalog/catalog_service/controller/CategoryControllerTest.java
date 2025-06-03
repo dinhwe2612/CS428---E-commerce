@@ -51,24 +51,24 @@ public class CategoryControllerTest {
         sampleCategory = new CategoryDTO();
         sampleCategory.setId(1L);
         sampleCategory.setName("Test Category");
+        sampleCategory.setCategoryPath("/test-path");
+        sampleCategory.setTitle("Test Header");
         sampleCategory.setDescription("Test Description");
-        sampleCategory.setImageId("img123");
         sampleCategory.setImageUrl("http://example.com/image.jpg");
-        sampleCategory.setStatus("ACTIVE");
 
         createRequest = new CreateCategoryRequest();
         createRequest.setName("New Category");
+        createRequest.setCategoryPath("/new-path");
+        createRequest.setTitle("New Header");
         createRequest.setDescription("New Description");
-        createRequest.setImageId("img456");
         createRequest.setImageUrl("http://example.com/new-image.jpg");
-        createRequest.setStatus("ACTIVE");
 
         updateRequest = new UpdateCategoryRequest();
         updateRequest.setName("Updated Category");
+        updateRequest.setCategoryPath("/updated-path");
+        updateRequest.setTitle("Updated Header");
         updateRequest.setDescription("Updated Description");
-        updateRequest.setImageId("img789");
         updateRequest.setImageUrl("http://example.com/updated-image.jpg");
-        updateRequest.setStatus("INACTIVE");
     }
 
     @Test
@@ -78,14 +78,14 @@ public class CategoryControllerTest {
         when(categoryService.getAllCategories()).thenReturn(categories);
 
         mockMvc.perform(get("/categories")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(sampleCategory.getId()))
                 .andExpect(jsonPath("$[0].name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$[0].categoryPath").value(sampleCategory.getCategoryPath()))
+                .andExpect(jsonPath("$[0].title").value(sampleCategory.getTitle()))
                 .andExpect(jsonPath("$[0].description").value(sampleCategory.getDescription()))
-                .andExpect(jsonPath("$[0].imageId").value(sampleCategory.getImageId()))
-                .andExpect(jsonPath("$[0].imageUrl").value(sampleCategory.getImageUrl()))
-                .andExpect(jsonPath("$[0].status").value(sampleCategory.getStatus()));
+                .andExpect(jsonPath("$[0].imageUrl").value(sampleCategory.getImageUrl()));
     }
 
     @Test
@@ -94,59 +94,59 @@ public class CategoryControllerTest {
         when(categoryService.getCategoryById(1L)).thenReturn(sampleCategory);
 
         mockMvc.perform(get("/categories/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleCategory.getId()))
                 .andExpect(jsonPath("$.name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$.categoryPath").value(sampleCategory.getCategoryPath()))
+                .andExpect(jsonPath("$.title").value(sampleCategory.getTitle()))
                 .andExpect(jsonPath("$.description").value(sampleCategory.getDescription()))
-                .andExpect(jsonPath("$.imageId").value(sampleCategory.getImageId()))
-                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()))
-                .andExpect(jsonPath("$.status").value(sampleCategory.getStatus()));
+                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void createCategory_ShouldReturnCreatedCategory() throws Exception {
         when(categoryService.createCategory(any(CreateCategoryRequest.class)))
-            .thenReturn(sampleCategory);
+                .thenReturn(sampleCategory);
 
         mockMvc.perform(post("/categories")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleCategory.getId()))
                 .andExpect(jsonPath("$.name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$.categoryPath").value(sampleCategory.getCategoryPath()))
+                .andExpect(jsonPath("$.title").value(sampleCategory.getTitle()))
                 .andExpect(jsonPath("$.description").value(sampleCategory.getDescription()))
-                .andExpect(jsonPath("$.imageId").value(sampleCategory.getImageId()))
-                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()))
-                .andExpect(jsonPath("$.status").value(sampleCategory.getStatus()));
+                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void updateCategory_ShouldReturnUpdatedCategory() throws Exception {
         when(categoryService.updateCategory(any(Long.class), any(UpdateCategoryRequest.class)))
-            .thenReturn(sampleCategory);
+                .thenReturn(sampleCategory);
 
         mockMvc.perform(put("/categories/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleCategory.getId()))
                 .andExpect(jsonPath("$.name").value(sampleCategory.getName()))
+                .andExpect(jsonPath("$.categoryPath").value(sampleCategory.getCategoryPath()))
+                .andExpect(jsonPath("$.title").value(sampleCategory.getTitle()))
                 .andExpect(jsonPath("$.description").value(sampleCategory.getDescription()))
-                .andExpect(jsonPath("$.imageId").value(sampleCategory.getImageId()))
-                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()))
-                .andExpect(jsonPath("$.status").value(sampleCategory.getStatus()));
+                .andExpect(jsonPath("$.imageUrl").value(sampleCategory.getImageUrl()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void deleteCategory_ShouldReturnNoContent() throws Exception {
         mockMvc.perform(delete("/categories/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
     }
-} 
+}

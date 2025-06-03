@@ -1,10 +1,10 @@
 package com.catalog.catalog_service.specification;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import com.catalog.catalog_service.model.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
-
-import com.catalog.catalog_service.model.product;
 
 public class ProductSpecificationTest {
 
@@ -17,7 +17,7 @@ public class ProductSpecificationTest {
         Long categoryId = null;
 
         // Act
-        Specification<product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
 
         // Assert
         assertNotNull(spec);
@@ -33,7 +33,7 @@ public class ProductSpecificationTest {
         Long categoryId = null;
 
         // Act
-        Specification<product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
 
         // Assert
         assertNotNull(spec);
@@ -48,7 +48,7 @@ public class ProductSpecificationTest {
         Long categoryId = 1L;
 
         // Act
-        Specification<product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
 
         // Assert
         assertNotNull(spec);
@@ -63,7 +63,7 @@ public class ProductSpecificationTest {
         Long categoryId = 1L;
 
         // Act
-        Specification<product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
 
         // Assert
         assertNotNull(spec);
@@ -78,7 +78,7 @@ public class ProductSpecificationTest {
         Long categoryId = null;
 
         // Act
-        Specification<product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
 
         // Assert
         assertNotNull(spec);

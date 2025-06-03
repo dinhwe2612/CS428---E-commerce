@@ -3,14 +3,12 @@ package com.catalog.catalog_service.specification;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.catalog.catalog_service.model.Product;
 import org.springframework.data.jpa.domain.Specification;
-
-import com.catalog.catalog_service.model.product;
-
 import jakarta.persistence.criteria.Predicate;
 
 public class ProductSpecification {
-    public static Specification<product> withFilters(
+    public static Specification<Product> withFilters(
             String name,
             Double minPrice,
             Double maxPrice,

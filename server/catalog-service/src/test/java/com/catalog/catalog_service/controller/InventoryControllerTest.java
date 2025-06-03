@@ -55,16 +55,10 @@ public class InventoryControllerTest {
         sampleInventoryDTO = new InventoryDTO();
         sampleInventoryDTO.setId(1L);
         sampleInventoryDTO.setProductId(1L);
-        sampleInventoryDTO.setCurrentStock(100);
-        sampleInventoryDTO.setAvailableStock(80);
-        sampleInventoryDTO.setReservedQuantity(20);
-        sampleInventoryDTO.setReorderLevel(20);
-        sampleInventoryDTO.setReorderQuantity(50);
-        sampleInventoryDTO.setLowStockThreshold(10);
-        sampleInventoryDTO.setUnitCost(new BigDecimal("10.99"));
-        sampleInventoryDTO.setLocation("Warehouse A");
-        sampleInventoryDTO.setStatus("ACTIVE");
-        sampleInventoryDTO.setSupplierId(1L);
+        sampleInventoryDTO.setQuantity(100);
+        sampleInventoryDTO.setArrivalDate(null);
+        sampleInventoryDTO.setDescription("Initial stock");
+        sampleInventoryDTO.setVersion(1L);
 
         // Wrap it into a List<InventoryDTO>
         sampleInventoriesDTO = Arrays.asList(sampleInventoryDTO);
@@ -72,29 +66,15 @@ public class InventoryControllerTest {
         // Prepare CreateInventoryRequest
         createRequest = new CreateInventoryRequest();
         createRequest.setProductId(1L);
-        createRequest.setCurrentStock(100);
-        createRequest.setAvailableStock(80);
-        createRequest.setReservedQuantity(20);
-        createRequest.setReorderLevel(20);
-        createRequest.setReorderQuantity(50);
-        createRequest.setLowStockThreshold(10);
-        createRequest.setUnitCost(new BigDecimal("10.99"));
-        createRequest.setLocation("Warehouse A");
-        createRequest.setStatus("ACTIVE");
-        createRequest.setSupplierId(1L);
+        createRequest.setQuantity(100);
+        createRequest.setArrivalDate(null);
+        createRequest.setDescription("Initial stock");
 
         // Prepare UpdateInventoryRequest
         updateRequest = new UpdateInventoryRequest();
-        updateRequest.setCurrentStock(90);
-        updateRequest.setAvailableStock(70);
-        updateRequest.setReservedQuantity(20);
-        updateRequest.setReorderLevel(20);
-        updateRequest.setReorderQuantity(50);
-        updateRequest.setLowStockThreshold(10);
-        updateRequest.setUnitCost(new BigDecimal("11.99"));
-        updateRequest.setLocation("Warehouse B");
-        updateRequest.setStatus("ACTIVE");
-        updateRequest.setSupplierId(1L);
+        updateRequest.setQuantity(90);
+        updateRequest.setArrivalDate(null);
+        updateRequest.setDescription("Adjusted stock");
     }
 
     @Test
@@ -108,67 +88,44 @@ public class InventoryControllerTest {
                 // Check first element in returned array
                 .andExpect(jsonPath("$[0].id").value(sampleInventoryDTO.getId()))
                 .andExpect(jsonPath("$[0].productId").value(sampleInventoryDTO.getProductId()))
-                .andExpect(jsonPath("$[0].currentStock").value(sampleInventoryDTO.getCurrentStock()))
-                .andExpect(jsonPath("$[0].availableStock").value(sampleInventoryDTO.getAvailableStock()))
-                .andExpect(jsonPath("$[0].reservedQuantity").value(sampleInventoryDTO.getReservedQuantity()))
-                .andExpect(jsonPath("$[0].reorderLevel").value(sampleInventoryDTO.getReorderLevel()))
-                .andExpect(jsonPath("$[0].reorderQuantity").value(sampleInventoryDTO.getReorderQuantity()))
-                .andExpect(jsonPath("$[0].lowStockThreshold").value(sampleInventoryDTO.getLowStockThreshold()))
-                .andExpect(jsonPath("$[0].unitCost").value(sampleInventoryDTO.getUnitCost()))
-                .andExpect(jsonPath("$[0].location").value(sampleInventoryDTO.getLocation()))
-                .andExpect(jsonPath("$[0].status").value(sampleInventoryDTO.getStatus()))
-                .andExpect(jsonPath("$[0].supplierId").value(sampleInventoryDTO.getSupplierId()));
+                .andExpect(jsonPath("$[0].quantity").value(sampleInventoryDTO.getQuantity()))
+                .andExpect(jsonPath("$[0].description").value(sampleInventoryDTO.getDescription()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void getInventoryById_ShouldReturnListOfInventory() throws Exception {
+    void getInventoryById_ShouldReturnSingleInventory() throws Exception {
         when(inventoryService.getInventoryById(anyLong())).thenReturn(sampleInventoryDTO);
 
         mockMvc.perform(get("/inventories/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
-                // Response is now an array, so check index [0]
-                .andExpect(jsonPath("$[0].id").value(sampleInventoryDTO.getId()))
-                .andExpect(jsonPath("$[0].productId").value(sampleInventoryDTO.getProductId()))
-                .andExpect(jsonPath("$[0].currentStock").value(sampleInventoryDTO.getCurrentStock()))
-                .andExpect(jsonPath("$[0].availableStock").value(sampleInventoryDTO.getAvailableStock()))
-                .andExpect(jsonPath("$[0].reservedQuantity").value(sampleInventoryDTO.getReservedQuantity()))
-                .andExpect(jsonPath("$[0].reorderLevel").value(sampleInventoryDTO.getReorderLevel()))
-                .andExpect(jsonPath("$[0].reorderQuantity").value(sampleInventoryDTO.getReorderQuantity()))
-                .andExpect(jsonPath("$[0].lowStockThreshold").value(sampleInventoryDTO.getLowStockThreshold()))
-                .andExpect(jsonPath("$[0].unitCost").value(sampleInventoryDTO.getUnitCost()))
-                .andExpect(jsonPath("$[0].location").value(sampleInventoryDTO.getLocation()))
-                .andExpect(jsonPath("$[0].status").value(sampleInventoryDTO.getStatus()))
-                .andExpect(jsonPath("$[0].supplierId").value(sampleInventoryDTO.getSupplierId()));
+                // Response is a single object
+                .andExpect(jsonPath("$.id").value(sampleInventoryDTO.getId()))
+                .andExpect(jsonPath("$.productId").value(sampleInventoryDTO.getProductId()))
+                .andExpect(jsonPath("$.quantity").value(sampleInventoryDTO.getQuantity()))
+                .andExpect(jsonPath("$.description").value(sampleInventoryDTO.getDescription()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void getInventoryByProductId_ShouldReturnListOfInventory() throws Exception {
+    void getInventoriesByProductId_ShouldReturnListOfInventory() throws Exception {
         when(inventoryService.getInventoriesByProductId(anyLong())).thenReturn(sampleInventoriesDTO);
 
         mockMvc.perform(get("/inventories/product/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
-                // Again, assert on the first element in the array
+                // Assert on the first element in the array
                 .andExpect(jsonPath("$[0].id").value(sampleInventoryDTO.getId()))
                 .andExpect(jsonPath("$[0].productId").value(sampleInventoryDTO.getProductId()))
-                .andExpect(jsonPath("$[0].currentStock").value(sampleInventoryDTO.getCurrentStock()))
-                .andExpect(jsonPath("$[0].availableStock").value(sampleInventoryDTO.getAvailableStock()))
-                .andExpect(jsonPath("$[0].reservedQuantity").value(sampleInventoryDTO.getReservedQuantity()))
-                .andExpect(jsonPath("$[0].reorderLevel").value(sampleInventoryDTO.getReorderLevel()))
-                .andExpect(jsonPath("$[0].reorderQuantity").value(sampleInventoryDTO.getReorderQuantity()))
-                .andExpect(jsonPath("$[0].lowStockThreshold").value(sampleInventoryDTO.getLowStockThreshold()))
-                .andExpect(jsonPath("$[0].unitCost").value(sampleInventoryDTO.getUnitCost()))
-                .andExpect(jsonPath("$[0].location").value(sampleInventoryDTO.getLocation()))
-                .andExpect(jsonPath("$[0].status").value(sampleInventoryDTO.getStatus()))
-                .andExpect(jsonPath("$[0].supplierId").value(sampleInventoryDTO.getSupplierId()));
+                .andExpect(jsonPath("$[0].quantity").value(sampleInventoryDTO.getQuantity()))
+                .andExpect(jsonPath("$[0].description").value(sampleInventoryDTO.getDescription()))
+                .andExpect(jsonPath("$[0].version").value(sampleInventoryDTO.getVersion()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void createInventory_ShouldReturnCreatedInventoryInList() throws Exception {
+    void createInventory_ShouldReturnCreatedInventory() throws Exception {
         when(inventoryService.createInventory(any(CreateInventoryRequest.class)))
                 .thenReturn(sampleInventoryDTO);
 
@@ -177,24 +134,16 @@ public class InventoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isOk())
-                // Now response is an array, so check index [0]
-                .andExpect(jsonPath("$[0].id").value(sampleInventoryDTO.getId()))
-                .andExpect(jsonPath("$[0].productId").value(sampleInventoryDTO.getProductId()))
-                .andExpect(jsonPath("$[0].currentStock").value(sampleInventoryDTO.getCurrentStock()))
-                .andExpect(jsonPath("$[0].availableStock").value(sampleInventoryDTO.getAvailableStock()))
-                .andExpect(jsonPath("$[0].reservedQuantity").value(sampleInventoryDTO.getReservedQuantity()))
-                .andExpect(jsonPath("$[0].reorderLevel").value(sampleInventoryDTO.getReorderLevel()))
-                .andExpect(jsonPath("$[0].reorderQuantity").value(sampleInventoryDTO.getReorderQuantity()))
-                .andExpect(jsonPath("$[0].lowStockThreshold").value(sampleInventoryDTO.getLowStockThreshold()))
-                .andExpect(jsonPath("$[0].unitCost").value(sampleInventoryDTO.getUnitCost()))
-                .andExpect(jsonPath("$[0].location").value(sampleInventoryDTO.getLocation()))
-                .andExpect(jsonPath("$[0].status").value(sampleInventoryDTO.getStatus()))
-                .andExpect(jsonPath("$[0].supplierId").value(sampleInventoryDTO.getSupplierId()));
+                // Single-object response: verify fields directly
+                .andExpect(jsonPath("$.id").value(sampleInventoryDTO.getId()))
+                .andExpect(jsonPath("$.productId").value(sampleInventoryDTO.getProductId()))
+                .andExpect(jsonPath("$.quantity").value(sampleInventoryDTO.getQuantity()))
+                .andExpect(jsonPath("$.description").value(sampleInventoryDTO.getDescription()));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void updateInventory_ShouldReturnUpdatedInventoryInList() throws Exception {
+    void updateInventory_ShouldReturnUpdatedInventory() throws Exception {
         when(inventoryService.updateInventory(anyLong(), any(UpdateInventoryRequest.class)))
                 .thenReturn(sampleInventoryDTO);
 
@@ -203,19 +152,11 @@ public class InventoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                // Array response: verify the first element
-                .andExpect(jsonPath("$[0].id").value(sampleInventoryDTO.getId()))
-                .andExpect(jsonPath("$[0].productId").value(sampleInventoryDTO.getProductId()))
-                .andExpect(jsonPath("$[0].currentStock").value(sampleInventoryDTO.getCurrentStock()))
-                .andExpect(jsonPath("$[0].availableStock").value(sampleInventoryDTO.getAvailableStock()))
-                .andExpect(jsonPath("$[0].reservedQuantity").value(sampleInventoryDTO.getReservedQuantity()))
-                .andExpect(jsonPath("$[0].reorderLevel").value(sampleInventoryDTO.getReorderLevel()))
-                .andExpect(jsonPath("$[0].reorderQuantity").value(sampleInventoryDTO.getReorderQuantity()))
-                .andExpect(jsonPath("$[0].lowStockThreshold").value(sampleInventoryDTO.getLowStockThreshold()))
-                .andExpect(jsonPath("$[0].unitCost").value(sampleInventoryDTO.getUnitCost()))
-                .andExpect(jsonPath("$[0].location").value(sampleInventoryDTO.getLocation()))
-                .andExpect(jsonPath("$[0].status").value(sampleInventoryDTO.getStatus()))
-                .andExpect(jsonPath("$[0].supplierId").value(sampleInventoryDTO.getSupplierId()));
+                // Single-object response: verify fields directly
+                .andExpect(jsonPath("$.id").value(sampleInventoryDTO.getId()))
+                .andExpect(jsonPath("$.productId").value(sampleInventoryDTO.getProductId()))
+                .andExpect(jsonPath("$.quantity").value(sampleInventoryDTO.getQuantity()))
+                .andExpect(jsonPath("$.description").value(sampleInventoryDTO.getDescription()));
     }
 
     @Test

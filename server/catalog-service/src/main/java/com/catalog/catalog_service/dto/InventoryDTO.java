@@ -12,17 +12,8 @@ import java.time.LocalDateTime;
 public class InventoryDTO {
     private Long id;
     private Long productId;
-    private Integer currentStock;
-    private Integer availableStock;
-    private Integer reservedQuantity;
-    private Integer reorderLevel;
-    private Integer reorderQuantity;
-    private Integer lowStockThreshold;
-    private BigDecimal unitCost;
-    private String location;
-    private String status;
-    private LocalDateTime lastStockMovement;
-    private String lastMovementType;
-    private Integer lastMovementQuantity;
-    private Long supplierId;
-} 
+    private Integer quantity;
+    private LocalDateTime arrivalDate;
+    private String description;
+    private Long version;
+}

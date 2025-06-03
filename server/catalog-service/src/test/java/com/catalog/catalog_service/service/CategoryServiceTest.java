@@ -1,30 +1,27 @@
 package com.catalog.catalog_service.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.catalog.catalog_service.dto.CategoryDTO;
 import com.catalog.catalog_service.dto.request.CreateCategoryRequest;
 import com.catalog.catalog_service.dto.request.UpdateCategoryRequest;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
-import com.catalog.catalog_service.model.category;
-import com.catalog.catalog_service.repository.CategoryRepository;
+import com.catalog.catalog_service.model.Category;
+import com.catalog.catalog_service.repository.jpa.CategoryRepository;
 import com.catalog.catalog_service.service.impl.CategoryServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
@@ -38,42 +35,47 @@ public class CategoryServiceTest {
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
-    private category sampleCategory;
+    private Category sampleCategory;
     private CategoryDTO sampleCategoryDTO;
     private CreateCategoryRequest createRequest;
     private UpdateCategoryRequest updateRequest;
 
     @BeforeEach
     void setUp() {
-        sampleCategory = new category();
+        // Prepare a Category entity with the new fields
+        sampleCategory = new Category();
         sampleCategory.setId(1L);
         sampleCategory.setName("Test Category");
+        sampleCategory.setCategoryPath("/test-path");
+        sampleCategory.setTitle("Test Title");
         sampleCategory.setDescription("Test Description");
-        sampleCategory.setImageId("img123");
         sampleCategory.setImageUrl("http://example.com/image.jpg");
-        sampleCategory.setStatus("ACTIVE");
+        sampleCategory.setProducts(Collections.emptyList());
 
+        // Prepare a corresponding CategoryDTO
         sampleCategoryDTO = new CategoryDTO();
         sampleCategoryDTO.setId(1L);
         sampleCategoryDTO.setName("Test Category");
+        sampleCategoryDTO.setCategoryPath("/test-path");
+        sampleCategoryDTO.setTitle("Test Title");
         sampleCategoryDTO.setDescription("Test Description");
-        sampleCategoryDTO.setImageId("img123");
         sampleCategoryDTO.setImageUrl("http://example.com/image.jpg");
-        sampleCategoryDTO.setStatus("ACTIVE");
 
+        // Prepare a CreateCategoryRequest matching the new fields
         createRequest = new CreateCategoryRequest();
         createRequest.setName("New Category");
+        createRequest.setCategoryPath("/new-path");
+        createRequest.setTitle("New Title");
         createRequest.setDescription("New Description");
-        createRequest.setImageId("img456");
         createRequest.setImageUrl("http://example.com/new-image.jpg");
-        createRequest.setStatus("ACTIVE");
 
+        // Prepare an UpdateCategoryRequest with updated values
         updateRequest = new UpdateCategoryRequest();
         updateRequest.setName("Updated Category");
+        updateRequest.setCategoryPath("/updated-path");
+        updateRequest.setTitle("Updated Title");
         updateRequest.setDescription("Updated Description");
-        updateRequest.setImageId("img789");
         updateRequest.setImageUrl("http://example.com/updated-image.jpg");
-        updateRequest.setStatus("INACTIVE");
     }
 
     @Test
@@ -88,13 +90,13 @@ public class CategoryServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        CategoryDTO returnedCategory = result.get(0);
-        assertEquals(sampleCategoryDTO.getId(), returnedCategory.getId());
-        assertEquals(sampleCategoryDTO.getName(), returnedCategory.getName());
-        assertEquals(sampleCategoryDTO.getDescription(), returnedCategory.getDescription());
-        assertEquals(sampleCategoryDTO.getImageId(), returnedCategory.getImageId());
-        assertEquals(sampleCategoryDTO.getImageUrl(), returnedCategory.getImageUrl());
-        assertEquals(sampleCategoryDTO.getStatus(), returnedCategory.getStatus());
+        CategoryDTO returned = result.get(0);
+        assertEquals(sampleCategoryDTO.getId(), returned.getId());
+        assertEquals(sampleCategoryDTO.getName(), returned.getName());
+        assertEquals(sampleCategoryDTO.getCategoryPath(), returned.getCategoryPath());
+        assertEquals(sampleCategoryDTO.getTitle(), returned.getTitle());
+        assertEquals(sampleCategoryDTO.getDescription(), returned.getDescription());
+        assertEquals(sampleCategoryDTO.getImageUrl(), returned.getImageUrl());
     }
 
     @Test
@@ -110,10 +112,10 @@ public class CategoryServiceTest {
         assertNotNull(result);
         assertEquals(sampleCategoryDTO.getId(), result.getId());
         assertEquals(sampleCategoryDTO.getName(), result.getName());
+        assertEquals(sampleCategoryDTO.getCategoryPath(), result.getCategoryPath());
+        assertEquals(sampleCategoryDTO.getTitle(), result.getTitle());
         assertEquals(sampleCategoryDTO.getDescription(), result.getDescription());
-        assertEquals(sampleCategoryDTO.getImageId(), result.getImageId());
         assertEquals(sampleCategoryDTO.getImageUrl(), result.getImageUrl());
-        assertEquals(sampleCategoryDTO.getStatus(), result.getStatus());
     }
 
     @Test
@@ -128,7 +130,7 @@ public class CategoryServiceTest {
     @Test
     void createCategory_ShouldReturnCreatedCategory() {
         // Arrange
-        when(categoryRepository.save(any(category.class))).thenReturn(sampleCategory);
+        when(categoryRepository.save(any(Category.class))).thenReturn(sampleCategory);
         when(entityMapper.toCategoryDTO(sampleCategory)).thenReturn(sampleCategoryDTO);
 
         // Act
@@ -138,18 +140,18 @@ public class CategoryServiceTest {
         assertNotNull(result);
         assertEquals(sampleCategoryDTO.getId(), result.getId());
         assertEquals(sampleCategoryDTO.getName(), result.getName());
+        assertEquals(sampleCategoryDTO.getCategoryPath(), result.getCategoryPath());
+        assertEquals(sampleCategoryDTO.getTitle(), result.getTitle());
         assertEquals(sampleCategoryDTO.getDescription(), result.getDescription());
-        assertEquals(sampleCategoryDTO.getImageId(), result.getImageId());
         assertEquals(sampleCategoryDTO.getImageUrl(), result.getImageUrl());
-        assertEquals(sampleCategoryDTO.getStatus(), result.getStatus());
-        verify(categoryRepository).save(any(category.class));
+        verify(categoryRepository).save(any(Category.class));
     }
 
     @Test
     void updateCategory_ShouldReturnUpdatedCategory() {
         // Arrange
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(sampleCategory));
-        when(categoryRepository.save(any(category.class))).thenReturn(sampleCategory);
+        when(categoryRepository.save(any(Category.class))).thenReturn(sampleCategory);
         when(entityMapper.toCategoryDTO(sampleCategory)).thenReturn(sampleCategoryDTO);
 
         // Act
@@ -159,11 +161,11 @@ public class CategoryServiceTest {
         assertNotNull(result);
         assertEquals(sampleCategoryDTO.getId(), result.getId());
         assertEquals(sampleCategoryDTO.getName(), result.getName());
+        assertEquals(sampleCategoryDTO.getCategoryPath(), result.getCategoryPath());
+        assertEquals(sampleCategoryDTO.getTitle(), result.getTitle());
         assertEquals(sampleCategoryDTO.getDescription(), result.getDescription());
-        assertEquals(sampleCategoryDTO.getImageId(), result.getImageId());
         assertEquals(sampleCategoryDTO.getImageUrl(), result.getImageUrl());
-        assertEquals(sampleCategoryDTO.getStatus(), result.getStatus());
-        verify(categoryRepository).save(any(category.class));
+        verify(categoryRepository).save(any(Category.class));
     }
 
     @Test
@@ -195,4 +197,4 @@ public class CategoryServiceTest {
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategory(1L));
     }
-} 
+}

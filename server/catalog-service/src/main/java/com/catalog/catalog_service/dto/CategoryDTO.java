@@ -10,8 +10,8 @@ import lombok.AllArgsConstructor;
 public class CategoryDTO {
     private Long id;
     private String name;
+    private String categoryPath;
+    private String title;
     private String description;
-    private String imageId;
     private String imageUrl;
-    private String status;
-} 
+}

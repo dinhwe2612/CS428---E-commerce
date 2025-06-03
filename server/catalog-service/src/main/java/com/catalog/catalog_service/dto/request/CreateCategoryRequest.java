@@ -10,14 +10,18 @@ import jakarta.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateCategoryRequest {
-    @NotBlank(message = "Category name is required")
-    @Size(min = 2, max = 100, message = "Category name must be between 2 and 100 characters")
+    @NotBlank(message = "Name is required")
     private String name;
 
-    @Size(max = 500, message = "Description cannot exceed 500 characters")
+    @NotBlank(message = "Category path is required")
+    private String categoryPath;
+
+    @NotBlank(message = "Title is required")
+    private String title;
+
+    @Size(max = 255, message = "Description must be less than 255 characters")
     private String description;
 
-    private String imageId;
+    @NotBlank(message = "Image URL is required")
     private String imageUrl;
-    private String status;
-} 
+}

@@ -1,21 +1,20 @@
 package com.catalog.catalog_service.service;
 
-import java.math.BigDecimal;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.catalog.catalog_service.dto.InventoryDTO;
@@ -23,10 +22,10 @@ import com.catalog.catalog_service.dto.request.CreateInventoryRequest;
 import com.catalog.catalog_service.dto.request.UpdateInventoryRequest;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
-import com.catalog.catalog_service.model.inventory;
-import com.catalog.catalog_service.model.product;
-import com.catalog.catalog_service.repository.InventoryRepository;
-import com.catalog.catalog_service.repository.ProductRepository;
+import com.catalog.catalog_service.model.Inventory;
+import com.catalog.catalog_service.model.Product;
+import com.catalog.catalog_service.repository.jpa.InventoryRepository;
+import com.catalog.catalog_service.repository.jpa.ProductRepository;
 import com.catalog.catalog_service.service.impl.InventoryServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,70 +43,60 @@ public class InventoryServiceTest {
     @InjectMocks
     private InventoryServiceImpl inventoryService;
 
-    private inventory sampleInventory;
+    private Inventory sampleInventory;
     private InventoryDTO sampleInventoryDTO;
-    private product sampleProduct;
+    private Product sampleProduct;
     private CreateInventoryRequest createRequest;
     private UpdateInventoryRequest updateRequest;
+    private LocalDateTime fixedArrival;
 
     @BeforeEach
     void setUp() {
-        sampleProduct = new product();
-        sampleProduct.setId(1L);
-        sampleProduct.setName("Test Product");
+        // Fixed arrival date for consistency
+        fixedArrival = LocalDateTime.of(2025, 1, 1, 12, 0);
 
-        sampleInventory = new inventory();
+        // Prepare a minimal Product (category can be null)
+        sampleProduct = new Product();
+        sampleProduct.setId(1L);
+        sampleProduct.setCategory(null);
+        sampleProduct.setProductPath("/test-path");
+        sampleProduct.setName("Test Product");
+        sampleProduct.setPrice("9.99");
+        sampleProduct.setDescriptionHtml("<p>Test</p>");
+        sampleProduct.setDescriptionText("Test");
+        sampleProduct.setImages(Collections.emptyList());
+
+        // Prepare a sample Inventory entity
+        sampleInventory = new Inventory();
         sampleInventory.setId(1L);
         sampleInventory.setProduct(sampleProduct);
-        sampleInventory.setCurrentStock(100);
-        sampleInventory.setAvailableStock(80);
-        sampleInventory.setReservedQuantity(20);
-        sampleInventory.setReorderLevel(20);
-        sampleInventory.setReorderQuantity(50);
-        sampleInventory.setLowStockThreshold(10);
-        sampleInventory.setUnitCost(new BigDecimal("10.99"));
-        sampleInventory.setLocation("Warehouse A");
-        sampleInventory.setStatus("ACTIVE");
-        sampleInventory.setSupplierId(1L);
+        sampleInventory.setQuantity(100);
+        sampleInventory.setArrivalDate(fixedArrival);
+        sampleInventory.setDescription("Initial stock");
+        sampleInventory.setVersion(1L);
+        sampleInventory.setPricingRules(Collections.emptyList());
 
+        // Prepare the corresponding DTO
         sampleInventoryDTO = new InventoryDTO();
         sampleInventoryDTO.setId(1L);
         sampleInventoryDTO.setProductId(1L);
-        sampleInventoryDTO.setCurrentStock(100);
-        sampleInventoryDTO.setAvailableStock(80);
-        sampleInventoryDTO.setReservedQuantity(20);
-        sampleInventoryDTO.setReorderLevel(20);
-        sampleInventoryDTO.setReorderQuantity(50);
-        sampleInventoryDTO.setLowStockThreshold(10);
-        sampleInventoryDTO.setUnitCost(new BigDecimal("10.99"));
-        sampleInventoryDTO.setLocation("Warehouse A");
-        sampleInventoryDTO.setStatus("ACTIVE");
-        sampleInventoryDTO.setSupplierId(1L);
+        sampleInventoryDTO.setQuantity(100);
+        sampleInventoryDTO.setArrivalDate(fixedArrival);
+        sampleInventoryDTO.setDescription("Initial stock");
+        sampleInventoryDTO.setVersion(1L);
 
+        // CreateInventoryRequest uses productId, quantity, arrivalDate, description
         createRequest = new CreateInventoryRequest();
         createRequest.setProductId(1L);
-        createRequest.setCurrentStock(100);
-        createRequest.setAvailableStock(80);
-        createRequest.setReservedQuantity(20);
-        createRequest.setReorderLevel(20);
-        createRequest.setReorderQuantity(50);
-        createRequest.setLowStockThreshold(10);
-        createRequest.setUnitCost(new BigDecimal("10.99"));
-        createRequest.setLocation("Warehouse A");
-        createRequest.setStatus("ACTIVE");
-        createRequest.setSupplierId(1L);
+        createRequest.setQuantity(100);
+        createRequest.setArrivalDate(fixedArrival);
+        createRequest.setDescription("Initial stock");
 
+        // UpdateInventoryRequest allows changing quantity, arrivalDate, description
         updateRequest = new UpdateInventoryRequest();
-        updateRequest.setCurrentStock(90);
-        updateRequest.setAvailableStock(70);
-        updateRequest.setReservedQuantity(20);
-        updateRequest.setReorderLevel(20);
-        updateRequest.setReorderQuantity(50);
-        updateRequest.setLowStockThreshold(10);
-        updateRequest.setUnitCost(new BigDecimal("11.99"));
-        updateRequest.setLocation("Warehouse B");
-        updateRequest.setStatus("ACTIVE");
-        updateRequest.setSupplierId(1L);
+        updateRequest.setQuantity(80);
+        updateRequest.setArrivalDate(fixedArrival.plusDays(1));
+        updateRequest.setDescription("Adjusted stock");
     }
 
     @Test
@@ -122,19 +111,12 @@ public class InventoryServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        InventoryDTO returnedInventory = result.get(0);
-        assertEquals(sampleInventoryDTO.getId(), returnedInventory.getId());
-        assertEquals(sampleInventoryDTO.getProductId(), returnedInventory.getProductId());
-        assertEquals(sampleInventoryDTO.getCurrentStock(), returnedInventory.getCurrentStock());
-        assertEquals(sampleInventoryDTO.getAvailableStock(), returnedInventory.getAvailableStock());
-        assertEquals(sampleInventoryDTO.getReservedQuantity(), returnedInventory.getReservedQuantity());
-        assertEquals(sampleInventoryDTO.getReorderLevel(), returnedInventory.getReorderLevel());
-        assertEquals(sampleInventoryDTO.getReorderQuantity(), returnedInventory.getReorderQuantity());
-        assertEquals(sampleInventoryDTO.getLowStockThreshold(), returnedInventory.getLowStockThreshold());
-        assertEquals(sampleInventoryDTO.getUnitCost(), returnedInventory.getUnitCost());
-        assertEquals(sampleInventoryDTO.getLocation(), returnedInventory.getLocation());
-        assertEquals(sampleInventoryDTO.getStatus(), returnedInventory.getStatus());
-        assertEquals(sampleInventoryDTO.getSupplierId(), returnedInventory.getSupplierId());
+        InventoryDTO returned = result.get(0);
+        assertEquals(sampleInventoryDTO.getId(), returned.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), returned.getProductId());
+        assertEquals(sampleInventoryDTO.getQuantity(), returned.getQuantity());
+        assertEquals(sampleInventoryDTO.getArrivalDate(), returned.getArrivalDate());
+        assertEquals(sampleInventoryDTO.getDescription(), returned.getDescription());
     }
 
     @Test
@@ -150,16 +132,9 @@ public class InventoryServiceTest {
         assertNotNull(result);
         assertEquals(sampleInventoryDTO.getId(), result.getId());
         assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
-        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
-        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
-        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
-        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
-        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
-        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
-        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
-        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
-        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
-        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
+        assertEquals(sampleInventoryDTO.getQuantity(), result.getQuantity());
+        assertEquals(sampleInventoryDTO.getArrivalDate(), result.getArrivalDate());
+        assertEquals(sampleInventoryDTO.getDescription(), result.getDescription());
     }
 
     @Test
@@ -175,7 +150,7 @@ public class InventoryServiceTest {
     void createInventory_ShouldReturnCreatedInventory() {
         // Arrange
         when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
-        when(inventoryRepository.save(any(inventory.class))).thenReturn(sampleInventory);
+        when(inventoryRepository.save(any(Inventory.class))).thenReturn(sampleInventory);
         when(entityMapper.toInventoryDTO(sampleInventory)).thenReturn(sampleInventoryDTO);
 
         // Act
@@ -185,17 +160,11 @@ public class InventoryServiceTest {
         assertNotNull(result);
         assertEquals(sampleInventoryDTO.getId(), result.getId());
         assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
-        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
-        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
-        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
-        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
-        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
-        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
-        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
-        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
-        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
-        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
-        verify(inventoryRepository).save(any(inventory.class));
+        assertEquals(sampleInventoryDTO.getQuantity(), result.getQuantity());
+        assertEquals(sampleInventoryDTO.getArrivalDate(), result.getArrivalDate());
+        assertEquals(sampleInventoryDTO.getDescription(), result.getDescription());
+        assertEquals(sampleInventoryDTO.getVersion(), result.getVersion());
+        verify(inventoryRepository).save(any(Inventory.class));
     }
 
     @Test
@@ -211,7 +180,7 @@ public class InventoryServiceTest {
     void updateInventory_ShouldReturnUpdatedInventory() {
         // Arrange
         when(inventoryRepository.findById(1L)).thenReturn(Optional.of(sampleInventory));
-        when(inventoryRepository.save(any(inventory.class))).thenReturn(sampleInventory);
+        when(inventoryRepository.save(any(Inventory.class))).thenReturn(sampleInventory);
         when(entityMapper.toInventoryDTO(sampleInventory)).thenReturn(sampleInventoryDTO);
 
         // Act
@@ -221,17 +190,10 @@ public class InventoryServiceTest {
         assertNotNull(result);
         assertEquals(sampleInventoryDTO.getId(), result.getId());
         assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
-        assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
-        assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
-        assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
-        assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
-        assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
-        assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
-        assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
-        assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
-        assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
-        assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
-        verify(inventoryRepository).save(any(inventory.class));
+        assertEquals(sampleInventoryDTO.getQuantity(), result.getQuantity());
+        assertEquals(sampleInventoryDTO.getArrivalDate(), result.getArrivalDate());
+        assertEquals(sampleInventoryDTO.getDescription(), result.getDescription());
+        verify(inventoryRepository).save(any(Inventory.class));
     }
 
     @Test
@@ -265,7 +227,7 @@ public class InventoryServiceTest {
     }
 
     @Test
-    void getInventoryByProductId_ShouldReturnInventory() {
+    void getInventoryByProductId_ShouldReturnInventoryList() {
         // Arrange
         when(productRepository.existsById(1L)).thenReturn(true);
         when(inventoryRepository.findAll()).thenReturn(Arrays.asList(sampleInventory));
@@ -275,21 +237,14 @@ public class InventoryServiceTest {
         List<InventoryDTO> results = inventoryService.getInventoriesByProductId(1L);
 
         // Assert
-        results.forEach(result -> {
-            assertNotNull(result);
-            assertEquals(sampleInventoryDTO.getId(), result.getId());
-            assertEquals(sampleInventoryDTO.getProductId(), result.getProductId());
-            assertEquals(sampleInventoryDTO.getCurrentStock(), result.getCurrentStock());
-            assertEquals(sampleInventoryDTO.getAvailableStock(), result.getAvailableStock());
-            assertEquals(sampleInventoryDTO.getReservedQuantity(), result.getReservedQuantity());
-            assertEquals(sampleInventoryDTO.getReorderLevel(), result.getReorderLevel());
-            assertEquals(sampleInventoryDTO.getReorderQuantity(), result.getReorderQuantity());
-            assertEquals(sampleInventoryDTO.getLowStockThreshold(), result.getLowStockThreshold());
-            assertEquals(sampleInventoryDTO.getUnitCost(), result.getUnitCost());
-            assertEquals(sampleInventoryDTO.getLocation(), result.getLocation());
-            assertEquals(sampleInventoryDTO.getStatus(), result.getStatus());
-            assertEquals(sampleInventoryDTO.getSupplierId(), result.getSupplierId());
-        });
+        assertNotNull(results);
+        assertEquals(1, results.size());
+        InventoryDTO returned = results.get(0);
+        assertEquals(sampleInventoryDTO.getId(), returned.getId());
+        assertEquals(sampleInventoryDTO.getProductId(), returned.getProductId());
+        assertEquals(sampleInventoryDTO.getQuantity(), returned.getQuantity());
+        assertEquals(sampleInventoryDTO.getArrivalDate(), returned.getArrivalDate());
+        assertEquals(sampleInventoryDTO.getDescription(), returned.getDescription());
     }
 
     @Test
@@ -302,7 +257,7 @@ public class InventoryServiceTest {
     }
 
     @Test
-    void getInventoryByProductId_ShouldThrowException_WhenInventoryNotFound() {
+    void getInventoryByProductId_ShouldThrowException_WhenNoInventoriesFound() {
         // Arrange
         when(productRepository.existsById(1L)).thenReturn(true);
         when(inventoryRepository.findAll()).thenReturn(Arrays.asList());
@@ -310,4 +265,4 @@ public class InventoryServiceTest {
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> inventoryService.getInventoriesByProductId(1L));
     }
-} 
+}

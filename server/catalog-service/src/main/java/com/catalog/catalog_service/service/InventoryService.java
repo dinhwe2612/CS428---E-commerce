@@ -12,4 +12,5 @@ public interface InventoryService {
     InventoryDTO updateInventory(Long id, UpdateInventoryRequest request);
     void deleteInventory(Long id);
     List<InventoryDTO> getInventoriesByProductId(Long productId);
-} 
+    void decreaseInventoryQuantity(Long id, Integer quantity);
+}
