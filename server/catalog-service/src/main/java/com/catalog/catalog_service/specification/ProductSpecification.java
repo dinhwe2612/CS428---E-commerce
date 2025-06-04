@@ -19,18 +19,36 @@ public class ProductSpecification {
             
             if (name != null && !name.trim().isEmpty()) {
                 String searchTerm = name.trim().toLowerCase();
-                predicates.add(cb.like(
-                    cb.lower(root.get("name")),
-                    "%" + searchTerm + "%"
-                ));
+                
+                List<Predicate> namePredicates = new ArrayList<>();
+                namePredicates.add(cb.like(cb.lower(root.get("name")), "%" + searchTerm + "%"));
+                namePredicates.add(cb.like(cb.lower(root.get("descriptionText")), "%" + searchTerm + "%"));
+                
+                String[] words = searchTerm.split("\\s+");
+                if (words.length > 1) {
+                    for (String word : words) {
+                        if (word.length() > 2) {
+                            namePredicates.add(cb.like(cb.lower(root.get("name")), "%" + word + "%"));
+                            namePredicates.add(cb.like(cb.lower(root.get("descriptionText")), "%" + word + "%"));
+                        }
+                    }
+                }
+                
+                predicates.add(cb.or(namePredicates.toArray(new Predicate[0])));
             }
             
             if (minPrice != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
+                predicates.add(cb.greaterThanOrEqualTo(
+                    cb.function("CAST", Double.class, root.get("price"), cb.literal(Double.class)),
+                    minPrice
+                ));
             }
             
             if (maxPrice != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
+                predicates.add(cb.lessThanOrEqualTo(
+                    cb.function("CAST", Double.class, root.get("price"), cb.literal(Double.class)),
+                    maxPrice
+                ));
             }
             
             if (categoryId != null) {

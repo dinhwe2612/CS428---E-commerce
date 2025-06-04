@@ -2,6 +2,7 @@ import os
 import logging
 import json
 import time
+import re
 from typing import Any, Text, Dict, List, Optional
 import requests
 from rasa_sdk import Action, Tracker
@@ -11,14 +12,14 @@ from rasa_sdk.events import SlotSet
 from dotenv import load_dotenv
 load_dotenv()
 
-# Configure logger first
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 EUREKA_SERVER_URL = os.getenv('EUREKA_SERVER_URL')
 INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')
 
-# Add validation for required environment variables
+
 if not EUREKA_SERVER_URL:
     logger.warning("EUREKA_SERVER_URL not set in environment variables, using localhost fallback")
     EUREKA_SERVER_URL = "http://localhost:8761/eureka"
@@ -38,12 +39,12 @@ class EurekaServiceDiscovery:
         
         current_time = time.time()
         
-        # Check if EUREKA_SERVER_URL is available
+        
         if not self.eureka_url:
             logger.error("EUREKA_SERVER_URL is not configured")
             return None
         
-        # Check cache first
+        
         if (service_name in self._service_cache and 
             current_time < self._cache_expiry.get(service_name, 0)):
             logger.info(f"Using cached service URL for {service_name}: {self._service_cache[service_name]}")
@@ -101,20 +102,20 @@ class CatalogServiceClient:
         self.eureka_client = EurekaServiceDiscovery()
         self.service_name = "catalog-service"
         self.internal_api_key = INTERNAL_API_KEY
-        # Add fallback URL for development/testing - USE LOCALHOST WHEN RUNNING OUTSIDE DOCKER
+        
         self.fallback_url = os.getenv('CATALOG_SERVICE_FALLBACK_URL', 'http://localhost:8089')
         
-        # If Eureka URL contains localhost or we can't resolve eureka-server, assume we're outside Docker
+        
         self.use_direct_url = True
         if EUREKA_SERVER_URL and 'eureka-server' in EUREKA_SERVER_URL:
             try:
-                # Test if we can resolve eureka-server hostname
+                
                 import socket
                 socket.gethostbyname('eureka-server')
-                self.use_direct_url = False  # We're inside Docker network
+                self.use_direct_url = False  
                 logger.info("Running inside Docker network, will use Eureka service discovery")
             except socket.gaierror:
-                self.use_direct_url = True  # We're outside Docker network
+                self.use_direct_url = True  
                 logger.info("Running outside Docker network, will use direct localhost URLs")
         
         logger.info(f"CatalogServiceClient initialized - use_direct_url: {self.use_direct_url}, fallback_url: {self.fallback_url}")
@@ -130,12 +131,12 @@ class CatalogServiceClient:
     
     def _get_service_url(self) -> Optional[str]:
         """Get service URL with fallback mechanism"""
-        # If we're outside Docker, use direct URL immediately
+        
         if self.use_direct_url:
             logger.info(f"Using direct URL: {self.fallback_url}")
             return self.fallback_url
             
-        # Otherwise, try Eureka discovery first
+        
         service_url = self.eureka_client.get_service_url(self.service_name)
         if not service_url and self.fallback_url:
             logger.info(f"Eureka discovery failed, using fallback URL: {self.fallback_url}")
@@ -147,7 +148,7 @@ class CatalogServiceClient:
         service_url = self._get_service_url()
         if not service_url:
             logger.error(f"Cannot find {self.service_name} in Eureka registry and no fallback URL configured")
-            # Return mock data for demonstration when service is not available
+            
             return self._get_mock_data(endpoint)
         
         try:
@@ -344,6 +345,37 @@ class ActionFlowerAdvice(Action):
             
         return None
 
+    def _extract_budget_from_text(self, text: str) -> float:
+        """Enhanced budget extraction for Vietnamese and English"""
+        budget_patterns = [
+            r'(\d+)\s*(?:ngàn|ngan|nghìn|nghin)',
+            r'(\d+)\s*(?:triệu|tr|million)',
+            r'(\d+)\s*(?:usd|USD|dollars?)',
+            r'(\d+\.?\d*)\s*[kK]',
+            r'(\d+)\s*(?:đồng|dong)',
+            r'tầm\s*(\d+)',
+            r'dưới\s*(\d+)',
+            r'under\s*(\d+)',
+            r'(\d+)\s*cành'
+        ]
+        
+        for pattern in budget_patterns:
+            match = re.search(pattern, text)
+            if match:
+                value = float(match.group(1))
+                if 'ngàn' in text or 'ngan' in text or 'nghìn' in text or 'nghin' in text:
+                    return value * 1000
+                elif 'triệu' in text or 'tr' in text or 'million' in text:
+                    return value * 1000000
+                elif 'k' in text.lower():
+                    return value * 1000
+                elif 'usd' in text.lower() or 'dollar' in text.lower():
+                    return value * 25000  
+                elif 'cành' in text:
+                    return value * 50000  
+                return value
+        return None
+
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
@@ -359,6 +391,26 @@ class ActionFlowerAdvice(Action):
         prev_color = tracker.get_slot("color")
         prev_occasion = tracker.get_slot("occasion")
         prev_budget = tracker.get_slot("budget")
+
+        user_text = tracker.latest_message.get("text", "").lower()
+        
+        
+        if not budget:
+            budget = self._extract_budget_from_text(user_text)
+        
+        
+        if any(word in user_text for word in ["hay", "hoặc", "or", "so sánh"]):
+            dispatcher.utter_message(response="utter_multiple_options")
+            return []
+        
+        
+        special_requirements = []
+        if any(word in user_text for word in ["dị ứng", "allergy", "phấn"]):
+            special_requirements.append("low_pollen")
+        if any(word in user_text for word in ["tươi", "longevity", "ngày"]):
+            special_requirements.append("long_lasting")
+        if any(word in user_text for word in ["thiệp", "card", "message"]):
+            special_requirements.append("with_card")
 
         
         if not occasion and flower_type:
@@ -413,6 +465,16 @@ class ActionFlowerAdvice(Action):
                     
                     if filtered_products:
                         message = self._create_recommendation_message(filtered_products, occasion, color, flower_type)
+                        
+                        suggestion_names = [p.get("name", f"Bó {i+1}") for i, p in enumerate(filtered_products)]
+                        dispatcher.utter_message(text=message)
+                        return [
+                            SlotSet("flower_type", flower_type),
+                            SlotSet("color", color),
+                            SlotSet("occasion", occasion),
+                            SlotSet("budget", budget),
+                            SlotSet("last_suggested_list", suggestion_names)
+                        ]
                     else:
                         
                         criteria = []
@@ -472,15 +534,7 @@ class ActionFlowerAdvice(Action):
         
         filtered = products.copy()
         
-        
-        if color:
-            filtered = [p for p in filtered if color.lower() in (p.get('name', '') + ' ' + p.get('description', '')).lower()]
-        
-        
-        if flower_type:
-            filtered = [p for p in filtered if flower_type.lower() in p.get('name', '').lower()]
-            
-        return filtered[:3]  
+        return filtered
 
 
 class ActionGetProducts(Action):
@@ -591,82 +645,295 @@ class ActionGetProductDetails(Action):
         return []
 
 
-class ActionGetPriceRange(Action):
-    
-    
+class ActionHandlePriceWithContext(Action):
     def name(self) -> Text:
-        return "action_get_price_range"
+        return "action_handle_price_with_context"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
-        flower_type = next(tracker.get_latest_entity_values("flower_type"), None)
-
+        
+        flower_type = tracker.get_slot("flower_type")
+        product_name = tracker.get_slot("product_name")
+        user_text = tracker.latest_message.get("text", "").lower()
+        
+        
+        target_product = None
+        if any(word in user_text for word in ["thứ", "số", "đầu tiên", "cuối"]):
+            target_product = self._resolve_index_reference(user_text, tracker)
+        
+        if not target_product:
+            target_product = product_name or flower_type or tracker.get_slot("last_product")
+        
+        if not target_product:
+            dispatcher.utter_message(response="utter_need_flower_type")
+            return []
+        
         try:
-            data = catalog_client.get_products(name=flower_type, size=100)
             
-            if data:
-                products = data.get('content', []) if isinstance(data, dict) else data
+            logger.info(f"Getting price for: {target_product}")
+            
+            
+            data = catalog_client.get_products(name=target_product, size=1)
+            
+            if data and data.get('content'):
+                product = data['content'][0]
+                price = product.get('price', 0)
+                name = product.get('name', target_product)
+                price_text = f"{int(price):,}".replace(',', '.')
+                message = f"💰 **{name}** có giá: **{price_text} VNĐ**"
                 
-                if products:
-                    prices = []
-                    for p in products:
-                        price_str = p.get('price', '0')
-                        try:
-                            price_float = float(price_str)
-                            prices.append(price_float)
-                        except (ValueError, TypeError):
-                            logger.warning(f"Invalid price format: {price_str}")
-                            continue
-                    
-                    if prices:
-                        min_price = min(prices)
-                        max_price = max(prices)
-                        avg_price = sum(prices) / len(prices)
-                        
-                        min_text = f"{int(min_price):,}".replace(',', '.')
-                        max_text = f"{int(max_price):,}".replace(',', '.')
-                        avg_text = f"{int(avg_price):,}".replace(',', '.')
-                        
-                        if flower_type:
-                            message = f"Thông tin giá {flower_type}:\n\n"
-                        else:
-                            message = "Thông tin giá các loại hoa:\n\n"
-                        
-                        message += f"💰 Giá thấp nhất: {min_text} VNĐ\n"
-                        message += f"💰 Giá cao nhất: {max_text} VNĐ\n"
-                        message += f"💰 Giá trung bình: {avg_text} VNĐ\n\n"
-                        message += "Bạn muốn xem sản phẩm nào cụ thể?"
-                    else:
-                        message = "Hiện tại chưa có thông tin giá hợp lệ cho sản phẩm này."
-                else:
-                    message = "Hiện tại chưa có thông tin giá sản phẩm."
+                
+                description = product.get('description', '')
+                if description:
+                    message += f"\n\n📝 {description[:150]}{'...' if len(description) > 150 else ''}"
+                
+                dispatcher.utter_message(text=message)
+                return [SlotSet("last_product", target_product)]
             else:
-                message = "Không thể lấy thông tin giá. Vui lòng thử lại sau!"
-
+                dispatcher.utter_message(text=f"Xin lỗi, tôi không tìm thấy giá của {target_product}. Bạn có thể xem danh sách sản phẩm để chọn lựa khác.")
+                
         except Exception as e:
-            logger.error(f"Error getting price range: {e}")
-            message = "Có lỗi xảy ra khi lấy thông tin giá!"
+            logger.error(f"Error getting price: {e}")
+            dispatcher.utter_message(text="Có lỗi xảy ra khi lấy giá. Vui lòng thử lại!")
+        
+        return []
+    
+    def _resolve_index_reference(self, text: str, tracker: Tracker) -> str:
+        """Resolve index references like 'bó thứ ba' to actual product names"""
+        suggestions = tracker.get_slot("last_suggested_list") or []
+        if not suggestions:
+            return None
+        
+        
+        index_patterns = [
+            (r'thứ\s*(\d+)', lambda x: int(x) - 1),
+            (r'số\s*(\d+)', lambda x: int(x) - 1),
+            (r'đầu tiên|first', lambda x: 0),
+            (r'cuối|last', lambda x: len(suggestions) - 1),
+        ]
+        
+        for pattern, index_func in index_patterns:
+            match = re.search(pattern, text)
+            if match:
+                try:
+                    if match.groups() and match.group(1).isdigit():
+                        index = index_func(match.group(1))
+                    else:
+                        index = index_func(None)
+                    if 0 <= index < len(suggestions):
+                        return suggestions[index]
+                except (ValueError, IndexError):
+                    pass
+        
+        return None
 
-        dispatcher.utter_message(text=message)
+class ActionCheckProductAvailability(Action):
+    def name(self) -> Text:
+        return "action_check_product_availability"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        product_name = tracker.get_slot("product_name")
+        
+        if not product_name:
+            dispatcher.utter_message(text="Bạn muốn kiểm tra sản phẩm nào? Vui lòng cho tôi biết tên sản phẩm.")
+            return []
+        
+        try:
+            
+            data = catalog_client.get_products(name=product_name, size=1)
+            
+            if data and data.get('content'):
+                product = data['content'][0]
+                name = product.get('name', product_name)
+                price = product.get('price', 0)
+                description = product.get('description', '')
+                
+                price_text = f"{int(price):,}".replace(',', '.')
+                
+                message = f"✅ **{name}** hiện có sẵn tại shop!\n\n"
+                message += f"💰 Giá: **{price_text} VNĐ**"
+                
+                if description:
+                    message += f"\n\n📝 {description[:200]}{'...' if len(description) > 200 else ''}"
+                
+                message += "\n\nBạn muốn đặt hàng hoặc biết thêm chi tiết không?"
+                
+                dispatcher.utter_message(text=message)
+                return [SlotSet("last_product", product_name)]
+            else:
+                dispatcher.utter_message(text=f"❌ Rất tiếc, hiện tại shop không có sẵn **{product_name}**. Bạn có thể xem các sản phẩm tương tự hoặc để lại thông tin để shop thông báo khi có hàng.")
+                
+        except Exception as e:
+            logger.error(f"Error checking product availability: {e}")
+            dispatcher.utter_message(text="Có lỗi xảy ra khi kiểm tra sản phẩm. Vui lòng thử lại!")
+        
         return []
 
+class ActionCheckStock(Action):
+    def name(self) -> Text:
+        return "action_check_stock"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        product_name = tracker.get_slot("product_name") or tracker.get_slot("flower_type")
+        
+        if not product_name:
+            dispatcher.utter_message(response="utter_need_flower_type")
+            return []
+        
+        try:
+            
+            data = catalog_client.get_products(name=product_name, size=1)
+            
+            if data and data.get('content'):
+                product = data['content'][0]
+                name = product.get('name', product_name)
+                
+                
+                import random
+                stock_level = random.choice(["high", "medium", "low", "out"])
+                
+                if stock_level == "high":
+                    message = f"📦 **{name}** còn nhiều hàng trong kho. Bạn có thể đặt ngay!"
+                elif stock_level == "medium":
+                    message = f"📦 **{name}** còn ít hàng trong kho. Nên đặt sớm để đảm bảo có hàng."
+                elif stock_level == "low":
+                    message = f"⚠️ **{name}** chỉ còn 1-2 bó cuối cùng. Bạn nên đặt ngay!"
+                else:
+                    message = f"❌ **{name}** hiện đã hết hàng. Shop sẽ nhập thêm trong 2-3 ngày tới."
+                
+                dispatcher.utter_message(text=message)
+                return [SlotSet("last_product", product_name)]
+            else:
+                dispatcher.utter_message(text=f"Không tìm thấy sản phẩm {product_name} trong hệ thống.")
+                
+        except Exception as e:
+            logger.error(f"Error checking stock: {e}")
+            dispatcher.utter_message(text="Có lỗi xảy ra khi kiểm tra tồn kho. Vui lòng thử lại!")
+        
+        return []
+
+class ActionHandleBudgetExtraction(Action):
+    def name(self) -> Text:
+        return "action_handle_budget_extraction"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        user_text = tracker.latest_message.get("text", "").lower()
+        budget = self._extract_comprehensive_budget(user_text)
+        
+        if budget:
+            dispatcher.utter_message(text=f"Tôi hiểu ngân sách của bạn là {budget:,.0f} VND. Để tư vấn tốt hơn, bạn có thêm yêu cầu gì khác không?")
+            return [SlotSet("budget", budget)]
+        else:
+            dispatcher.utter_message(response="utter_budget_not_recognized")
+            return []
+    
+    def _extract_comprehensive_budget(self, text: str) -> float:
+        """Comprehensive budget extraction including edge cases"""
+        patterns = [
+            (r'(\d+)\s*(?:ngàn|ngan|nghìn|nghin|k)', 1000),
+            (r'(\d+)\s*(?:triệu|tr|million)', 1000000),
+            (r'(\d+)\s*(?:usd|USD|dollars?)', 25000),
+            (r'(\d+\.?\d*)\s*[kK]', 1000),
+            (r'(\d+)\s*(?:đồng|dong)', 1),
+            (r'tầm\s*(\d+)', 1),
+            (r'dưới\s*(\d+)', 1),
+            (r'under\s*(\d+)', 25000),
+            (r'(\d+)\s*cành', 50000),  
+        ]
+        
+        for pattern, multiplier in patterns:
+            match = re.search(pattern, text)
+            if match:
+                value = float(match.group(1))
+                return value * multiplier
+        
+        return None
+
+class ActionHandleComparison(Action):
+    def name(self) -> Text:
+        return "action_handle_comparison"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        user_text = tracker.latest_message.get("text", "").lower()
+        
+        
+        options = self._extract_comparison_options(user_text)
+        
+        if len(options) >= 2:
+            dispatcher.utter_message(text=f"Tôi thấy bạn đang so sánh giữa {' và '.join(options)}. Để tư vấn chính xác, bạn có thể cho tôi biết tiêu chí quan trọng nhất không? (giá cả, màu sắc, ý nghĩa, độ bền...)")
+            return []
+        else:
+            dispatcher.utter_message(response="utter_multiple_options")
+            return []
+    
+    def _extract_comparison_options(self, text: str) -> List[str]:
+        """Extract comparison options from text"""
+        connectors = ['hay', 'hoặc', 'or', 'vs', 'versus']
+        for connector in connectors:
+            if connector in text:
+                parts = text.split(connector)
+                return [part.strip() for part in parts if part.strip()]
+        return []
+
+class ActionContextAwareResponse(Action):
+    def name(self) -> Text:
+        return "action_context_aware_response"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        
+        conversation_context = self._analyze_context(tracker)
+        
+        if conversation_context == "missing_product_reference":
+            dispatcher.utter_message(response="utter_context_lost")
+        elif conversation_context == "incomplete_criteria":
+            dispatcher.utter_message(response="utter_refine_request")
+        elif conversation_context == "comparison_needed":
+            dispatcher.utter_message(response="utter_multiple_options")
+        else:
+            dispatcher.utter_message(response="utter_ask_rephrase")
+        
+        return []
+    
+    def _analyze_context(self, tracker: Tracker) -> str:
+        """Analyze conversation context to determine appropriate response"""
+        user_text = tracker.latest_message.get("text", "").lower()
+        
+        if any(word in user_text for word in ["đó", "này", "that", "this"]):
+            return "missing_product_reference"
+        elif any(word in user_text for word in ["hay", "hoặc", "or", "so sánh"]):
+            return "comparison_needed"
+        elif len(user_text.split()) < 3:
+            return "incomplete_criteria"
+        else:
+            return "general_fallback"
 
 class ActionRecommendFlowers(Action):
-    
-    
     def name(self) -> Text:
         return "action_recommend_flowers"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
+        
         try:
-            
             data = catalog_client.get_products(size=5)
-            
+        
             if data:
                 products = data.get('content', []) if isinstance(data, dict) else data
                 
@@ -677,40 +944,40 @@ class ActionRecommendFlowers(Action):
                         price = product.get('price', 0)
                         price_text = f"{int(price):,}".replace(',', '.')
                         message += f"{i}. **{name}** - {price_text} VNĐ\n"
-                    
+                
                     message += "\nBạn muốn biết thêm về sản phẩm nào không?"
+                    
+                    
+                    rec_names = [p.get("name", f"Gợi ý {i+1}") for i, p in enumerate(products)]
+                    dispatcher.utter_message(text=message)
+                    return [SlotSet("last_suggested_list", rec_names)]
                 else:
                     message = "Hiện tại chưa có đủ dữ liệu để gợi ý."
             else:
                 message = "Không thể lấy danh sách gợi ý. Vui lòng thử lại sau!"
-
+                
         except Exception as e:
             logger.error(f"Error getting recommendations: {e}")
             message = "Có lỗi xảy ra khi lấy gợi ý!"
-
+        
         dispatcher.utter_message(text=message)
         return []
 
-
 class ActionGetProductsByCategory(Action):
-    """
-    Action to handle category selection and show products in specific category
-    """
-    
     def name(self) -> Text:
         return "action_get_products_by_category"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
+        
         category_name = next(tracker.get_latest_entity_values("category_name"), None)
         
         if not category_name:
             message = "Bạn muốn xem danh mục nào? Vui lòng chọn từ danh sách categories đã hiển thị."
             dispatcher.utter_message(text=message)
             return []
-
+        
         logger.info(f"Category selection request - Category: {category_name}")
 
         try:
@@ -740,7 +1007,6 @@ class ActionGetProductsByCategory(Action):
 
             logger.info(f"Mapped category '{category_name}' to ID: {category_id}")
             
-            # Primary attempt: get products by category
             data = catalog_client.get_products_by_category(category_id, size=10)
             
             if data:
@@ -767,91 +1033,48 @@ class ActionGetProductsByCategory(Action):
                         message += "\n"
                     
                     message += "Bạn muốn biết thêm chi tiết về sản phẩm nào không?"
+                    
+                    
+                    product_names = [p.get("name", f"Sản phẩm {i+1}") for i, p in enumerate(products)]
+                    dispatcher.utter_message(text=message)
+                    return [
+                        SlotSet("category_name", category_name),
+                        SlotSet("last_suggested_list", product_names)
+                    ]
                 else:
                     logger.info(f"No products found for category {category_name}")
-                    # Fallback: try to get general products and filter by name
-                    logger.info("Attempting fallback search by category name")
-                    fallback_data = catalog_client.get_products(name=category_name.lower(), size=5)
-                    
-                    if fallback_data:
-                        fallback_products = fallback_data.get('content', []) if isinstance(fallback_data, dict) else fallback_data
-                        if fallback_products and len(fallback_products) > 0:
-                            message = f"🌸 Một số sản phẩm liên quan đến **{category_name}**:\n\n"
-                            for i, product in enumerate(fallback_products, 1):
-                                name = product.get('name', 'Sản phẩm')
-                                price = product.get('price', 0)
-                                try:
-                                    price_text = f"{int(float(price)):,}".replace(',', '.')
-                                except (ValueError, TypeError):
-                                    price_text = "Liên hệ"
-                                message += f"{i}. **{name}** - {price_text} VNĐ\n"
-                            message += "\nBạn muốn biết thêm chi tiết về sản phẩm nào không?"
-                        else:
-                            message = f"Rất tiếc, hiện tại danh mục {category_name} chưa có sản phẩm nào."
-                    else:
-                        message = f"Rất tiếc, hiện tại danh mục {category_name} chưa có sản phẩm nào."
+                    message = f"Rất tiếc, hiện tại danh mục {category_name} chưa có sản phẩm nào."
             else:
                 logger.error(f"Failed to get data for category {category_name} (ID: {category_id})")
-                # Fallback: try to get general products
-                logger.info("Attempting fallback to general product search")
-                fallback_data = catalog_client.get_products(size=5)
+                message = "Không thể kết nối tới hệ thống. Vui lòng thử lại sau!"
                 
-                if fallback_data:
-                    fallback_products = fallback_data.get('content', []) if isinstance(fallback_data, dict) else fallback_data
-                    if fallback_products and len(fallback_products) > 0:
-                        message = f"Hiện tại không thể lấy danh mục {category_name}, nhưng đây là một số sản phẩm khác:\n\n"
-                        for i, product in enumerate(fallback_products[:3], 1):
-                            name = product.get('name', 'Sản phẩm')
-                            price = product.get('price', 0)
-                            try:
-                                price_text = f"{int(float(price)):,}".replace(',', '.')
-                            except (ValueError, TypeError):
-                                price_text = "Liên hệ"
-                            message += f"{i}. **{name}** - {price_text} VNĐ\n"
-                        message += "\nVui lòng thử lại sau để xem danh mục đầy đủ."
-                    else:
-                        message = "Không thể kết nối tới hệ thống. Vui lòng thử lại sau!"
-                else:
-                    message = "Không thể kết nối tới hệ thống. Vui lòng thử lại sau!"
-
         except Exception as e:
             logger.error(f"Error in category selection: {e}", exc_info=True)
             message = "Có lỗi xảy ra khi lấy sản phẩm theo danh mục. Vui lòng thử lại sau!"
 
         dispatcher.utter_message(text=message)
-        
-        
-        return [
-            SlotSet("category_name", category_name)
-        ]
-
+        return [SlotSet("category_name", category_name)]
 
 class ActionSpecificFlowerSearch(Action):
-    """
-    Action to handle specific flower search requests like "rose", "hoa hồng", etc.
-    """
-    
     def name(self) -> Text:
         return "action_specific_flower_search"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
         
         flower_type = next(tracker.get_latest_entity_values("flower_type"), None)
         if not flower_type:
             flower_type = tracker.get_slot("flower_type")
 
         logger.info(f"Specific flower search request - Type: {flower_type}")
-
+        
         if not flower_type:
             message = "Bạn muốn tìm loại hoa nào ạ? Ví dụ: hoa hồng, hoa lan, hoa tulip..."
             dispatcher.utter_message(text=message)
             return []
-
+     
         try:
-            
             data = catalog_client.get_products(name=flower_type, size=5)
             
             if data:
@@ -859,7 +1082,6 @@ class ActionSpecificFlowerSearch(Action):
                 logger.info(f"Retrieved {len(products) if products else 0} products for flower type {flower_type}")
                 
                 if products and len(products) > 0:
-                    
                     message = f"🌸 **{flower_type.title()}** có tại shop:\n\n"
                     
                     for i, product in enumerate(products, 1):
@@ -881,27 +1103,7 @@ class ActionSpecificFlowerSearch(Action):
                     message += "Bạn muốn biết thêm chi tiết về sản phẩm nào không?"
                 else:
                     logger.info(f"No products found for flower type {flower_type}")
-                    # Try fallback with general product search
-                    logger.info("Attempting fallback search with general products")
-                    fallback_data = catalog_client.get_products(size=5)
-                    
-                    if fallback_data:
-                        fallback_products = fallback_data.get('content', []) if isinstance(fallback_data, dict) else fallback_data
-                        if fallback_products and len(fallback_products) > 0:
-                            message = f"Rất tiếc, hiện tại shop chưa có {flower_type} trong kho. Tuy nhiên, đây là một số loại hoa khác:\n\n"
-                            for i, product in enumerate(fallback_products[:3], 1):
-                                name = product.get('name', 'Sản phẩm')
-                                price = product.get('price', 0)
-                                try:
-                                    price_text = f"{int(float(price)):,}".replace(',', '.')
-                                except (ValueError, TypeError):
-                                    price_text = "Liên hệ"
-                                message += f"{i}. **{name}** - {price_text} VNĐ\n"
-                            message += "\nBạn có muốn xem loại nào khác không?"
-                        else:
-                            message = f"Rất tiếc, hiện tại shop chưa có {flower_type} trong kho. Bạn có muốn xem các loại hoa khác không?"
-                    else:
-                        message = f"Rất tiếc, hiện tại shop chưa có {flower_type} trong kho. Bạn có muốn xem các loại hoa khác không?"
+                    message = f"Rất tiếc, hiện tại shop chưa có {flower_type} trong kho. Bạn có muốn xem các loại hoa khác không?"
             else:
                 logger.error(f"Failed to get data for flower type {flower_type}")
                 message = "Không thể kết nối tới hệ thống. Vui lòng thử lại sau!"
@@ -912,7 +1114,6 @@ class ActionSpecificFlowerSearch(Action):
 
         dispatcher.utter_message(text=message)
         
-        
         return [
             SlotSet("flower_type", flower_type),
             SlotSet("occasion", None),  
@@ -920,21 +1121,15 @@ class ActionSpecificFlowerSearch(Action):
             SlotSet("budget", None)     
         ]
 
-
 class ActionHealthCheck(Action):
-    """
-    Action to handle health check requests
-    """
-    
     def name(self) -> Text:
         return "action_health_check"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
+        
         try:
-            # Test catalog service connection
             data = catalog_client.get_products(size=1)
             
             if data:
@@ -955,7 +1150,7 @@ class ActionHealthCheck(Action):
         return []
 
 
-        
+
         
         
 

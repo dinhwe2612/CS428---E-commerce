@@ -1,4 +1,4 @@
-#!/bin/bash
+/bin/bash
 set -e
 
 if [ "$SKIP_EUREKA_CHECK" != "true" ]; then
@@ -10,7 +10,6 @@ if [ "$SKIP_EUREKA_CHECK" != "true" ]; then
     while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Checking Eureka server (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)..."
         
-        # Try multiple endpoints to check if Eureka is ready
         if curl -f --connect-timeout 5 --max-time 10 "http://$EUREKA_HOST/actuator/health" 2>/dev/null || \
            curl -f --connect-timeout 5 --max-time 10 "http://$EUREKA_HOST/eureka/" 2>/dev/null || \
            curl -f --connect-timeout 5 --max-time 10 "http://$EUREKA_HOST/" 2>/dev/null; then
@@ -23,8 +22,6 @@ if [ "$SKIP_EUREKA_CHECK" != "true" ]; then
             echo "Eureka not ready yet, waiting 10 seconds..."
             sleep 10
         else
-            echo "Warning: Eureka server not responding after $MAX_RETRIES attempts"
-            echo "Proceeding anyway..."
             break
         fi
     done
@@ -39,7 +36,6 @@ ACTION_PID=$!
 echo "Waiting for Action Server to start..."
 sleep 10
 
-# Check if action server is still running
 if ! kill -0 $ACTION_PID 2>/dev/null; then
     echo "Action server failed to start"
     exit 1
@@ -48,5 +44,4 @@ fi
 echo "Starting Rasa Core Server..."
 rasa run --enable-api --port 5005 --cors "*" --debug
 
-# Wait for any process to exit
 wait

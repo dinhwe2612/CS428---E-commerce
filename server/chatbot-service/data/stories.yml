@@ -34,7 +34,7 @@ stories:
 - story: ask price
   steps:
   - intent: ask_price
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 - story: ask categories
   steps:
@@ -93,7 +93,7 @@ stories:
     - occasion: "valentine"
   - action: action_flower_advice
   - intent: ask_price
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 - story: recommendation flow
   steps:
@@ -117,7 +117,7 @@ stories:
     - intent: flower_advice
     - action: action_flower_advice
     - intent: ask_price
-    - action: action_get_price_range
+    - action: action_handle_price_with_context
     - intent: thank
     - action: utter_thank
 
@@ -176,7 +176,7 @@ stories:
   - intent: ask_product_details
   - action: action_get_product_details
   - intent: ask_price
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 - story: context switch from birthday to valentine
   steps:
@@ -203,7 +203,6 @@ stories:
   - slot_was_set:
     - occasion: "sinh nhật"
   - action: action_flower_advice
-  - action: utter_ask_more_details
   - intent: ask_specific_flower
     entities:
     - flower_type: "rose"
@@ -275,7 +274,7 @@ stories:
     - category_name: "Unique Stems"
   - action: action_get_products_by_category
   - intent: ask_price
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 # New stories for better handling
 - story: tulips specific flower search
@@ -347,7 +346,7 @@ stories:
     - flower_type: "rose"
   - action: action_specific_flower_search
   - intent: ask_price
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 - story: valentine advice with roses
   steps:
@@ -373,21 +372,23 @@ stories:
   - intent: ask_price
     entities:
     - flower_type: "hoa hồng"
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 - story: tulips price inquiry
   steps:
   - intent: ask_price
     entities:
-    - flower_type: "tulips"
-  - action: action_get_price_range
+    - flower_type: "tulip"
+  - slot_was_set:
+    - flower_type: "tulip"
+  - action: action_handle_price_with_context
 
 - story: roses price inquiry
   steps:
   - intent: ask_price
     entities:
     - flower_type: "roses"
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
 
 - story: complex conversation flow
   steps:
@@ -408,7 +409,7 @@ stories:
     - flower_type: "roses"
   - action: action_specific_flower_search
   - intent: ask_price
-  - action: action_get_price_range
+  - action: action_handle_price_with_context
   - intent: thank
   - action: utter_thank
 
@@ -433,9 +434,9 @@ stories:
   - action: action_recommend_flowers
   - intent: ask_specific_flower
     entities:
-    - flower_type: "tulips"
+    - flower_type: "tulip"
   - slot_was_set:
-    - flower_type: "tulips"
+    - flower_type: "tulip"
   - action: action_specific_flower_search
 
 - story: general advice to category
@@ -444,6 +445,263 @@ stories:
   - action: action_flower_advice
   - intent: ask_categories
   - action: action_get_categories
+  - intent: select_category
+    entities:
+    - category_name: "Tulips"
+  - slot_was_set:
+    - category_name: "Tulips"
+  - action: action_get_products_by_category
+
+- story: simple product availability check
+  steps:
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Queen Bee"
+  - slot_was_set:
+    - product_name: "Queen Bee"
+  - action: action_check_product_availability
+
+- story: product availability then details
+  steps:
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Exuberance"
+  - slot_was_set:
+    - product_name: "Exuberance"
+  - action: action_check_product_availability
+  - intent: ask_product_details
+  - action: action_get_product_details
+
+- story: product availability then price
+  steps:
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Cool Breeze"
+  - slot_was_set:
+    - product_name: "Cool Breeze"
+  - action: action_check_product_availability
+  - intent: ask_price
+  - action: action_handle_price_with_context
+
+- story: greeting then product availability
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Aquamarine"
+  - slot_was_set:
+    - product_name: "Aquamarine"
+  - action: action_check_product_availability
+
+- story: category browsing then product check
+  steps:
+  - intent: ask_categories
+  - action: action_get_categories
+  - intent: select_category
+    entities:
+    - category_name: "Hydrangeas"
+  - slot_was_set:
+    - category_name: "Hydrangeas"
+  - action: action_get_products_by_category
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Queen Bee"
+  - slot_was_set:
+    - product_name: "Queen Bee"
+  - action: action_check_product_availability
+
+- story: product details request directly
+  steps:
+  - intent: ask_product_details
+    entities:
+    - product_name: "Dreamscape"
+  - slot_was_set:
+    - product_name: "Dreamscape"
+  - action: action_get_product_details
+
+- story: comprehensive product inquiry
+  steps:
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Bayside"
+  - slot_was_set:
+    - product_name: "Bayside"
+  - action: action_check_product_availability
+  - intent: ask_product_details
+  - action: action_get_product_details
+  - intent: ask_price
+  - action: action_handle_price_with_context
+  - intent: thank
+  - action: utter_thank
+
+- story: multiple product inquiries
+  steps:
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Swell"
+  - slot_was_set:
+    - product_name: "Swell"
+  - action: action_check_product_availability
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Glowing"
+  - slot_was_set:
+    - product_name: "Glowing"
+  - action: action_check_product_availability
+
+- story: flower advice then product check
+  steps:
+  - intent: flower_advice
+    entities:
+    - occasion: "wedding"
+    - color: "white"
+  - slot_was_set:
+    - occasion: "wedding"
+    - color: "white"
+  - action: action_flower_advice
+  - intent: ask_product_availability
+    entities:
+    - product_name: "The Elegance Party Box"
+  - slot_was_set:
+    - product_name: "The Elegance Party Box"
+  - action: action_check_product_availability
+
+- story: specific flower then product availability
+  steps:
+  - intent: ask_specific_flower
+    entities:
+    - flower_type: "peonies"
+  - slot_was_set:
+    - flower_type: "peonies"
+  - action: action_specific_flower_search
+  - intent: ask_product_availability
+    entities:
+    - product_name: "25 Farmer's Choice Peonies"
+  - slot_was_set:
+    - product_name: "25 Farmer's Choice Peonies"
+  - action: action_check_product_availability
+
+- story: recommendation then product inquiry
+  steps:
+  - intent: ask_recommendation
+  - action: action_recommend_flowers
+  - intent: ask_product_availability
+    entities:
+    - product_name: "All the Rage"
+  - slot_was_set:
+    - product_name: "All the Rage"
+  - action: action_check_product_availability
+
+- story: health check conversation
+  steps:
+  - intent: health_check
+  - action: action_health_check
+
+- story: extensive conversation flow
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: flower_advice
+    entities:
+    - occasion: "valentine"
+    - color: "red"
+  - slot_was_set:
+    - occasion: "valentine"
+    - color: "red"
+  - action: action_flower_advice
+  - intent: ask_categories
+  - action: action_get_categories
+  - intent: select_category
+    entities:
+    - category_name: "Roses"
+  - slot_was_set:
+    - category_name: "Roses"
+  - action: action_get_products_by_category
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Amethyst"
+  - slot_was_set:
+    - product_name: "Amethyst"
+  - action: action_check_product_availability
+  - intent: ask_product_details
+  - action: action_get_product_details
+  - intent: ask_price
+  - action: action_handle_price_with_context
+  - intent: thank
+  - action: utter_thank
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: mixed language product inquiry
+  steps:
+  - intent: ask_product_availability
+    entities:
+    - product_name: "Bejeweled"
+  - slot_was_set:
+    - product_name: "Bejeweled"
+  - action: action_check_product_availability
+  - intent: ask_specific_flower
+    entities:
+    - flower_type: "hoa hồng"
+  - slot_was_set:
+    - flower_type: "hoa hồng"
+  - action: action_specific_flower_search
+
+- story: deny then redirect
+  steps:
+  - intent: flower_advice
+  - action: action_flower_advice
+  - intent: deny
+  - action: utter_ask_rephrase
+  - intent: ask_categories
+  - action: action_get_categories
+
+- story: affirm then continue
+  steps:
+  - intent: ask_recommendation
+  - action: action_recommend_flowers
+  - intent: affirm
+  - action: utter_happy
+  - intent: ask_product_details
+  - action: action_get_product_details
+
+- story: mood management
+  steps:
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - intent: flower_advice
+    entities:
+    - occasion: "cheer up"
+  - slot_was_set:
+    - occasion: "cheer up"
+  - action: action_flower_advice
+
+- story: price comparison flow
+  steps:
+  - intent: ask_price
+    entities:
+    - flower_type: "roses"
+  - slot_was_set:
+    - flower_type: "roses"
+  - action: action_handle_price_with_context
+  - intent: ask_price
+    entities:
+    - flower_type: "tulip"
+  - slot_was_set:
+    - flower_type: "tulip"
+  - action: action_handle_price_with_context
+
+- story: seasonal flower inquiry
+  steps:
+  - intent: flower_advice
+    entities:
+    - occasion: "spring"
+    - flower_type: "tulips"
+  - slot_was_set:
+    - occasion: "spring"
+    - flower_type: "tulips"
+  - action: action_flower_advice
   - intent: select_category
     entities:
     - category_name: "Tulips"
