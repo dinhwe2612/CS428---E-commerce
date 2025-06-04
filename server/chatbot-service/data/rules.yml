@@ -1,0 +1,98 @@
+version: "3.1"
+
+rules:
+
+- rule: Say goodbye anytime the user says goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: Say thanks anytime the user says thanks
+  steps:
+  - intent: thank
+  - action: utter_thank
+
+- rule: Respond to greeting
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- rule: Bot challenge
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- rule: Happy mood response
+  steps:
+  - intent: mood_great
+  - action: utter_happy
+
+- rule: Unhappy mood response
+  steps:
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+
+- rule: Ask for categories always triggers category action
+  steps:
+  - intent: ask_categories
+  - action: action_get_categories
+
+- rule: Category selection always triggers category products
+  steps:
+  - intent: select_category
+  - action: action_get_products_by_category
+
+- rule: Specific flower search always triggers flower search action
+  steps:
+  - intent: ask_specific_flower
+  - action: action_specific_flower_search
+
+- rule: Flower advice always triggers advice action
+  steps:
+  - intent: flower_advice
+  - action: action_flower_advice
+
+- rule: Price inquiry triggers price action
+  steps:
+  - intent: ask_price
+  - action: action_handle_price_with_context
+
+- rule: Product details inquiry
+  steps:
+  - intent: ask_product_details
+  - action: action_get_product_details
+
+- rule: Recommendation request
+  steps:
+  - intent: ask_recommendation
+  - action: action_recommend_flowers
+
+- rule: Health check
+  steps:
+  - intent: health_check
+  - action: action_health_check
+
+- rule: Product availability check
+  steps:
+  - intent: ask_product_availability
+  - action: action_check_product_availability
+
+- rule: Inventory check
+  steps:
+  - intent: ask_inventory
+  - action: action_check_stock
+
+- rule: Greet then immediate category selection
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- rule: Deny then refine flower advice
+  steps:
+  - intent: deny
+  - action: utter_ask_rephrase
+
+- rule: Affirm after suggestions
+  steps:
+  - intent: affirm
+  - action: utter_happy 

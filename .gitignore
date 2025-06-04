@@ -2,3 +2,7 @@ server/.env
 server/.idea
 server/**/target
 /server/database/__pycache__
+
+/server/chatbot-service/models
+/server/chatbot-service/build-chatbot.sh
+/server/chatbot-ui

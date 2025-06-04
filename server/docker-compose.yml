@@ -8,8 +8,11 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
+    mem_limit: 768m
+    mem_reservation: 256m
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/" ]
       interval: 10s
@@ -290,6 +293,44 @@ services:
         condition: service_started
     networks:
       - microservice-network
+
+  chatbot-service:
+    build:
+      context: .
+      dockerfile: chatbot-service/Dockerfile
+    container_name: chatbot-service
+    ports:
+      - "5005:5005"
+      - "5055:5055"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-72357538782F413F4428472B4B62506453}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+    networks:
+      - microservice-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5005/webhooks/rest/webhook -X POST -H 'Content-Type: application/json' -d '{\"sender\":\"healthcheck\",\"message\":\"ping\"}' || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+  # chatbot-ui:
+  #   build:
+  #     context: chatbot-ui/
+  #     dockerfile: Dockerfile
+  #   container_name: chatbot-ui
+  #   ports:
+  #     - "3000:8080"
+  #   depends_on:
+  #     chatbot-service:
+  #       condition: service_healthy
+  #   networks:
+  #     - microservice-network
 
 volumes:
   image-storage:

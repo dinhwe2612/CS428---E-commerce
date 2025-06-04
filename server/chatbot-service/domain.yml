@@ -1,0 +1,167 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - thank
+  - flower_advice
+  - ask_specific_flower
+  - ask_price
+  - ask_product_details
+  - ask_categories
+  - select_category
+  - ask_inventory
+  - ask_recommendation
+  - ask_product_availability
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - health_check
+
+entities:
+  - flower_type
+  - color
+  - occasion
+  - budget
+  - price_range
+  - category_name
+  - product_id
+  - product_name
+
+slots:
+  flower_type:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: flower_type
+  
+  color:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: color
+  
+  occasion:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: occasion
+  
+  budget:
+    type: float
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: budget
+  
+  category_name:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: category_name
+
+  product_name:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: product_name
+
+  last_suggested_list:
+    type: list
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  last_product:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  conversation_context:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+responses:
+  utter_greet:
+  - text: "Xin chào! Tôi là trợ lý ảo của Shop Hoa 🌸. Tôi có thể giúp bạn tư vấn chọn hoa phù hợp. Bạn cần tư vấn gì hôm nay?"
+
+  utter_goodbye:
+  - text: "Tạm biệt! Chúc bạn có một ngày tuyệt vời với những bông hoa xinh đẹp 🌺"
+
+  utter_thank:
+  - text: "Rất vui được giúp đỡ bạn! Nếu cần tư vấn thêm, đừng ngần ngại hỏi nhé 😊"
+
+  utter_default:
+  - text: "Xin lỗi, tôi chưa hiểu ý bạn. Bạn có thể hỏi tôi về các loại hoa, giá cả, hoặc xin tư vấn chọn hoa cho các dịp đặc biệt!"
+
+  utter_iamabot:
+  - text: "Tôi là chatbot của Shop Hoa, được tạo ra để hỗ trợ bạn tư vấn chọn hoa!"
+
+  utter_happy:
+  - text: "Thật tuyệt! Rất vui khi được giúp đỡ bạn 🎉"
+
+  utter_cheer_up:
+  - text: "Đừng lo lắng! Hoa luôn có thể làm mọi thứ tươi sáng hơn 🌻"
+
+  utter_ask_rephrase:
+  - text: "Bạn vui lòng nói lại yêu cầu, shop sẽ hỗ trợ thêm nhé!"
+
+  utter_ask_occasion:
+  - text: "Bạn muốn chọn hoa cho dịp gì ạ? (ví dụ: sinh nhật, valentine, đám cưới...)"
+
+  utter_ask_more_details:
+  - text: "Bạn muốn biết thêm chi tiết về sản phẩm nào không?"
+
+  utter_need_flower_type:
+  - text: "Bạn đang hỏi bó hoa nào? Vui lòng nhắc lại tên sản phẩm."
+
+  utter_no_budget_found:
+  - text: "Bạn có ngân sách cụ thể không ạ? (ví dụ: 500k, 1 triệu…)"
+
+  utter_ask_index_ref:
+  - text: "Bạn đang nói đến bó số mấy trong danh sách vừa rồi ạ?"
+
+  utter_clarify_product:
+  - text: "Bạn muốn hỏi về sản phẩm nào? Vui lòng cho tôi biết tên cụ thể."
+
+  utter_budget_not_recognized:
+  - text: "Tôi chưa hiểu ngân sách của bạn. Bạn có thể nói rõ hơn không? (ví dụ: 500 nghìn, 1 triệu, 50 USD...)"
+
+  utter_multiple_options:
+  - text: "Tôi thấy bạn đang so sánh nhiều lựa chọn. Để tư vấn tốt nhất, bạn có thể cho tôi biết tiêu chí quan trọng nhất không?"
+
+  utter_context_lost:
+  - text: "Xin lỗi, tôi không nhớ chúng ta đang nói về sản phẩm nào. Bạn có thể nhắc lại không?"
+
+  utter_refine_request:
+  - text: "Để tư vấn chính xác hơn, bạn có thể bổ sung thêm thông tin về dịp tặng, màu sắc yêu thích, hoặc ngân sách không?"
+
+actions:
+  - action_flower_advice
+  - action_specific_flower_search
+  - action_get_products
+  - action_get_categories
+  - action_get_products_by_category
+  - action_get_product_details
+  - action_handle_price_with_context
+  - action_recommend_flowers
+  - action_health_check
+  - action_check_product_availability
+  - action_check_stock
+  - action_handle_budget_extraction
+  - action_handle_comparison
+  - action_context_aware_response
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true 

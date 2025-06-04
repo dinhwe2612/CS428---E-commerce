@@ -1,0 +1,946 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - xin chào
+    - chào bạn
+    - hello
+    - hi
+    - chào shop
+    - chào em
+    - good morning
+    - good evening
+    - chào buổi sáng
+    - chào buổi chiều
+    - chào buổi tối
+    - hế lô
+    - hay nhỉ
+    - ơi
+    - chào nhé
+    - xin chào shop
+    - chào cả nhà
+    - chào anh chị
+    - tôi muốn hỏi
+    - cho tôi hỏi
+    - xin chào ạ
+    - hi there
+    - hey
+    - good day
+    - morning
+    - evening
+    - chào chú
+    - chào cô
+    - hello shop
+    - hỗ trợ tôi
+    - giúp tôi
+    - Hi shop, [Orchids](category_name) còn mẫu nào đẹp?
+    - Chào em, cho xem [Roses](category_name) nhé
+    - Hello, tôi muốn [Tulips](category_name)
+
+- intent: goodbye
+  examples: |
+    - tạm biệt
+    - bye
+    - goodbye
+    - see you later
+    - chào tạm biệt
+    - hẹn gặp lại
+    - cảm ơn, tạm biệt
+    - bye bye
+    - thôi tạm biệt nhé
+    - cảm ơn bạn nhé
+    - ok bye
+    - thôi nhé
+    - hẹn gặp lại sau
+    - see ya
+    - catch you later
+    - until next time
+    - farewell
+    - thôi tạm thời thế
+    - kết thúc
+    - xong rồi
+
+- intent: affirm
+  examples: |
+    - có
+    - đúng
+    - yes
+    - vâng
+    - ừm
+    - được
+    - ok
+    - đồng ý
+    - chắc chắn
+    - ừ
+    - uhm
+    - oke
+    - okay
+    - được ạ
+    - vâng ạ
+    - dạ
+    - dạ vâng
+    - chính xác
+    - đúng rồi
+    - phải
+    - tôi muốn
+    - absolutely
+    - sure
+    - of course
+    - definitely
+    - indeed
+    - exactly
+    - right
+    - correct
+    - agree
+    - yep
+    - yeah
+    - yup
+    - ừ đúng rồi
+    - ừ thế
+
+- intent: deny
+  examples: |
+    - không
+    - no
+    - không phải
+    - không đúng
+    - không muốn
+    - thôi không
+    - không cần
+    - không ạ
+    - thôi
+    - ko
+    - k
+    - nope
+    - không được
+    - từ chối
+    - nah
+    - never
+    - negative
+    - not really
+    - I don't think so
+    - not interested
+    - pass
+    - skip
+    - cancel
+    - abort
+    - không, mà [8/3](occasion) cơ
+    - không, màu [kem](color) cơ
+    - thôi không, tôi muốn [đỏ](color)
+
+- intent: thank
+  examples: |
+    - cảm ơn
+    - thanks
+    - thank you
+    - cảm ơn bạn
+    - cảm ơn shop
+    - merci
+    - cảm ơn nhiều
+    - thank you so much
+    - cảm ơn ạ
+    - cảm ơn em
+    - cảm ơn anh chị
+    - tks
+    - ty
+    - cám ơn
+    - much appreciated
+    - grateful
+    - appreciate it
+    - cheers
+    - thanks a lot
+    - thank you very much
+    - many thanks
+    - thx
+
+- intent: flower_advice
+  examples: |
+    - tôi muốn tư vấn chọn hoa
+    - gợi ý hoa cho tôi
+    - nên chọn hoa gì
+    - tư vấn hoa [sinh nhật](occasion)
+    - hoa tặng [bạn gái](occasion) 
+    - hoa màu [đỏ](color) đẹp không
+    - tôi muốn mua [hoa hồng](flower_type)
+    - hoa [trắng](color) cho [đám cưới](occasion)
+    - gợi ý hoa trong tầm [500000](budget) đồng
+    - hoa đẹp tầm giá [1 triệu](budget)
+    - tư vấn hoa tặng [mẹ](occasion) ngày [8/3](occasion)
+    - hoa [vàng](color) cho [khai trương](occasion)
+    - [hoa lan](flower_type) màu [tím](color)
+    - hoa [valentine](occasion) [đỏ](color)
+    - [hoa valentine](flower_type) màu [đỏ](color)
+    - tư vấn hoa cho [valentine](occasion)
+    - hoa tặng người yêu ngày [valentine](occasion)
+    - hoa [đỏ](color) cho [valentine](occasion)
+    - [hoa hồng](flower_type) [đỏ](color) [valentine](occasion)
+    - muốn mua hoa [valentine](occasion)
+    - hoa [lễ tình nhân](occasion)
+    - hoa cho ngày [lễ tình nhân](occasion)
+    - [hoa hồng](flower_type) cho [lễ tình nhân](occasion)
+    - tư vấn hoa [giáng sinh](occasion)
+    - hoa [noel](occasion)
+    - hoa cho [christmas](occasion)
+    - hoa [20/10](occasion)
+    - hoa [phụ nữ việt nam](occasion)
+    - hoa tặng [vợ](occasion)
+    - hoa cho [người yêu](occasion)
+    - hoa [chúc mừng](occasion)
+    - hoa [kỷ niệm](occasion)
+    - hoa [valentine](occasion) màu [đỏ](color)
+    - [valentine](occasion) hoa [đỏ](color)
+    - hoa [tình yêu](occasion)
+    - hoa [14/2](occasion)
+    - hoa ngày [14/2](occasion)
+    - hoa ngày [valentine](occasion)
+    - [hoa valentine đỏ](flower_type)
+    - hoa [valentine](occasion) [trắng](color)
+    - hoa [valentine](occasion) [hồng](color)
+    - hoa [valentine](occasion) [đỏ](color)
+    - [valentine](occasion) [đỏ](color)
+    - [valentine](occasion) [hoa đỏ](flower_type)
+    - mua hoa [valentine](occasion) màu [đỏ](color)
+    - cần hoa [valentine](occasion)
+    - hoa [14 tháng 2](occasion)
+    - tư vấn hoa [sinh nhật](occasion) cho [bạn](occasion)
+    - hoa tặng [sinh nhật](occasion) [mẹ](occasion)
+    - hoa [sinh nhật](occasion) màu [hồng](color)
+    - [hoa hồng](flower_type) [sinh nhật](occasion)
+    - tư vấn loại hoa đẹp
+    - hoa gì đẹp nhất
+    - loại hoa nào phù hợp
+    - gợi ý hoa tặng
+    - hoa nào tốt nhất
+    - chọn hoa thế nào
+    - hoa phù hợp với dịp gì
+    - hoa màu gì đẹp
+    - loại hoa nào được yêu thích
+    - hoa hot nhất hiện tại
+    - hoa trending
+    - tư vấn chọn hoa đẹp
+    - hoa đẹp và ý nghĩa
+    - hoa cho [đám cưới](occasion) màu [trắng](color)
+    - [hoa lily](flower_type) [trắng](color) [đám cưới](occasion)
+    - hoa [khai trương](occasion) màu [vàng](color)
+    - hoa [chia buồn](occasion) màu [trắng](color)
+    - hoa [tốt nghiệp](occasion)
+    - hoa [thành công](occasion)
+    - hoa [xin lỗi](occasion)
+    - hoa [cảm ơn](occasion)
+    - hoa màu [cam](color)
+    - hoa màu [xanh](color)
+    - hoa màu [tím](color)
+    - gợi ý hoa theo ngân sách [300k](budget)
+    - hoa trong tầm [2 triệu](budget)
+    - hoa giá rẻ
+    - hoa cao cấp
+    - hoa sang trọng
+    - hoa đơn giản
+    - hoa nhỏ xinh
+    - hoa to đẹp
+    - bó hoa đẹp
+    - lẵng hoa
+    - giỏ hoa
+    - hoa bó
+    - hoa lẻ
+    - advice on flowers
+    - flower recommendation
+    - help me choose flowers
+    - what flowers should I buy
+    - suggest flowers for [wedding](occasion)
+    - [red](color) flowers for [valentine](occasion)
+    - flowers for [mother's day](occasion)
+    - [birthday](occasion) flowers
+    - romantic flowers
+    - anniversary flowers
+    - graduation flowers
+    - Cho mình bó [sinh nhật](occasion) màu [hồng](color) tầm [500 ngàn](budget) nhé
+    - Tư vấn hoa tông [đỏ đô](color) cho [Valentine](occasion)
+    - [hoa hong](flower_type) [do](color) [valentine](occasion)
+    - [Sinh nhật](occasion) [mẹ](occasion) 60 tuổi, muốn bó hoa pastel dưới [1 triệu](budget) và giữ tươi 5 ngày
+    - Nên tặng [hồng đỏ](flower_type) hay [tulip hồng](flower_type) cho [kỷ niệm](occasion) 3 năm?
+    - Can you recommend a romantic bouquet under [40 USD](budget)?
+    - Tặng [bạn gái](occasion), bó [hoa hồng đỏ](flower_type), nhớ kèm thiệp chúc mừng
+    - Mình dị ứng phấn hoa, có loại nào an toàn không?
+    - Tôi cần bó [24](budget) cành, loại nào hợp [kỷ niệm cưới](occasion)?
+    - bouquet tone vintage ngân sách [2tr](budget)
+    - hoa pastel but non-scent please
+    - [bo](flower_type) [24](budget) canh mau [trang](color) duoi [800 nghin](budget)
+
+- intent: ask_specific_flower
+  examples: |
+    - [rose](flower_type)
+    - [hoa hồng](flower_type)
+    - [tulip](flower_type)
+    - [hoa tulip](flower_type)
+    - [tulips](flower_type)
+    - [hoa tulips](flower_type)
+    - [lan](flower_type)
+    - [hoa lan](flower_type)
+    - [lily](flower_type)
+    - [hoa ly](flower_type)
+    - [lilies](flower_type)
+    - [sunflower](flower_type)
+    - [hoa hướng dương](flower_type)
+    - [cẩm chướng](flower_type)
+    - [hoa cẩm chướng](flower_type)
+    - [baby](flower_type)
+    - [hoa baby](flower_type)
+    - [peony](flower_type)
+    - [ranunculus](flower_type)
+    - [hoa mẫu đơn](flower_type)
+    - [orchid](flower_type)
+    - [orchids](flower_type)
+    - [carnation](flower_type)
+    - [daisies](flower_type)
+    - [chrysanthemum](flower_type)
+    - [hoa cúc](flower_type)
+    - [cúc](flower_type)
+    - [hồng](flower_type)
+    - [ly](flower_type)
+    - [roses](flower_type)
+    - [hydrangeas](flower_type)
+    - [hoa cẩm tú cầu](flower_type)
+    - [anemones](flower_type)
+    - [succulents](flower_type)
+    - [tropical flowers](flower_type)
+    - [dried flowers](flower_type)
+    - cho tôi xem [hoa hồng](flower_type)
+    - tôi muốn biết về [rose](flower_type)
+    - [hoa hồng](flower_type) có không
+    - shop có [tulip](flower_type) không
+    - thông tin về [hoa lan](flower_type)
+    - tìm [rose](flower_type)
+    - xem [hoa hồng](flower_type)
+    - có [tulips](flower_type) không
+    - [hoa cúc](flower_type) thế nào
+    - [lily](flower_type) đẹp không
+    - [orchid](flower_type) có nhiều màu không
+    - [hoa baby](flower_type) nhỏ xinh
+    - [carnation](flower_type) là gì
+    - [peony](flower_type) có đắt không
+    - [sunflower](flower_type) to không
+    - [hoa hướng dương](flower_type) màu vàng
+    - [ranunculus](flower_type) có nhiều lớp
+    - [hoa mẫu đơn](flower_type) sang trọng
+    - [daisies](flower_type) giá bao nhiêu
+    - [chrysanthemum](flower_type) nhiều màu
+    - show me [roses](flower_type)
+    - what about [tulips](flower_type)
+    - tell me about [lilies](flower_type)
+    - [orchids](flower_type) information
+    - [carnation](flower_type) details
+    - I want [sunflowers](flower_type)
+    - looking for [peonies](flower_type)
+    - search [hydrangeas](flower_type)
+
+- intent: ask_product_availability
+  examples: |
+    - có [Exuberance](product_name) không
+    - shop còn [Queen Bee](product_name) chứ
+    - [Cool Breeze](product_name) còn hàng không
+    - bạn có [Aquamarine](product_name) không
+    - [Dreamscape](product_name) có sẵn không
+    - [Bayside](product_name) còn không
+    - có [Swell](product_name) không ạ
+    - [Glowing](product_name) hết hàng chưa
+    - [The Elegance Party Box](product_name) còn không
+    - shop có bán [All the Rage](product_name) không
+    - [Amethyst](product_name) có không
+    - [Bejeweled](product_name) còn hàng không
+    - [25 Farmer's Choice Peonies](product_name) còn không
+    - [50 Farmer's Choice Ranunculus](product_name) có sẵn không
+    - tôi tìm [Love Story](product_name)
+    - [Fairy Tale](product_name) có không
+    - còn [Midnight](product_name) không
+    - [Sunrise](product_name) có sẵn chứ
+    - shop có [Garden Party](product_name)
+    - [Spring Bouquet](product_name) còn hàng
+    - availability of [Exuberance](product_name)
+    - do you have [Queen Bee](product_name)
+    - is [Cool Breeze](product_name) available
+    - [Aquamarine](product_name) in stock
+    - check [Dreamscape](product_name) availability
+    - còn [Royal Flush](product_name) không
+    - có [Sweet Dreams](product_name) chứ
+    - [Perfect Match](product_name) hết chưa
+    - [Golden Hour](product_name) còn không ạ
+    - kiểm tra [Blue Sky](product_name)
+    - Shop còn bouquet [Queen Bee](product_name) không?
+
+- intent: ask_price
+  examples: |
+    - giá bao nhiêu
+    - [hoa hồng](flower_type) giá bao nhiêu
+    - giá [hoa lan](flower_type)
+    - bao nhiêu tiền một bó
+    - hoa này giá thế nào
+    - chi phí bao nhiêu
+    - giá cả ra sao
+    - price
+    - cost
+    - giá [25 Farmer's Choice Peonies](product_name)
+    - giá [50 Farmer's Choice Ranunculus](product_name)
+    - giá [All the Rage](product_name)
+    - giá [Amethyst](product_name)
+    - giá [Bejeweled](product_name)
+    - [25 Farmer's Choice Peonies](product_name) giá bao nhiêu
+    - [50 Farmer's Choice Ranunculus](product_name) bao nhiêu tiền
+    - [All the Rage](product_name) giá thế nào
+    - cho tôi biết giá [25 Farmer's Choice Peonies](product_name)
+    - tôi muốn biết giá [hoa hồng](flower_type)
+    - [hoa lan](flower_type) có giá bao nhiêu
+    - bao nhiêu tiền [hoa tulip](flower_type)
+    - chi phí [hoa cẩm chướng](flower_type)
+    - giá của [rose](flower_type)
+    - price of [tulip](flower_type)
+    - cost of [lily](flower_type)
+    - how much [peony](flower_type)
+    - [orchid](flower_type) price
+    - giá [tulips](flower_type)
+    - [roses](flower_type) bao nhiêu tiền
+    - giá cả [lilies](flower_type)
+    - [sunflower](flower_type) giá thế nào
+    - [carnation](flower_type) chi phí
+    - giá [daisies](flower_type)
+    - [chrysanthemum](flower_type) bao nhiêu
+    - giá [hoa cúc](flower_type)
+    - [hoa baby](flower_type) giá
+    - [Exuberance](product_name) giá bao nhiêu
+    - [Queen Bee](product_name) bao nhiêu tiền
+    - [Cool Breeze](product_name) giá thế nào
+    - [Aquamarine](product_name) chi phí
+    - [Dreamscape](product_name) giá cả
+    - [Bayside](product_name) price
+    - [Swell](product_name) cost
+    - [Glowing](product_name) giá
+    - price list
+    - bảng giá
+    - giá tiền
+    - mức giá
+    - tầm giá
+    - giá từ bao nhiêu đến bao nhiêu
+    - giá dao động
+    - giá hiện tại
+    - giá mới nhất
+    - how much does it cost
+    - what's the price
+    - pricing information
+    - Bó thứ ba giá bao nhiêu?
+    - cái thứ hai bao nhiêu tiền
+    - item số 1 giá thế nào
+    - bó đầu tiên chi phí
+    - Bó đó giữ tươi được mấy ngày?
+
+- intent: ask_product_details
+  examples: |
+    - chi tiết sản phẩm
+    - thông tin về hoa này
+    - mô tả sản phẩm
+    - hoa này như thế nào
+    - cho tôi biết thêm về [hoa cẩm chướng](flower_type)
+    - details
+    - thông tin
+    - cho tôi biết thêm
+    - chi tiết hơn
+    - mô tả chi tiết
+    - sản phẩm này thế nào
+    - hoa này có gì đặc biệt
+    - đặc điểm của hoa này
+    - hoa này có ý nghĩa gì
+    - màu sắc thế nào
+    - kích thước ra sao
+    - thời gian tươi bao lâu
+    - cách chăm sóc
+    - xuất xứ từ đâu
+    - có mùi thơm không
+    - phù hợp với dịp nào
+    - ý nghĩa của hoa này
+    - symbolism
+    - meaning
+    - [Queen Bee](product_name) chi tiết thế nào
+    - mô tả [Exuberance](product_name) giúp tôi
+    - [Bayside](product_name) gồm những hoa gì
+    - giới thiệu về [Swell](product_name)
+    - [Cool Breeze](product_name) có gì đặc biệt
+    - [Aquamarine](product_name) như thế nào
+    - [Dreamscape](product_name) chi tiết
+    - [Glowing](product_name) mô tả
+    - thông tin [The Elegance Party Box](product_name)
+    - describe [Exuberance](product_name)
+    - tell me about [Queen Bee](product_name)
+    - what's in [Cool Breeze](product_name)
+    - [Aquamarine](product_name) details
+    - information about [Dreamscape](product_name)
+    - [Bayside](product_name) description
+    - features of [Swell](product_name)
+    - [Glowing](product_name) specifications
+
+- intent: ask_categories
+  examples: |
+    - có những loại hoa gì
+    - danh mục hoa
+    - phân loại hoa
+    - categories
+    - các thể loại
+    - menu hoa
+    - category
+    - danh sách
+    - catalog
+    - loại hoa
+    - các loại
+    - thể loại nào
+    - phân loại thế nào
+    - có mấy loại
+    - menu
+    - list categories
+    - show categories
+    - flower types
+    - types
+    - kinds
+    - varieties
+    - classification
+    - groups
+    - sections
+    - browse categories
+    - show me options
+    - what do you have
+    - flower catalog
+    - product categories
+    - collections
+    - ranges
+
+- intent: select_category
+  examples: |
+    - [Orchids](category_name)
+    - [Roses](category_name)
+    - [Lilies](category_name)
+    - [Unique Stems](category_name)
+    - [Peonies](category_name)
+    - [Tropical](category_name)
+    - [Succulents](category_name)
+    - [Sunflowers](category_name)
+    - [Tulips](category_name)
+    - [Ranunculus](category_name)
+    - [Dried Flowers](category_name)
+    - [Hydrangeas](category_name)
+    - [Anemones](category_name)
+    - tôi muốn xem [Orchids](category_name)
+    - cho tôi xem [Roses](category_name)
+    - category [Lilies](category_name)
+    - danh mục [Unique Stems](category_name)
+    - loại [Peonies](category_name)
+    - hoa [Tropical](category_name)
+    - [Succulents](category_name) có gì
+    - xem [Sunflowers](category_name)
+    - [Tulips](category_name) nào đẹp
+    - [Ranunculus](category_name) thì sao
+    - [Dried Flowers](category_name) như thế nào
+    - show me [Orchids](category_name)
+    - I want [Roses](category_name)
+    - select [Lilies](category_name)
+    - choose [Peonies](category_name)
+    - [Tropical](category_name) flowers
+    - [Sunflowers](category_name) category
+    - browse [Tulips](category_name)
+    - explore [Ranunculus](category_name)
+    - view [Hydrangeas](category_name)
+    - see [Anemones](category_name)
+    - pick [Orchids](category_name)
+    - go to [Roses](category_name)
+    - check out [Lilies](category_name)
+
+- intent: ask_recommendation
+  examples: |
+    - hoa nào bán chạy nhất
+    - hoa phổ biến
+    - hoa hot nhất
+    - recommendation
+    - gợi ý bán chạy
+    - best seller
+    - gợi ý
+    - recommend
+    - suggest
+    - hoa được ưa chuộng
+    - hoa trend
+    - hoa nổi tiếng
+    - hoa được yêu thích
+    - top flower
+    - popular flowers
+    - trending flowers
+    - most loved
+    - customer favorite
+    - bestselling
+    - top selling
+    - most popular
+    - highly rated
+    - recommended flowers
+    - suggestions
+    - what do you recommend
+    - gợi ý hoa đẹp
+    - hoa nào đáng mua
+    - top picks
+    - staff recommendations
+    - editor's choice
+    - featured products
+    - must-have flowers
+    - signature bouquets
+
+- intent: ask_inventory
+  examples: |
+    - còn hàng không
+    - tồn kho
+    - inventory
+    - stock
+    - có sẵn không
+    - còn không
+    - hết hàng chưa
+    - còn mấy bó
+    - số lượng còn lại
+    - check stock
+    - availability
+
+- intent: mood_great
+  examples: |
+    - tuyệt vời
+    - perfect
+    - excellent
+    - great
+    - tốt quá
+    - amazing
+    - wonderful
+    - fantastic
+    - awesome
+    - brilliant
+    - superb
+    - marvelous
+    - outstanding
+    - incredible
+    - terrific
+    - lovely
+    - beautiful
+    - gorgeous
+    - stunning
+    - magnificent
+    - phenomenal
+    - spectacular
+    - fabulous
+    - extraordinary
+    - remarkable
+
+- intent: mood_unhappy
+  examples: |
+    - buồn
+    - sad
+    - không vui
+    - tệ quá
+    - terrible
+    - awful
+    - bad
+    - horrible
+    - disappointing
+    - frustrated
+    - upset
+    - angry
+    - mad
+    - annoyed
+    - irritated
+    - depressed
+    - down
+    - unhappy
+    - dissatisfied
+    - not good
+    - poor
+    - unsatisfactory
+
+- intent: bot_challenge
+  examples: |
+    - bạn là ai
+    - bạn là bot à
+    - are you a bot
+    - are you human
+    - am I talking to a bot
+    - bạn có phải robot không
+    - you are a bot
+    - are you real
+    - are you a person
+    - who are you
+    - what are you
+    - bạn là gì
+    - bạn là người không
+    - bạn thật không
+    - ai tạo ra bạn
+    - bạn có thật không
+    - are you artificial intelligence
+    - chatbot
+    - virtual assistant
+    - AI
+
+- intent: health_check
+  examples: |
+    - health check
+    - system check
+    - test
+    - ping
+    - status
+    - check status
+    - system status
+    - health
+    - alive
+    - working
+
+- lookup: flower_type
+  examples: |
+    - hoa hồng
+    - rose
+    - roses
+    - hoa lan
+    - lan
+    - orchid
+    - orchids
+    - hoa cẩm chướng
+    - cẩm chướng
+    - carnation
+    - carnations
+    - hoa ly
+    - lily
+    - lilies
+    - hoa tulip
+    - tulip
+    - tulips
+    - hoa hướng dương
+    - sunflower
+    - sunflowers
+    - hoa cúc
+    - daisy
+    - daisies
+    - hoa baby
+    - baby
+    - hoa đồng tiền
+    - hoa salem
+    - hoa lavender
+    - lavender
+    - peony
+    - peonies
+    - ranunculus
+    - hoa mẫu đơn
+    - hoa valentine
+    - chrysanthemum
+    - cúc
+    - hồng
+    - ly
+    - hydrangeas
+    - hoa cẩm tú cầu
+    - anemones
+    - succulents
+    - tropical flowers
+    - dried flowers
+    - hong
+    - bo
+    - hoa hong
+    - hong do
+    - tulip hong
+    - hoa hong do
+
+- lookup: color
+  examples: |
+    - đỏ
+    - red
+    - trắng
+    - white
+    - vàng
+    - yellow
+    - hồng
+    - pink
+    - tím
+    - purple
+    - xanh
+    - blue
+    - green
+    - cam
+    - orange
+    - nâu
+    - brown
+    - đen
+    - black
+    - be
+    - beige
+    - kem
+    - cream
+    - xanh lá
+    - xanh dương
+    - màu da cam
+    - gold
+    - silver
+    - lavender
+    - do
+    - hong
+    - trang
+    - vang
+    - tim
+    - đỏ đô
+    - đỏ tươi
+    - hồng phấn
+    - trắng tinh
+    - vàng kem
+
+- lookup: occasion
+  examples: |
+    - sinh nhật
+    - birthday
+    - lễ tình nhân
+    - valentine
+    - 14/2
+    - 14 tháng 2
+    - 8/3
+    - 20/10
+    - đám cưới
+    - wedding
+    - khai trương
+    - chia buồn
+    - tốt nghiệp
+    - graduation
+    - mẹ
+    - mom
+    - bạn gái
+    - girlfriend
+    - vợ
+    - wife
+    - bố
+    - dad
+    - sếp
+    - boss
+    - bạn bè
+    - friends
+    - giáng sinh
+    - noel
+    - christmas
+    - phụ nữ việt nam
+    - người yêu
+    - chúc mừng
+    - kỷ niệm
+    - anniversary
+    - new year
+    - năm mới
+    - tết
+    - tình yêu
+    - xin lỗi
+    - cảm ơn
+    - thành công
+    - bạn
+    - mother's day
+    - father's day
+    - engagement
+    - housewarming
+    - promotion
+    - apology
+    - thank you
+    - get well
+    - sympathy
+    - kỷ niệm cưới
+
+- regex: budget
+  examples: |
+    - [0-9]+[k|K]
+    - [0-9]+[\.][0-9]+[k|K]
+    - [0-9]+ nghìn
+    - [0-9]+ triệu
+    - [0-9]+đồng
+    - [0-9]+[ ]?ng[àa]n
+    - [0-9]+[ ]?ngàn
+    - [0-9]+[ ]?ngan
+    - [0-9]+[ ]?[u|U][s|S][d|D]
+    - [0-9]+[ ]?usd
+    - [0-9]+[ ]?USD
+    - [0-9]+[ ]?dollars?
+    - [0-9]+[ ]?tr
+    - [0-9]+\.[0-9]+[ ]?tr
+    - [0-9]+\.[0-9]+k
+    - [0-9]+ngh?ìn
+    - [0-9]+[ ]?nghin
+
+- lookup: category_name
+  examples: |
+    - Orchids
+    - Roses
+    - Lilies
+    - Unique Stems
+    - Peonies
+    - Tropical
+    - Succulents
+    - Sunflowers
+    - Tulips
+    - Ranunculus
+    - Dried Flowers
+    - Hydrangeas
+    - Anemones
+
+- lookup: product_name
+  examples: |
+    - Exuberance
+    - Queen Bee
+    - Cool Breeze
+    - Aquamarine
+    - Dreamscape
+    - Bayside
+    - Swell
+    - Glowing
+    - The Elegance Party Box
+    - All the Rage
+    - Amethyst
+    - Bejeweled
+    - 25 Farmer's Choice Peonies
+    - 50 Farmer's Choice Ranunculus
+    - Love Story
+    - Fairy Tale
+    - Midnight
+    - Sunrise
+    - Garden Party
+    - Spring Bouquet
+    - Royal Flush
+    - Sweet Dreams
+    - Perfect Match
+    - Golden Hour
+    - Blue Sky
+    - Moonlight
+    - Ocean Breeze
+    - Sunset
+    - Morning Dew
+    - Starlight
+    - Rainbow
+    - Enchanted
+    - Blissful
+    - Harmony
+    - Serenity
+    - Radiance
+
+- synonym: đỏ
+  examples: |
+    - do
+    - đỏ đô
+    - đỏ tươi
+
+- synonym: hồng
+  examples: |
+    - hong
+    - hồng phấn
+
+- synonym: trắng
+  examples: |
+    - trang
+    - trắng tinh
+
+- synonym: vàng
+  examples: |
+    - vang
+    - vàng kem
+
+- synonym: tím
+  examples: |
+    - tim
+
+- synonym: xanh
+  examples: |
+    - xanh lá
+    - xanh dương
