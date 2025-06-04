@@ -23,16 +23,19 @@ import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.request.CreateProductRequest;
 import com.catalog.catalog_service.dto.request.UpdateProductRequest;
 import com.catalog.catalog_service.service.ProductService;
+import com.catalog.catalog_service.service.ProductSyncService;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductSyncService productSyncService;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductSyncService productSyncService) {
         this.productService = productService;
+        this.productSyncService = productSyncService;
     }
 
     @GetMapping
@@ -95,5 +98,11 @@ public class ProductController {
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(productService.getAutocompleteSuggestions(query, limit));
+    }
+
+    @PostMapping("/sync-to-elasticsearch")
+    public ResponseEntity<String> syncToElasticsearch() {
+        productSyncService.syncAllProducts();
+        return ResponseEntity.ok("Product sync to Elasticsearch completed successfully");
     }
 } 

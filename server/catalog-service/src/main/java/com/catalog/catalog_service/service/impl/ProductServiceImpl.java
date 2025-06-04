@@ -1,13 +1,9 @@
 package com.catalog.catalog_service.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.catalog.catalog_service.model.Category;
-import com.catalog.catalog_service.model.Product;
-import com.catalog.catalog_service.model.ProductImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +20,15 @@ import com.catalog.catalog_service.dto.request.CreateProductRequest;
 import com.catalog.catalog_service.dto.request.UpdateProductRequest;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
+import com.catalog.catalog_service.model.Category;
+import com.catalog.catalog_service.model.Product;
+import com.catalog.catalog_service.model.ProductDocument;
+import com.catalog.catalog_service.model.ProductImage;
+import com.catalog.catalog_service.repository.es.ProductSearchRepository;
 import com.catalog.catalog_service.repository.jpa.CategoryRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
-import com.catalog.catalog_service.repository.es.ProductSearchRepository;
 import com.catalog.catalog_service.service.ProductService;
 import com.catalog.catalog_service.specification.ProductSpecification;
-import com.catalog.catalog_service.model.ProductDocument;
 
 @Service
 public class ProductServiceImpl implements ProductService {
