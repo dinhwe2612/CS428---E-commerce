@@ -1,0 +1,111 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - thank
+  - flower_advice
+  - ask_specific_flower
+  - ask_price
+  - ask_product_details
+  - ask_categories
+  - select_category
+  - ask_inventory
+  - ask_recommendation
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - health_check
+
+entities:
+  - flower_type
+  - color
+  - occasion
+  - budget
+  - price_range
+  - category_name
+  - product_id
+
+slots:
+  flower_type:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: flower_type
+  
+  color:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: color
+  
+  occasion:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: occasion
+  
+  budget:
+    type: float
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: budget
+  
+  category_name:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: category_name
+
+responses:
+  utter_greet:
+  - text: "Xin chào! Tôi là trợ lý ảo của Shop Hoa 🌸. Tôi có thể giúp bạn tư vấn chọn hoa phù hợp. Bạn cần tư vấn gì hôm nay?"
+
+  utter_goodbye:
+  - text: "Tạm biệt! Chúc bạn có một ngày tuyệt vời với những bông hoa xinh đẹp 🌺"
+
+  utter_thank:
+  - text: "Rất vui được giúp đỡ bạn! Nếu cần tư vấn thêm, đừng ngần ngại hỏi nhé 😊"
+
+  utter_default:
+  - text: "Xin lỗi, tôi chưa hiểu ý bạn. Bạn có thể hỏi tôi về các loại hoa, giá cả, hoặc xin tư vấn chọn hoa cho các dịp đặc biệt!"
+
+  utter_iamabot:
+  - text: "Tôi là chatbot của Shop Hoa, được tạo ra để hỗ trợ bạn tư vấn chọn hoa!"
+
+  utter_happy:
+  - text: "Thật tuyệt! Rất vui khi được giúp đỡ bạn 🎉"
+
+  utter_cheer_up:
+  - text: "Đừng lo lắng! Hoa luôn có thể làm mọi thứ tươi sáng hơn 🌻"
+
+  utter_ask_rephrase:
+  - text: "Bạn vui lòng nói lại yêu cầu, shop sẽ hỗ trợ thêm nhé!"
+
+  utter_ask_occasion:
+  - text: "Bạn muốn chọn hoa cho dịp gì ạ? (ví dụ: sinh nhật, valentine, đám cưới...)"
+
+  utter_ask_more_details:
+  - text: "Bạn muốn biết thêm chi tiết về sản phẩm nào không?"
+
+actions:
+  - action_flower_advice
+  - action_specific_flower_search
+  - action_get_products
+  - action_get_categories
+  - action_get_products_by_category
+  - action_get_product_details
+  - action_get_price_range
+  - action_recommend_flowers
+  - action_health_check
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true 
