@@ -319,18 +319,18 @@ services:
       retries: 5
       start_period: 120s
 
-  chatbot-ui:
-    build:
-      context: chatbot-ui/
-      dockerfile: Dockerfile
-    container_name: chatbot-ui
-    ports:
-      - "3000:8080"
-    depends_on:
-      chatbot-service:
-        condition: service_healthy
-    networks:
-      - microservice-network
+  # chatbot-ui:
+  #   build:
+  #     context: chatbot-ui/
+  #     dockerfile: Dockerfile
+  #   container_name: chatbot-ui
+  #   ports:
+  #     - "3000:8080"
+  #   depends_on:
+  #     chatbot-service:
+  #       condition: service_healthy
+  #   networks:
+  #     - microservice-network
 
 volumes:
   image-storage:

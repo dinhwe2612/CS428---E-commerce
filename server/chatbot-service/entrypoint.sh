@@ -1,4 +1,4 @@
-/bin/bash
+#!/bin/bash
 set -e
 
 if [ "$SKIP_EUREKA_CHECK" != "true" ]; then
