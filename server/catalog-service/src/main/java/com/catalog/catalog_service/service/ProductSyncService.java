@@ -3,6 +3,7 @@ package com.catalog.catalog_service.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,21 @@ public class ProductSyncService {
     
     private final ProductRepository productRepository;
     private final ProductSearchRepository productSearchRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
+
+    public void deleteIndex() {
+        try {
+            if (elasticsearchOperations.indexOps(ProductDocument.class).exists()) {
+                elasticsearchOperations.indexOps(ProductDocument.class).delete();
+                log.info("Successfully deleted products index");
+            } else {
+                log.info("Products index does not exist");
+            }
+        } catch (Exception e) {
+            log.error("Error deleting products index", e);
+            throw e;
+        }
+    }
 
     @Transactional
     public void syncAllProducts() {

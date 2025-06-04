@@ -4,6 +4,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -17,11 +18,23 @@ public class RabbitMQConfig {
     public static final String PRODUCT_OUTOFSTOCK_QUEUE = "product.outofstock.queue";
     public static final String PRODUCT_OUTOFSTOCK_EXCHANGE = "product.outofstock.exchange";
     public static final String PRODUCT_OUTOFSTOCK_ROUTING_KEY = "product.outofstock.routingkey";
+    public static final String PRODUCT_SYNC_QUEUE = "product.sync.queue";
+    public static final String PRODUCT_SYNC_EXCHANGE = "product.sync.exchange";
+    public static final String PRODUCT_SYNC_ROUTING_KEY = "product.*";
 
     @Bean
     public Queue productOutOfStockQueue() {
         return new Queue(PRODUCT_OUTOFSTOCK_QUEUE, true);
     }
+    @Bean
+    public Queue productSyncQueue() {
+        return new Queue(PRODUCT_SYNC_QUEUE, true);
+    }
+    @Bean
+    public TopicExchange productSyncExchange() {
+        return new TopicExchange(PRODUCT_SYNC_EXCHANGE);
+    }
+
 
  
     @Bean
@@ -29,7 +42,13 @@ public class RabbitMQConfig {
         return new DirectExchange(PRODUCT_OUTOFSTOCK_EXCHANGE);
     }
 
-
+    @Bean
+    public Binding productSyncBinding() {
+        return BindingBuilder
+                .bind(productSyncQueue())
+                .to(productSyncExchange())
+                .with(PRODUCT_SYNC_ROUTING_KEY);
+    }
     @Bean
     public Binding productOutOfStockBinding() {
         return BindingBuilder

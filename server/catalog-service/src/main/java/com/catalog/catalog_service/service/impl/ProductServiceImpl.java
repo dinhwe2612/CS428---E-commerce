@@ -18,12 +18,15 @@ import com.catalog.catalog_service.dto.PageDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.request.CreateProductRequest;
 import com.catalog.catalog_service.dto.request.UpdateProductRequest;
+import com.catalog.catalog_service.event.ProductCreatedEvent;
+import com.catalog.catalog_service.event.ProductDeletedEvent;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
 import com.catalog.catalog_service.model.Category;
 import com.catalog.catalog_service.model.Product;
 import com.catalog.catalog_service.model.ProductDocument;
 import com.catalog.catalog_service.model.ProductImage;
+import com.catalog.catalog_service.producer.RabbitProducer;
 import com.catalog.catalog_service.repository.es.ProductSearchRepository;
 import com.catalog.catalog_service.repository.jpa.CategoryRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
@@ -38,16 +41,19 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final EntityMapper entityMapper;
     private final ProductSearchRepository productSearchRepository;
+    private final RabbitProducer rabbitProducer;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, 
                             CategoryRepository categoryRepository,
                             EntityMapper entityMapper,
-                            ProductSearchRepository productSearchRepository) {
+                            ProductSearchRepository productSearchRepository,
+                            RabbitProducer rabbitProducer) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.entityMapper = entityMapper;
         this.productSearchRepository = productSearchRepository;
+        this.rabbitProducer = rabbitProducer;
     }
 
     @Override
@@ -110,17 +116,18 @@ public class ProductServiceImpl implements ProductService {
             Product savedProduct = productRepository.save(product);
             
             // Index in Elasticsearch
-            ProductDocument document = ProductDocument.builder()
-                .id(savedProduct.getId())
-                .name(savedProduct.getName())
-                .description(savedProduct.getDescriptionText())
-                .price(Double.valueOf(savedProduct.getPrice()))
-                .categoryId(category.getId())
-                .categoryName(category.getName())
-                .build();
-            productSearchRepository.save(document);
+           // ProductDocument document = ProductDocument.builder()
+           //     .id(savedProduct.getId())
+            //    .name(savedProduct.getName())
+             //   .description(savedProduct.getDescriptionText())
+             //   .price(Double.valueOf(savedProduct.getPrice()))
+              //  .categoryId(category.getId())
+              //  .categoryName(category.getName())
+              //  .build();
+            //productSearchRepository.save(document);
+            rabbitProducer.sendProductCreatedEvent(new ProductCreatedEvent(savedProduct.getId(), savedProduct.getName(), savedProduct.getDescriptionText(), Double.valueOf(savedProduct.getPrice()), category.getId(), category.getName(), savedProduct.getProductPath()));
             
-            logger.debug("Product saved successfully with id: {}", savedProduct.getId());
+            logger.debug("Product saved successfully with id: {}", savedProduct.getId());  
             
             return entityMapper.toProductDTO(savedProduct);
         } catch (Exception e) {
@@ -180,6 +187,9 @@ public class ProductServiceImpl implements ProductService {
             throw new ResourceNotFoundException("Product not found with id: " + id);
         }
         productRepository.deleteById(id);
+        rabbitProducer.sendProductDeletedEvent(new ProductDeletedEvent(id
+        )
+        );
     }
 
     @Override
@@ -215,14 +225,17 @@ public class ProductServiceImpl implements ProductService {
         }
 
         String searchQuery = query.trim().toLowerCase();
+        logger.debug("Searching for suggestions with query: {}", searchQuery);
+        
         List<String> suggestions = productSearchRepository
-            .findByNameContainingOrDescriptionContaining(searchQuery, searchQuery)
+            .searchSuggestions(searchQuery)
             .stream()
             .map(ProductDocument::getName)
             .distinct()
             .limit(limit)
             .collect(Collectors.toList());
 
+        logger.debug("Found {} suggestions for query: {}", suggestions.size(), searchQuery);
         return new AutocompleteResponse(suggestions);
     }
 }
