@@ -29,6 +29,10 @@ else
     echo "Skipping Eureka check (SKIP_EUREKA_CHECK=true)"
 fi
 
+echo "Starting Eureka client..."
+python -c "from eureka_client import eureka_client; eureka_client.start()" &
+EUREKA_PID=$!
+
 echo "Starting Rasa Action Server..."
 rasa run actions --port 5055 --debug &
 ACTION_PID=$!
@@ -42,6 +46,23 @@ if ! kill -0 $ACTION_PID 2>/dev/null; then
 fi
 
 echo "Starting Rasa Core Server..."
-rasa run --enable-api --port 5005 --cors "*" --debug
+rasa run --enable-api --port 5005 --cors "*" --debug &
+RASA_PID=$!
 
-wait
+cleanup() {
+    echo "Shutting down services..."
+    if [ ! -z "$EUREKA_PID" ] && kill -0 $EUREKA_PID 2>/dev/null; then
+        python -c "from eureka_client import eureka_client; eureka_client.unregister()"
+        kill $EUREKA_PID
+    fi
+    if [ ! -z "$ACTION_PID" ] && kill -0 $ACTION_PID 2>/dev/null; then
+        kill $ACTION_PID
+    fi
+    if [ ! -z "$RASA_PID" ] && kill -0 $RASA_PID 2>/dev/null; then
+        kill $RASA_PID
+    fi
+}
+
+trap cleanup EXIT
+
+wait $RASA_PID

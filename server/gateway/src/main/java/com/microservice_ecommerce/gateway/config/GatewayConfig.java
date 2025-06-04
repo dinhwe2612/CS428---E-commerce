@@ -33,6 +33,12 @@ public class GatewayConfig {
                                 .route("order_service_all", r -> r.path("/api/v1/orders/**")
                                                 .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://order-service"))
+                                .route("report_service_all", r -> r.path("/api/v1/reports/**")
+                                                .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
+                                                .uri("lb://catalog-service"))
+                                .route("chatbot_service_all", r -> r.path("/api/v1/chatbot/**")
+                                                .filters(f -> f.stripPrefix(3))
+                                                .uri("lb://CHATBOT-SERVICE"))
                                 .route("notification_ws", r -> r
                                         .order(-1)
                                         .path("/api/v1/notification/ws/**")
