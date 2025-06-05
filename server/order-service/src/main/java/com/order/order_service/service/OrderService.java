@@ -15,4 +15,6 @@ public interface OrderService {
     void deleteOrder(Long id);
     OrderResponseDTO updateOrderMessage(Long id, String message);
     List<ProductDTO> getProductsByIds(List<Long> ids);
+    List<OrderResponseDTO> getAllOrders();
+    OrderResponseDTO updateDeliveryStatus(Long id, String deliveryStatus);
 } 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -51,6 +52,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse<OrderResponseDTO>> updateOrderStatus(
             @PathVariable Long id,
             @RequestParam String status) {
@@ -59,8 +61,25 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
         return ResponseEntity.ok(new ApiResponse<>(true, "Order deleted", null));
+    }
+
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getAllOrders() {
+        List<OrderResponseDTO> orderResponses = orderService.getAllOrders();
+        return ResponseEntity.ok(new ApiResponse<>(true, "All orders retrieved", orderResponses));
+    }
+
+    @PatchMapping("/admin/{id}/delivery-status")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> updateDeliveryStatus(
+            @PathVariable Long id,
+            @RequestParam String deliveryStatus) {
+        OrderResponseDTO orderResponse = orderService.updateDeliveryStatus(id, deliveryStatus);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Delivery status updated", orderResponse));
     }
 } 

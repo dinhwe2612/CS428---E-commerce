@@ -4,11 +4,15 @@ import org.springframework.stereotype.Service;
 
 import com.server.user_service.DTOs.UpdateRequest;
 import com.server.user_service.DTOs.UserResponse;
+import com.server.user_service.model.Role;
 import com.server.user_service.model.User;
 import com.server.user_service.repository.UserRepository;
 import com.server.user_service.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,40 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        return mapToUserResponse(user);
+    }
+
+    @Override
+    public void createUser(User user) {
+        System.out.println("Creating user: " + user);
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserResponse> getUsersByRole(Role role) {
+        List<User> users = userRepository.findByRole(role);
+        return users.stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateUserRole(Long id, Role role) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+    private UserResponse mapToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
         userResponse.setId(user.getId());
         userResponse.setAvatar_url(user.getAvatarUrl());
@@ -51,10 +89,4 @@ public class UserServiceImpl implements UserService {
         userResponse.setUsername(user.getUsername());
         return userResponse;
     }
-        @Override
-        public void createUser(User user) {
-            //log the user
-            System.out.println("Creating user: " + user);
-            userRepository.save(user);
-        }
 }

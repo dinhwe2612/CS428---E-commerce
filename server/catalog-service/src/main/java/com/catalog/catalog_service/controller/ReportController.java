@@ -1,5 +1,6 @@
 package com.catalog.catalog_service.controller;
 
+import com.catalog.catalog_service.dto.ProductSalesDTO;
 import com.catalog.catalog_service.dto.SalesReportDTO;
 import com.catalog.catalog_service.security.UserDetailsWithUserId;
 import com.catalog.catalog_service.service.ReportService;
@@ -12,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -69,5 +71,20 @@ public class ReportController {
         
         SalesReportDTO report = reportService.generateMonthlySalesReport();
         return ResponseEntity.ok(report);
+    }
+
+    @GetMapping("/best-selling-products")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<List<ProductSalesDTO>> getBestSellingProducts(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            @RequestParam(defaultValue = "10") int limit,
+            @AuthenticationPrincipal UserDetailsWithUserId userDetails) {
+        
+        log.info("User {} generating best-selling products report from {} to {} with limit {}", 
+                userDetails.getUserId(), startDate, endDate, limit);
+        
+        List<ProductSalesDTO> bestSellingProducts = reportService.getBestSellingProducts(startDate, endDate, limit);
+        return ResponseEntity.ok(bestSellingProducts);
     }
 } 

@@ -60,6 +60,9 @@ public class Order {
     @Column
     private String paymentUrl;
 
+    @Column
+    private String deliveryStatus;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

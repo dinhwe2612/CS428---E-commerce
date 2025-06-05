@@ -56,6 +56,44 @@ public class ReportServiceImpl implements ReportService {
         return generateSalesReport(startDate, endDate);
     }
 
+    @Override
+    public List<ProductSalesDTO> getBestSellingProducts(LocalDate startDate, LocalDate endDate, int limit) {
+        List<OrderResponseDTO> completedOrders = orderServiceClient.getOrdersByStatus("COMPLETED");
+        
+        List<OrderResponseDTO> filteredOrders = completedOrders.stream()
+                .filter(order -> {
+                    LocalDate orderDate = order.getCreatedAt().toLocalDate();
+                    return !orderDate.isBefore(startDate) && !orderDate.isAfter(endDate);
+                })
+                .collect(Collectors.toList());
+
+        Map<String, ProductSalesData> productSalesMap = new HashMap<>();
+        
+        filteredOrders.stream()
+                .flatMap(order -> order.getOrderItems().stream())
+                .forEach(item -> {
+                    String productId = item.getProductId();
+                    productSalesMap.computeIfAbsent(productId, k -> new ProductSalesData())
+                            .addSale(item.getQuantity(), item.getSubtotal(), item.getProductName());
+                });
+
+        return productSalesMap.entrySet().stream()
+                .map(entry -> {
+                    String productId = entry.getKey();
+                    ProductSalesData data = entry.getValue();
+                    return new ProductSalesDTO(
+                            Long.valueOf(productId),
+                            data.productName,
+                            data.totalQuantity,
+                            data.totalRevenue,
+                            data.totalRevenue / data.totalQuantity
+                    );
+                })
+                .sorted((p1, p2) -> Integer.compare(p2.getQuantitySold(), p1.getQuantitySold()))
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
     private SalesReportDTO createSalesReport(List<OrderResponseDTO> orders, LocalDate startDate, LocalDate endDate) {
         SalesReportDTO report = new SalesReportDTO();
         

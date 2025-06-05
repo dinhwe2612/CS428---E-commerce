@@ -181,4 +181,22 @@ public class OrderServiceImpl implements OrderService {
     public List<ProductDTO> getProductsByIds(List<Long> ids) {
         return catalogServiceClient.getProductsByIds(ids);
     }
+
+    @Override
+    public List<OrderResponseDTO> getAllOrders() {
+        return orderRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public OrderResponseDTO updateDeliveryStatus(Long id, String deliveryStatus) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        order.setDeliveryStatus(deliveryStatus);
+        Order updatedOrder = orderRepository.save(order);
+        return convertToDTO(updatedOrder);
+    }
 }
