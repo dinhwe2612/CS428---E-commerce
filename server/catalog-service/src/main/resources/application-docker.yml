@@ -45,7 +45,7 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
   instance:
     preferIpAddress: true
-    hostname: user-service
+    hostname: catalog-service
 
 management:
   endpoints:
@@ -53,4 +53,9 @@ management:
       exposure:
         include: health,info
 
+JWT_SECRET: ${JWT_SECRET}
 INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+
+integration:
+  order:
+    base-url: http://order-service

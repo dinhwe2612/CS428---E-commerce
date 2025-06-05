@@ -168,6 +168,8 @@ services:
         condition: service_started
       elasticsearch:
         condition: service_healthy
+      order-service:
+        condition: service_started
     networks:
       - microservice-network
 
