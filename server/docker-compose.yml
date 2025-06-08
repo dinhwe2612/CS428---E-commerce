@@ -143,6 +143,7 @@ services:
         condition: service_started
     networks:
       - microservice-network
+
   catalog-service:
     build:
       context: .
@@ -185,7 +186,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-      
+
   image-rabbitmq:
     image: rabbitmq:management
     container_name: image-rabbitmq
@@ -271,7 +272,7 @@ services:
         condition: service_started
     networks:
       - microservice-network
-      
+
   payment-service:
     build:
       context: .
@@ -333,6 +334,30 @@ services:
   #       condition: service_healthy
   #   networks:
   #     - microservice-network
+
+  recommend-service:
+    build:
+      context: ./recommend-service
+      dockerfile: Dockerfile
+    container_name: recommend-service
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./recommend-service/.env
+    environment:
+      # Eureka
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+      - EUREKA_APP_NAME=RECOMMEND-SERVICE
+      - RECOMMEND_PORT=5000
+      # RabbitMQ
+      - RABBITMQ_URL=amqp://guest:guest@image-rabbitmq:5672/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
 volumes:
   image-storage:

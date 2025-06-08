@@ -50,6 +50,12 @@ public class GatewayConfig {
                                 .route("notification_service_all", r -> r.path("/api/v1/notification/**")
                                                 .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                                 .uri("lb://notification-service"))
+                                .route("recommend_service_all", r -> r.path("/api/v1/recommend/**")
+                                                .filters(f -> f
+                                                        .stripPrefix(3)
+                                                        .filter(authFilter.apply(new AuthenticationFilter.Config())))
+                                                .uri("lb://RECOMMEND-SERVICE")
+                                )
                                 .build();
         }
 

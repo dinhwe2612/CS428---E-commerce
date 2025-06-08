@@ -2,3 +2,5 @@
 **/.env
 DEVELOPMENT.md
 dev-rebuild.sh
+**/venv
+**/__pycache__/
