@@ -5,15 +5,21 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
 
     @Bean
     public OpenAPI baseOpenAPI() {
+        Server gatewayServer = new Server()
+                .url("http://localhost:8085") // Gateway address
+                .description("Gateway");
         return new OpenAPI()
                 .info(new Info()
                         .title("E-Commerce Auth API")
@@ -28,7 +34,8 @@ public class OpenApiConfig {
                                         .bearerFormat("JWT")
                         )
                 )
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .servers(List.of(gatewayServer));
     }
 
     @Bean
