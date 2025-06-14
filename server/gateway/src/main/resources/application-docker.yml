@@ -57,3 +57,5 @@ springdoc:
     urls:
         - name: Auth
           url: /v3/api-docs/auth
+        - name: Image
+          url: /v3/api-docs/images
