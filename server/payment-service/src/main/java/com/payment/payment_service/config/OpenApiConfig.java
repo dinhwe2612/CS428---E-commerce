@@ -1,0 +1,34 @@
+package com.payment.payment_service.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.Contact;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public OpenAPI paymentServiceOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Payment Service API")
+                        .version("1.0.0")
+                        .description("APIs for payment processing, webhooks, and callbacks")
+                        .contact(new Contact()
+                                .name("Payment Team")
+                                .email("payments@example.com")
+                        )
+                );
+    }
+
+    @Bean
+    public GroupedOpenApi paymentGroup() {
+        return GroupedOpenApi.builder()
+                .group("payment")
+                .pathsToMatch("/api/v1/payments/**")
+                .build();
+    }
+}

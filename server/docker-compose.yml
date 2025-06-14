@@ -95,84 +95,84 @@ services:
     networks:
       - microservice-network
 
-#  image-service:
-#    build:
-#      context: .
-#      dockerfile: image-service/Dockerfile
-#    container_name: image-service
-#    ports:
-#      - "8087:8087"
-#    env_file:
-#      - ./image-service/.env
-#    volumes:
-#      - ./config/image-service/application-docker.yml:/app/config/application-docker.yml
-#      - image-storage:/app/storage
-#      - ./image-service/src:/app/image-service/src
-#      - maven-repo:/root/.m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  image-service:
+    build:
+      context: .
+      dockerfile: image-service/Dockerfile
+    container_name: image-service
+    ports:
+      - "8087:8087"
+    env_file:
+      - ./image-service/.env
+    volumes:
+      - ./config/image-service/application-docker.yml:/app/config/application-docker.yml
+      - image-storage:/app/storage
+      - ./image-service/src:/app/image-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
-#  user-service:
-#    build:
-#      context: .
-#      dockerfile: user-service/Dockerfile
-#    container_name: user-service
-#    ports:
-#      - "8088:8088"
-#    env_file:
-#      - ./user-service/.env
-#    volumes:
-#      - ./config/user-service/application-docker.yml:/app/config/application-docker.yml
-#      - ./user-service/src:/app/user-service/src
-#      - maven-repo:/root/.m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8088:8088"
+    env_file:
+      - ./user-service/.env
+    volumes:
+      - ./config/user-service/application-docker.yml:/app/config/application-docker.yml
+      - ./user-service/src:/app/user-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
-#  catalog-service:
-#    build:
-#      context: .
-#      dockerfile: catalog-service/Dockerfile
-#    container_name: catalog-service
-#    ports:
-#      - "8089:8089"
-#    env_file:
-#      - ./catalog-service/.env
-#    volumes:
-#      - ./config/catalog-service/application-docker.yml:/app/config/application-docker.yml
-#      - ./catalog-service/src:/app/catalog-service/src
-#      - maven-repo:/root/.m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#      - SPRING_ELASTICSEARCH_REST_URIS=http://elasticsearch:9200
-#      - SPRING_PROFILES_ACTIVE=docker
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#      elasticsearch:
-#        condition: service_healthy
-#      order-service:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  catalog-service:
+    build:
+      context: .
+      dockerfile: catalog-service/Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8089:8089"
+    env_file:
+      - ./catalog-service/.env
+    volumes:
+      - ./config/catalog-service/application-docker.yml:/app/config/application-docker.yml
+      - ./catalog-service/src:/app/catalog-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - SPRING_ELASTICSEARCH_REST_URIS=http://elasticsearch:9200
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      order-service:
+        condition: service_started
+    networks:
+      - microservice-network
 
   redis:
     image: redis:latest
@@ -201,126 +201,126 @@ services:
       timeout: 5s
       retries: 3
 
-#  cart-service:
-#    build:
-#      context: .
-#      dockerfile: cart-service/Dockerfile
-#    container_name: cart-service
-#    ports:
-#      - "8090:8090"
-#    env_file:
-#      - ./cart-service/.env
-#    volumes:
-#      - ./config/cart-service/application-docker.yml:/app/config/application-docker.yml
-#      - ./cart-service/src:/app/cart-service/src
-#      - maven-repo:/root/.m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#    networks:
-#      - microservice-network
+  cart-service:
+    build:
+      context: .
+      dockerfile: cart-service/Dockerfile
+    container_name: cart-service
+    ports:
+      - "8090:8090"
+    env_file:
+      - ./cart-service/.env
+    volumes:
+      - ./config/cart-service/application-docker.yml:/app/config/application-docker.yml
+      - ./cart-service/src:/app/cart-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - microservice-network
 
-#  order-service:
-#    build:
-#      context: .
-#      dockerfile: order-service/Dockerfile
-#    container_name: order-service
-#    ports:
-#      - "8091:8091"
-#    env_file:
-#      - ./order-service/.env
-#    volumes:
-#      - ./config/order-service/application-docker.yml:/app/config/application-docker.yml
-#      - ./order-service/src:/app/order-service/src
-#      - maven-repo:/root/.m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    container_name: order-service
+    ports:
+      - "8091:8091"
+    env_file:
+      - ./order-service/.env
+    volumes:
+      - ./config/order-service/application-docker.yml:/app/config/application-docker.yml
+      - ./order-service/src:/app/order-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
-#  notification-service:
-#    build:
-#      context: .
-#      dockerfile: notification-service/Dockerfile
-#    container_name: notification-service
-#    ports:
-#      - "8095:8095"
-#    env_file:
-#      - ./notification-service/src/main/resources/.env
-#    volumes:
-#      - ./config/notification-service/application-docker.yml:/app/config/application-docker.yml
-#      - ./notification-service/src:/app/notification-service/src
-#      - maven-repo:/root/m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    ports:
+      - "8095:8095"
+    env_file:
+      - ./notification-service/src/main/resources/.env
+    volumes:
+      - ./config/notification-service/application-docker.yml:/app/config/application-docker.yml
+      - ./notification-service/src:/app/notification-service/src
+      - maven-repo:/root/m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+      - INTERNAL_API_KEY=72357538782F413F4428472B4B62506453
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
-#  payment-service:
-#    build:
-#      context: .
-#      dockerfile: payment-service/Dockerfile
-#    container_name: payment-service
-#    ports:
-#      - "8092:8092"
-#    env_file:
-#      - ./payment-service/.env
-#    volumes:
-#      - ./config/payment-service/application-docker.yml:/app/config/application-docker.yml
-#      - ./payment-service/src:/app/payment-service/src
-#      - maven-repo:/root/.m2
-#    environment:
-#      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-#      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    container_name: payment-service
+    ports:
+      - "8092:8092"
+    env_file:
+      - ./payment-service/.env
+    volumes:
+      - ./config/payment-service/application-docker.yml:/app/config/application-docker.yml
+      - ./payment-service/src:/app/payment-service/src
+      - maven-repo:/root/.m2
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_ADD_PROPERTIES=true
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
-#  chatbot-service:
-#    build:
-#      context: .
-#      dockerfile: chatbot-service/Dockerfile
-#    container_name: chatbot-service
-#    ports:
-#      - "5005:5005"
-#      - "5055:5055"
-#    environment:
-#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
-#      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-72357538782F413F4428472B4B62506453}
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      catalog-service:
-#        condition: service_started
-#    networks:
-#      - microservice-network
-#    healthcheck:
-#      test: ["CMD-SHELL", "curl -f http://localhost:5005/webhooks/rest/webhook -X POST -H 'Content-Type: application/json' -d '{\"sender\":\"healthcheck\",\"message\":\"ping\"}' || exit 1"]
-#      interval: 30s
-#      timeout: 15s
-#      retries: 5
-#      start_period: 120s
+  chatbot-service:
+    build:
+      context: .
+      dockerfile: chatbot-service/Dockerfile
+    container_name: chatbot-service
+    ports:
+      - "5005:5005"
+      - "5055:5055"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-72357538782F413F4428472B4B62506453}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+    networks:
+      - microservice-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5005/webhooks/rest/webhook -X POST -H 'Content-Type: application/json' -d '{\"sender\":\"healthcheck\",\"message\":\"ping\"}' || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   # chatbot-ui:
   #   build:
@@ -335,29 +335,29 @@ services:
   #   networks:
   #     - microservice-network
 
-#  recommend-service:
-#    build:
-#      context: ./recommend-service
-#      dockerfile: Dockerfile
-#    container_name: recommend-service
-#    ports:
-#      - "5000:5000"
-#    env_file:
-#      - ./recommend-service/.env
-#    environment:
-#      # Eureka
-#      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
-#      - EUREKA_APP_NAME=RECOMMEND-SERVICE
-#      - RECOMMEND_PORT=5000
-#      # RabbitMQ
-#      - RABBITMQ_URL=amqp://guest:guest@image-rabbitmq:5672/
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      image-rabbitmq:
-#        condition: service_started
-#    networks:
-#      - microservice-network
+  recommend-service:
+    build:
+      context: ./recommend-service
+      dockerfile: Dockerfile
+    container_name: recommend-service
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./recommend-service/.env
+    environment:
+      # Eureka
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
+      - EUREKA_APP_NAME=RECOMMEND-SERVICE
+      - RECOMMEND_PORT=5000
+      # RabbitMQ
+      - RABBITMQ_URL=amqp://guest:guest@image-rabbitmq:5672/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      image-rabbitmq:
+        condition: service_started
+    networks:
+      - microservice-network
 
 volumes:
   image-storage:

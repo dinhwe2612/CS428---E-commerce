@@ -54,12 +54,6 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html 
-
 services:
   catalog:
     base-url: http://catalog-service
@@ -71,4 +65,14 @@ services:
     service:
       url: http://payment-service
 
-INTERNAL_API_KEY: ${INTERNAL_API_KEY} 
+INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    default-url: /v3/api-docs/order
+    urls:
+      - name: Orders
+        url: /v3/api-docs/order

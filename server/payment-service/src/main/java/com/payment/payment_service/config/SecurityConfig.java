@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/payments/webhook/**").permitAll()
                 .requestMatchers("/api/v1/payments/success").permitAll()
                 .requestMatchers("/api/v1/payments/cancel").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/actuator/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .anyRequest().authenticated())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

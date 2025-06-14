@@ -59,3 +59,13 @@ INTERNAL_API_KEY: ${INTERNAL_API_KEY}
 integration:
   order:
     base-url: http://order-service
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    default-url: /v3/api-docs/catalog
+    urls:
+      - name: Catalog
+        url: /v3/api-docs/catalog

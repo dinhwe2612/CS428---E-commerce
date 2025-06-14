@@ -41,15 +41,19 @@ eureka:
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html 
-
 services:
   catalog:
     base-url: http://catalog-service:8089
     timeout: 5000
 
-INTERNAL_API_KEY: ${INTERNAL_API_KEY} 
+INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    default-url: /v3/api-docs/cart
+    urls:
+      - name: Cart
+        url: /v3/api-docs/cart

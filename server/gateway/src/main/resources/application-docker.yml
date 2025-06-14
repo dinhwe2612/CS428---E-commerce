@@ -55,7 +55,19 @@ springdoc:
     path: /swagger-ui.html
     defaultUrl: /v3/api-docs/auth
     urls:
-        - name: Auth
-          url: /v3/api-docs/auth
-        - name: Image
-          url: /v3/api-docs/images
+      - name: Auth
+        url: /v3/api-docs/auth
+      - name: Image
+        url: /v3/api-docs/images
+      - name: Cart
+        url: /v3/api-docs/cart
+      - name: Catalog
+        url: /v3/api-docs/catalog
+      - name: Payment
+        url: /v3/api-docs/payment
+      - name: User
+        url: /v3/api-docs/user
+      - name: Order
+        url: /v3/api-docs/order
+      - name: Notification
+        url: /v3/api-docs/notification
