@@ -46,4 +46,14 @@ eureka:
     prefer-ip-address: true
     hostname: api-gateway
     lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 10 
+    lease-expiration-duration-in-seconds: 10
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    defaultUrl: /v3/api-docs/auth
+    urls:
+        - name: Auth
+          url: /v3/api-docs/auth

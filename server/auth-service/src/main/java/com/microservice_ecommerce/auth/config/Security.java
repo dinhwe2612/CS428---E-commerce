@@ -43,7 +43,7 @@ public class Security {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/signin", "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password", "/api/v1/auth/ping", "/actuator/**",
-                        "/api/v1/auth/test").permitAll()
+                        "/api/v1/auth/test", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

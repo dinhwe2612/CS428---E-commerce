@@ -68,4 +68,8 @@ springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html 
+    path: /swagger-ui.html
+    defaultUrl: /v3/api-docs/auth
+    urls:
+      - name: Auth
+        url: /v3/api-docs/auth
