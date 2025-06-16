@@ -18,7 +18,6 @@ jobs:
       cart: ${{ steps.filter.outputs.cart }}
       gateway: ${{ steps.filter.outputs.gateway }}
       image: ${{ steps.filter.outputs.image }}
-      voucher: ${{ steps.filter.outputs.voucher }}
       chatbot: ${{ steps.filter.outputs.chatbot }}
       eureka: ${{ steps.filter.outputs.eureka }}
       recommend: ${{ steps.filter.outputs.recommend }}
@@ -47,8 +46,6 @@ jobs:
             - 'server/cart-service/**'
           image:
             - 'server/image-service/**'
-          voucher:
-            - 'server/voucher-service/**'
           chatbot:
             - 'server/chatbot-service/**'
           eureka:
@@ -217,25 +214,6 @@ jobs:
       run: docker push hisokaxxzk/image-service:latest
     - name: Clean up Docker image
       run: docker image rm hisokaxxzk/image-service:latest
-
-  build-voucher:
-    needs: changes
-    if: needs.changes.outputs.voucher == 'true'
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Login Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Build Docker image
-      run: docker build -t hisokaxxzk/voucher-service:latest -f server/voucher-service/Dockerfile server/
-    - name: Push Docker image
-      run: docker push hisokaxxzk/voucher-service:latest
-    - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/voucher-service:latest
-
   build-chatbot:
     needs: changes
     if: needs.changes.outputs.chatbot == 'true'
@@ -304,7 +282,7 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/auth-service:latest
-            docker compose up -d --build --no-deps auth-service
+            docker compose up -d --build --no-deps auth
 
   deploy-gateway:
     needs: build-gateway
@@ -434,38 +412,6 @@ jobs:
             docker pull hisokaxxzk/image-service:latest
             docker compose up -d --build --no-deps image-service
 
-  deploy-voucher:
-    needs: build-voucher
-    if: needs.changes.outputs.voucher == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to Azure VM via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.AZURE_HOST }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.AZURE_SSH_KEY }}
-          script: |
-            cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/voucher-service:latest
-            docker compose up -d --build --no-deps voucher-service
-
-  deploy-chatbot:
-    needs: build-chatbot
-    if: needs.changes.outputs.chatbot == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to Azure VM via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.AZURE_HOST }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.AZURE_SSH_KEY }}
-          script: |
-            cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/chatbot-service:latest
-            docker compose up -d --build --no-deps chatbot-service
-
   deploy-eureka:
     needs: build-eureka
     if: needs.changes.outputs.eureka == 'true'
@@ -482,18 +428,4 @@ jobs:
             docker pull hisokaxxzk/eureka-server:latest
             docker compose up -d --build --no-deps eureka-server
 
-  deploy-recommend:
-    needs: build-recommend
-    if: needs.changes.outputs.recommend == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to Azure VM via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.AZURE_HOST }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.AZURE_SSH_KEY }}
-          script: |
-            cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/recommend-service:latest
-            docker compose up -d --build --no-deps recommend-service
+
