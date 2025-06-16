@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Transactional
 public class VoucherService {
-    
+    // Repository
     private final VoucherRepository voucherRepository;
     private final VoucherDomainService voucherDomainService;
     private final VoucherMapper voucherMapper;
