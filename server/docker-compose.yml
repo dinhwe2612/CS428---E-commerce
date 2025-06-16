@@ -3,8 +3,8 @@ version: '3.8'
 services:
   eureka-server:
     build:
-      context: ./eureka-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: eureka-server/Dockerfile
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -28,8 +28,8 @@ services:
 
   gateway:
     build:
-      context: ./gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: gateway/Dockerfile
     container_name: api-gateway
     ports:
       - "8085:8085"
@@ -52,8 +52,8 @@ services:
 
   auth:
     build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: auth-service/Dockerfile
     container_name: auth-service
     ports:
       - "8041:8081"
@@ -76,8 +76,8 @@ services:
 
   image-service:
     build:
-      context: ./image-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: image-service/Dockerfile
     container_name: image-service
     ports:
       - "8087:8087"
@@ -101,8 +101,8 @@ services:
 
   user-service:
     build:
-      context: ./user-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: user-service/Dockerfile
     container_name: user-service
     ports:
       - "8088:8088"
@@ -125,8 +125,8 @@ services:
 
   catalog-service:
     build:
-      context: ./catalog-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: catalog-service/Dockerfile
     container_name: catalog-service
     ports:
       - "8089:8089"
@@ -179,8 +179,8 @@ services:
 
   cart-service:
     build:
-      context: ./cart-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: cart-service/Dockerfile
     container_name: cart-service
     ports:
       - "8090:8090"
@@ -201,8 +201,8 @@ services:
 
   order-service:
     build:
-      context: ./order-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: order-service/Dockerfile
     container_name: order-service
     ports:
       - "8091:8091"
@@ -226,8 +226,8 @@ services:
 
   notification-service:
     build:
-      context: ./notification-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: notification-service/Dockerfile
     container_name: notification-service
     ports:
       - "8095:8095"
@@ -251,8 +251,8 @@ services:
 
   payment-service:
     build:
-      context: ./payment-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: payment-service/Dockerfile
     container_name: payment-service
     ports:
       - "8092:8092"

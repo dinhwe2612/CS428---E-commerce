@@ -1,16 +1,12 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
 
-# Copy parent pom.xml from parent directory (for building from service directory)
-COPY ../pom.xml ./pom.xml
-
-# Copy current service pom.xml
-COPY pom.xml ./payment-service/pom.xml
+COPY pom.xml .
+COPY payment-service/pom.xml ./payment-service/
 
 RUN mvn -f payment-service/pom.xml dependency:go-offline
 
-# Copy service source code
-COPY src ./payment-service/src/
+COPY payment-service/src ./payment-service/src/
 
 RUN mvn -f payment-service/pom.xml clean package -DskipTests
 
