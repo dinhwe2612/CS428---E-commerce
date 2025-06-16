@@ -19,6 +19,7 @@ jobs:
       gateway: ${{ steps.filter.outputs.gateway }}
       image: ${{ steps.filter.outputs.image }}
       eureka: ${{ steps.filter.outputs.eureka }}
+      shared: ${{ steps.filter.outputs.shared }}
     
     steps:
     - uses: actions/checkout@v3
@@ -44,16 +45,18 @@ jobs:
             - 'server/cart-service/**'
           image:
             - 'server/image-service/**'
-          chatbot:
-            - 'server/chatbot-service/**'
           eureka:
             - 'server/eureka-server/**'
-          recommend:
-            - 'server/recommend-service/**'
+          shared:
+            - 'server/pom.xml'
+            - 'server/docker-compose.yml'
+            - 'server/mvnw'
+            - 'server/mvnw.cmd'
+            - 'server/.mvn/**'
 
   build-auth:
     needs: changes
-    if: needs.changes.outputs.auth == 'true'
+    if: needs.changes.outputs.auth == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -71,7 +74,7 @@ jobs:
 
   build-gateway:
     needs: changes
-    if: needs.changes.outputs.gateway == 'true'
+    if: needs.changes.outputs.gateway == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -89,7 +92,7 @@ jobs:
 
   build-user:
     needs: changes
-    if: needs.changes.outputs.user == 'true'
+    if: needs.changes.outputs.user == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -107,7 +110,7 @@ jobs:
 
   build-catalog:
     needs: changes
-    if: needs.changes.outputs.catalog == 'true'
+    if: needs.changes.outputs.catalog == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -125,7 +128,7 @@ jobs:
 
   build-order:
     needs: changes
-    if: needs.changes.outputs.order == 'true'
+    if: needs.changes.outputs.order == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -143,7 +146,7 @@ jobs:
 
   build-payment:
     needs: changes
-    if: needs.changes.outputs.payment == 'true'
+    if: needs.changes.outputs.payment == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -161,7 +164,7 @@ jobs:
 
   build-notification:
     needs: changes
-    if: needs.changes.outputs.notification == 'true'
+    if: needs.changes.outputs.notification == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -179,7 +182,7 @@ jobs:
 
   build-cart:
     needs: changes
-    if: needs.changes.outputs.cart == 'true'
+    if: needs.changes.outputs.cart == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -197,7 +200,7 @@ jobs:
 
   build-image:
     needs: changes
-    if: needs.changes.outputs.image == 'true'
+    if: needs.changes.outputs.image == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -215,7 +218,7 @@ jobs:
 
   build-eureka:
     needs: changes
-    if: needs.changes.outputs.eureka == 'true'
+    if: needs.changes.outputs.eureka == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -233,7 +236,7 @@ jobs:
 
   deploy-auth:
     needs: build-auth
-    if: needs.changes.outputs.auth == 'true'
+    if: needs.changes.outputs.auth == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -249,7 +252,7 @@ jobs:
 
   deploy-gateway:
     needs: build-gateway
-    if: needs.changes.outputs.gateway == 'true'
+    if: needs.changes.outputs.gateway == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -265,7 +268,7 @@ jobs:
 
   deploy-user:
     needs: build-user
-    if: needs.changes.outputs.user == 'true'
+    if: needs.changes.outputs.user == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -281,7 +284,7 @@ jobs:
 
   deploy-catalog:
     needs: build-catalog
-    if: needs.changes.outputs.catalog == 'true'
+    if: needs.changes.outputs.catalog == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -297,7 +300,7 @@ jobs:
 
   deploy-order:
     needs: build-order
-    if: needs.changes.outputs.order == 'true'
+    if: needs.changes.outputs.order == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -313,7 +316,7 @@ jobs:
 
   deploy-payment:
     needs: build-payment
-    if: needs.changes.outputs.payment == 'true'
+    if: needs.changes.outputs.payment == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -329,7 +332,7 @@ jobs:
 
   deploy-notification:
     needs: build-notification
-    if: needs.changes.outputs.notification == 'true'
+    if: needs.changes.outputs.notification == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -345,7 +348,7 @@ jobs:
 
   deploy-cart:
     needs: build-cart
-    if: needs.changes.outputs.cart == 'true'
+    if: needs.changes.outputs.cart == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -361,7 +364,7 @@ jobs:
 
   deploy-image:
     needs: build-image
-    if: needs.changes.outputs.image == 'true'
+    if: needs.changes.outputs.image == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
@@ -377,7 +380,7 @@ jobs:
 
   deploy-eureka:
     needs: build-eureka
-    if: needs.changes.outputs.eureka == 'true'
+    if: needs.changes.outputs.eureka == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure VM via SSH
