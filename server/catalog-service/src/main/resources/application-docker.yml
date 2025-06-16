@@ -39,6 +39,10 @@ spring:
       repositories:
         enabled: true
 
+elasticsearch:
+  host: ${ELASTICSEARCH_HOST}
+  port: ${ELASTICSEARCH_PORT}
+
 eureka:
   client:
     serviceUrl:
@@ -68,4 +72,4 @@ springdoc:
     default-url: /v3/api-docs/catalog
     urls:
       - name: Catalog
-        url: /v3/api-docs/catalog
+        url: /v3/api-docs/catalog 
