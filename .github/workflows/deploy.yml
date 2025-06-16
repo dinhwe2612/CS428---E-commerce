@@ -289,3 +289,211 @@ jobs:
       run: docker push hisokaxxzk/recommend-service:latest
     - name: Clean up Docker image
       run: docker image rm hisokaxxzk/recommend-service:latest
+
+  deploy-auth:
+    needs: build-auth
+    if: needs.changes.outputs.auth == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/auth-service:latest
+            docker compose up -d --build --no-deps auth-service
+
+  deploy-gateway:
+    needs: build-gateway
+    if: needs.changes.outputs.gateway == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/gateway:latest
+            docker compose up -d --build --no-deps gateway
+
+  deploy-user:
+    needs: build-user
+    if: needs.changes.outputs.user == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/user-service:latest
+            docker compose up -d --build --no-deps user-service
+
+  deploy-catalog:
+    needs: build-catalog
+    if: needs.changes.outputs.catalog == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/catalog-service:latest
+            docker compose up -d --build --no-deps catalog-service
+
+  deploy-order:
+    needs: build-order
+    if: needs.changes.outputs.order == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/order-service:latest
+            docker compose up -d --build --no-deps order-service
+
+  deploy-payment:
+    needs: build-payment
+    if: needs.changes.outputs.payment == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/payment-service:latest
+            docker compose up -d --build --no-deps payment-service
+
+  deploy-notification:
+    needs: build-notification
+    if: needs.changes.outputs.notification == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/notification-service:latest
+            docker compose up -d --build --no-deps notification-service
+
+  deploy-cart:
+    needs: build-cart
+    if: needs.changes.outputs.cart == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/cart-service:latest
+            docker compose up -d --build --no-deps cart-service
+
+  deploy-image:
+    needs: build-image
+    if: needs.changes.outputs.image == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/image-service:latest
+            docker compose up -d --build --no-deps image-service
+
+  deploy-voucher:
+    needs: build-voucher
+    if: needs.changes.outputs.voucher == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/voucher-service:latest
+            docker compose up -d --build --no-deps voucher-service
+
+  deploy-chatbot:
+    needs: build-chatbot
+    if: needs.changes.outputs.chatbot == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/chatbot-service:latest
+            docker compose up -d --build --no-deps chatbot-service
+
+  deploy-eureka:
+    needs: build-eureka
+    if: needs.changes.outputs.eureka == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/eureka-server:latest
+            docker compose up -d --build --no-deps eureka-server
+
+  deploy-recommend:
+    needs: build-recommend
+    if: needs.changes.outputs.recommend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            cd /home/hisokaxxzk/CS428---E-commerce/server
+            docker pull hisokaxxzk/recommend-service:latest
+            docker compose up -d --build --no-deps recommend-service
