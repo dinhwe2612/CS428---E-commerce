@@ -245,7 +245,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-auth:latest
-            docker tag hisokaxxzk/server-auth:latest server-auth:latest
             docker compose up -d --no-deps auth
 
   deploy-gateway:
@@ -262,7 +261,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-gateway:latest
-            docker tag hisokaxxzk/server-gateway:latest server-gateway:latest
             docker compose up -d --no-deps gateway
 
   deploy-user:
@@ -279,7 +277,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-user-service:latest
-            docker tag hisokaxxzk/server-user-service:latest server-user-service:latest
             docker compose up -d --no-deps user-service
 
   deploy-catalog:
@@ -296,7 +293,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-catalog-service:latest
-            docker tag hisokaxxzk/server-catalog-service:latest server-catalog-service:latest
             docker compose up -d --no-deps catalog-service
 
   deploy-order:
@@ -313,7 +309,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-order-service:latest
-            docker tag hisokaxxzk/server-order-service:latest server-order-service:latest
             docker compose up -d --no-deps order-service
 
   deploy-payment:
@@ -330,7 +325,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-payment-service:latest
-            docker tag hisokaxxzk/server-payment-service:latest server-payment-service:latest
             docker compose up -d --no-deps payment-service
 
   deploy-notification:
@@ -347,7 +341,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-notification-service:latest
-            docker tag hisokaxxzk/server-notification-service:latest server-notification-service:latest
             docker compose up -d --no-deps notification-service
 
   deploy-cart:
@@ -364,7 +357,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-cart-service:latest
-            docker tag hisokaxxzk/server-cart-service:latest server-cart-service:latest
             docker compose up -d --no-deps cart-service
 
   deploy-image:
@@ -381,7 +373,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-image-service:latest
-            docker tag hisokaxxzk/server-image-service:latest server-image-service:latest
             docker compose up -d --no-deps image-service
 
   deploy-eureka:
@@ -398,7 +389,6 @@ jobs:
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
             docker pull hisokaxxzk/server-eureka-server:latest
-            docker tag hisokaxxzk/server-eureka-server:latest server-eureka-server:latest
             docker compose up -d --no-deps eureka-server
 
 
