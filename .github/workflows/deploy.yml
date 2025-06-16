@@ -65,11 +65,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/auth-service:latest -f server/auth-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-auth:latest -f server/auth-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/auth-service:latest
+      run: docker push hisokaxxzk/server-auth:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/auth-service:latest
+      run: docker image rm hisokaxxzk/server-auth:latest
 
   build-gateway:
     needs: changes
@@ -83,11 +83,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/gateway:latest -f server/gateway/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-gateway:latest -f server/gateway/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/gateway:latest
+      run: docker push hisokaxxzk/server-gateway:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/gateway:latest
+      run: docker image rm hisokaxxzk/server-gateway:latest
 
   build-user:
     needs: changes
@@ -101,11 +101,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/user-service:latest -f server/user-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-user-service:latest -f server/user-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/user-service:latest
+      run: docker push hisokaxxzk/server-user-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/user-service:latest
+      run: docker image rm hisokaxxzk/server-user-service:latest
 
   build-catalog:
     needs: changes
@@ -119,11 +119,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/catalog-service:latest -f server/catalog-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-catalog-service:latest -f server/catalog-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/catalog-service:latest
+      run: docker push hisokaxxzk/server-catalog-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/catalog-service:latest
+      run: docker image rm hisokaxxzk/server-catalog-service:latest
 
   build-order:
     needs: changes
@@ -137,11 +137,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/order-service:latest -f server/order-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-order-service:latest -f server/order-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/order-service:latest
+      run: docker push hisokaxxzk/server-order-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/order-service:latest
+      run: docker image rm hisokaxxzk/server-order-service:latest
 
   build-payment:
     needs: changes
@@ -155,11 +155,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/payment-service:latest -f server/payment-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-payment-service:latest -f server/payment-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/payment-service:latest
+      run: docker push hisokaxxzk/server-payment-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/payment-service:latest
+      run: docker image rm hisokaxxzk/server-payment-service:latest
 
   build-notification:
     needs: changes
@@ -173,11 +173,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/notification-service:latest -f server/notification-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-notification-service:latest -f server/notification-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/notification-service:latest
+      run: docker push hisokaxxzk/server-notification-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/notification-service:latest
+      run: docker image rm hisokaxxzk/server-notification-service:latest
 
   build-cart:
     needs: changes
@@ -191,11 +191,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/cart-service:latest -f server/cart-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-cart-service:latest -f server/cart-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/cart-service:latest
+      run: docker push hisokaxxzk/server-cart-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/cart-service:latest
+      run: docker image rm hisokaxxzk/server-cart-service:latest
 
   build-image:
     needs: changes
@@ -209,11 +209,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/image-service:latest -f server/image-service/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-image-service:latest -f server/image-service/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/image-service:latest
+      run: docker push hisokaxxzk/server-image-service:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/image-service:latest
+      run: docker image rm hisokaxxzk/server-image-service:latest
   build-chatbot:
     needs: changes
     if: needs.changes.outputs.chatbot == 'true'
@@ -244,11 +244,11 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker image
-      run: docker build -t hisokaxxzk/eureka-server:latest -f server/eureka-server/Dockerfile server/
+      run: docker build -t hisokaxxzk/server-eureka-server:latest -f server/eureka-server/Dockerfile server/
     - name: Push Docker image
-      run: docker push hisokaxxzk/eureka-server:latest
+      run: docker push hisokaxxzk/server-eureka-server:latest
     - name: Clean up Docker image
-      run: docker image rm hisokaxxzk/eureka-server:latest
+      run: docker image rm hisokaxxzk/server-eureka-server:latest
 
   build-recommend:
     needs: changes
@@ -281,8 +281,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/auth-service:latest
-            docker compose up -d --build --no-deps auth
+            docker pull hisokaxxzk/server-auth:latest
+            docker tag hisokaxxzk/server-auth:latest server-auth:latest
+            docker compose up -d --no-deps auth
 
   deploy-gateway:
     needs: build-gateway
@@ -297,8 +298,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/gateway:latest
-            docker compose up -d --build --no-deps gateway
+            docker pull hisokaxxzk/server-gateway:latest
+            docker tag hisokaxxzk/server-gateway:latest server-gateway:latest
+            docker compose up -d --no-deps gateway
 
   deploy-user:
     needs: build-user
@@ -313,8 +315,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/user-service:latest
-            docker compose up -d --build --no-deps user-service
+            docker pull hisokaxxzk/server-user-service:latest
+            docker tag hisokaxxzk/server-user-service:latest server-user-service:latest
+            docker compose up -d --no-deps user-service
 
   deploy-catalog:
     needs: build-catalog
@@ -329,8 +332,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/catalog-service:latest
-            docker compose up -d --build --no-deps catalog-service
+            docker pull hisokaxxzk/server-catalog-service:latest
+            docker tag hisokaxxzk/server-catalog-service:latest server-catalog-service:latest
+            docker compose up -d --no-deps catalog-service
 
   deploy-order:
     needs: build-order
@@ -345,8 +349,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/order-service:latest
-            docker compose up -d --build --no-deps order-service
+            docker pull hisokaxxzk/server-order-service:latest
+            docker tag hisokaxxzk/server-order-service:latest server-order-service:latest
+            docker compose up -d --no-deps order-service
 
   deploy-payment:
     needs: build-payment
@@ -361,8 +366,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/payment-service:latest
-            docker compose up -d --build --no-deps payment-service
+            docker pull hisokaxxzk/server-payment-service:latest
+            docker tag hisokaxxzk/server-payment-service:latest server-payment-service:latest
+            docker compose up -d --no-deps payment-service
 
   deploy-notification:
     needs: build-notification
@@ -377,8 +383,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/notification-service:latest
-            docker compose up -d --build --no-deps notification-service
+            docker pull hisokaxxzk/server-notification-service:latest
+            docker tag hisokaxxzk/server-notification-service:latest server-notification-service:latest
+            docker compose up -d --no-deps notification-service
 
   deploy-cart:
     needs: build-cart
@@ -393,8 +400,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/cart-service:latest
-            docker compose up -d --build --no-deps cart-service
+            docker pull hisokaxxzk/server-cart-service:latest
+            docker tag hisokaxxzk/server-cart-service:latest server-cart-service:latest
+            docker compose up -d --no-deps cart-service
 
   deploy-image:
     needs: build-image
@@ -409,8 +417,9 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/image-service:latest
-            docker compose up -d --build --no-deps image-service
+            docker pull hisokaxxzk/server-image-service:latest
+            docker tag hisokaxxzk/server-image-service:latest server-image-service:latest
+            docker compose up -d --no-deps image-service
 
   deploy-eureka:
     needs: build-eureka
@@ -425,7 +434,8 @@ jobs:
           key: ${{ secrets.AZURE_SSH_KEY }}
           script: |
             cd /home/hisokaxxzk/CS428---E-commerce/server
-            docker pull hisokaxxzk/eureka-server:latest
-            docker compose up -d --build --no-deps eureka-server
+            docker pull hisokaxxzk/server-eureka-server:latest
+            docker tag hisokaxxzk/server-eureka-server:latest server-eureka-server:latest
+            docker compose up -d --no-deps eureka-server
 
 
