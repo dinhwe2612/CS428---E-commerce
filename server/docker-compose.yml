@@ -1,27 +1,6 @@
 version: '3.8'
 
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
-    container_name: es-local
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ports:
-      - "9200:9200"
-    mem_limit: 768m
-    mem_reservation: 256m
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200/" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - microservice-network
-
   eureka-server:
     build:
       context: ./eureka-server
@@ -160,15 +139,12 @@ services:
     environment:
       - SPRING_DEVTOOLS_RESTART_ENABLED=true
       - SPRING_DEVTOOLS_ADD_PROPERTIES=true
-      - SPRING_ELASTICSEARCH_REST_URIS=http://elasticsearch:9200
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       eureka-server:
         condition: service_healthy
       image-rabbitmq:
         condition: service_started
-      elasticsearch:
-        condition: service_healthy
       order-service:
         condition: service_started
     networks:
