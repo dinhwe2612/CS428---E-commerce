@@ -298,14 +298,13 @@ services:
       - microservice-network
 
   # chatbot-service:
-  #   image: hisokaxxzk/chatbot-service:latest
+  #   build:
+  #     context: ./chatbot-service
+  #     dockerfile: chatbot-service/Dockerfile
   #   container_name: chatbot-service
   #   ports:
   #     - "5005:5005"
   #     - "5055:5055"
-  #   environment:
-  #     - EUREKA_SERVER_URL=http://eureka-server:8761/eureka
-  #     - INTERNAL_API_KEY=${INTERNAL_API_KEY:-72357538782F413F4428472B4B62506453}
   #   depends_on:
   #     eureka-server:
   #       condition: service_healthy
