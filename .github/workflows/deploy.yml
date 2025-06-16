@@ -2,7 +2,7 @@ name: CI/CD Pipeline to AWS EC2
 
 on:
   push:
-    branches: [master]
+    branches: [CICD-flow]
 
 jobs:
   changes:
