@@ -1,12 +1,16 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
 
-COPY pom.xml ./
-COPY cart-service/pom.xml ./cart-service/
+# Copy parent pom.xml from parent directory (for building from service directory)
+COPY ../pom.xml ./pom.xml
+
+# Copy current service pom.xml
+COPY pom.xml ./cart-service/pom.xml
 
 RUN mvn -f cart-service/pom.xml dependency:go-offline
 
-COPY cart-service/src ./cart-service/src/
+# Copy service source code
+COPY src ./cart-service/src/
 
 RUN mvn -f cart-service/pom.xml clean package -DskipTests
 

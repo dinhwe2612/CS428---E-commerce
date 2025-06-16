@@ -1,12 +1,16 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
 
-COPY pom.xml ./
-COPY voucher-service/pom.xml ./voucher-service/
+# Copy parent pom.xml from parent directory (for building from service directory)
+COPY ../pom.xml ./pom.xml
+
+# Copy current service pom.xml
+COPY pom.xml ./voucher-service/pom.xml
 
 RUN mvn -f voucher-service/pom.xml dependency:go-offline
 
-COPY voucher-service/src ./voucher-service/src/
+# Copy service source code
+COPY src ./voucher-service/src/
 
 RUN mvn -f voucher-service/pom.xml clean package -DskipTests
 

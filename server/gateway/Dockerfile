@@ -1,12 +1,16 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
 
-COPY pom.xml ./
-COPY gateway/pom.xml ./gateway/
+# Copy parent pom.xml from parent directory (for building from service directory)
+COPY ../pom.xml ./pom.xml
+
+# Copy current service pom.xml
+COPY pom.xml ./gateway/pom.xml
 
 RUN mvn -f gateway/pom.xml dependency:go-offline
 
-COPY gateway/src ./gateway/src/
+# Copy service source code
+COPY src ./gateway/src/
 
 RUN mvn -f gateway/pom.xml clean package -DskipTests
 

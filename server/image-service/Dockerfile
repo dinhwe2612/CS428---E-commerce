@@ -1,12 +1,16 @@
 FROM maven:3.9-amazoncorretto-17 AS build
 WORKDIR /app
 
-COPY pom.xml ./
-COPY image-service/pom.xml ./image-service/
+# Copy parent pom.xml from parent directory (for building from service directory)
+COPY ../pom.xml ./pom.xml
+
+# Copy current service pom.xml
+COPY pom.xml ./image-service/pom.xml
 
 RUN mvn -f image-service/pom.xml dependency:go-offline
 
-COPY image-service/src ./image-service/src/
+# Copy service source code
+COPY src ./image-service/src/
 
 RUN mvn -f image-service/pom.xml clean package -DskipTests
 
