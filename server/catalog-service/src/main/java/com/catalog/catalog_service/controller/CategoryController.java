@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/categories")
 @Tag(name = "Categories", description = "Endpoints for managing product categories")
 public class CategoryController {
-
+        // TODO: add pagination
     private final CategoryService categoryService;
 
     @Autowired
