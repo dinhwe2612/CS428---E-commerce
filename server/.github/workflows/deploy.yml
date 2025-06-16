@@ -1,0 +1,291 @@
+name: CI/CD Pipeline to AWS EC2
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+
+    outputs: 
+      auth: ${{ steps.filter.outputs.auth }}
+      user: ${{ steps.filter.outputs.user }}
+      catalog: ${{ steps.filter.outputs.catalog }}
+      order: ${{ steps.filter.outputs.order }}
+      payment: ${{ steps.filter.outputs.payment }}
+      notification: ${{ steps.filter.outputs.notification }}
+      cart: ${{ steps.filter.outputs.cart }}
+      gateway: ${{ steps.filter.outputs.gateway }}
+      image: ${{ steps.filter.outputs.image }}
+      voucher: ${{ steps.filter.outputs.voucher }}
+      chatbot: ${{ steps.filter.outputs.chatbot }}
+      eureka: ${{ steps.filter.outputs.eureka }}
+      recommend: ${{ steps.filter.outputs.recommend }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          auth:
+            - 'auth-service/**'
+          gateway:
+            - 'gateway/**'
+          order:
+            - 'order-service/**'
+          catalog:
+            - 'catalog-service/**'
+          user:
+            - 'user-service/**'
+          payment:
+            - 'payment-service/**'
+          notification:
+            - 'notification-service/**'
+          cart:
+            - 'cart-service/**'
+          image:
+            - 'image-service/**'
+          voucher:
+            - 'voucher-service/**'
+          chatbot:
+            - 'chatbot-service/**'
+          eureka:
+            - 'eureka-server/**'
+          recommend:
+            - 'recommend-service/**'
+
+  build-auth:
+    needs: changes
+    if: needs.changes.outputs.auth == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/auth-service:latest auth-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/auth-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/auth-service:latest
+
+  build-gateway:
+    needs: changes
+    if: needs.changes.outputs.gateway == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/gateway:latest gateway/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/gateway:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/gateway:latest
+
+  build-user:
+    needs: changes
+    if: needs.changes.outputs.user == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/user-service:latest user-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/user-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/user-service:latest
+
+  build-catalog:
+    needs: changes
+    if: needs.changes.outputs.catalog == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/catalog-service:latest catalog-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/catalog-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/catalog-service:latest
+
+  build-order:
+    needs: changes
+    if: needs.changes.outputs.order == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/order-service:latest order-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/order-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/order-service:latest
+
+  build-payment:
+    needs: changes
+    if: needs.changes.outputs.payment == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/payment-service:latest payment-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/payment-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/payment-service:latest
+
+  build-notification:
+    needs: changes
+    if: needs.changes.outputs.notification == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/notification-service:latest notification-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/notification-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/notification-service:latest
+
+  build-cart:
+    needs: changes
+    if: needs.changes.outputs.cart == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/cart-service:latest cart-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/cart-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/cart-service:latest
+
+  build-image:
+    needs: changes
+    if: needs.changes.outputs.image == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/image-service:latest image-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/image-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/image-service:latest
+
+  build-voucher:
+    needs: changes
+    if: needs.changes.outputs.voucher == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/voucher-service:latest voucher-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/voucher-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/voucher-service:latest
+
+  build-chatbot:
+    needs: changes
+    if: needs.changes.outputs.chatbot == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/chatbot-service:latest chatbot-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/chatbot-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/chatbot-service:latest
+
+  build-eureka:
+    needs: changes
+    if: needs.changes.outputs.eureka == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/eureka-server:latest eureka-server/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/eureka-server:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/eureka-server:latest
+
+  build-recommend:
+    needs: changes
+    if: needs.changes.outputs.recommend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker image
+      run: docker build -t hisokaxxzk/recommend-service:latest recommend-service/.
+    - name: Push Docker image
+      run: docker push hisokaxxzk/recommend-service:latest
+    - name: Clean up Docker image
+      run: docker image rm hisokaxxzk/recommend-service:latest
