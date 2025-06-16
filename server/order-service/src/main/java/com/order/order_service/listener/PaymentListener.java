@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PaymentListener {
-
+    //test 4
     private final OrderService orderService;
 
     @RabbitListener(queues = "order.payment.queue")
