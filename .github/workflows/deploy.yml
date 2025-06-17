@@ -26,6 +26,8 @@ jobs:
     - uses: dorny/paths-filter@v3
       id: filter
       with:
+        list-files: shell
+        base: HEAD~1
         filters: |
           auth:
             - 'server/auth-service/**'
@@ -235,7 +237,7 @@ jobs:
       run: docker image rm hisokaxxzk/server-eureka-server:latest
 
   deploy-auth:
-    needs: build-auth
+    needs: [changes, build-auth]
     if: needs.changes.outputs.auth == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -251,7 +253,7 @@ jobs:
             docker compose up -d --no-deps auth
 
   deploy-gateway:
-    needs: build-gateway
+    needs: [changes, build-gateway]
     if: needs.changes.outputs.gateway == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -267,7 +269,7 @@ jobs:
             docker compose up -d --no-deps gateway
 
   deploy-user:
-    needs: build-user
+    needs: [changes, build-user]
     if: needs.changes.outputs.user == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -283,7 +285,7 @@ jobs:
             docker compose up -d --no-deps user-service
 
   deploy-catalog:
-    needs: build-catalog
+    needs: [changes, build-catalog]
     if: needs.changes.outputs.catalog == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -299,7 +301,7 @@ jobs:
             docker compose up -d --no-deps catalog-service
 
   deploy-order:
-    needs: build-order
+    needs: [changes, build-order]
     if: needs.changes.outputs.order == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -315,7 +317,7 @@ jobs:
             docker compose up -d --no-deps order-service
 
   deploy-payment:
-    needs: build-payment
+    needs: [changes, build-payment]
     if: needs.changes.outputs.payment == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -331,7 +333,7 @@ jobs:
             docker compose up -d --no-deps payment-service
 
   deploy-notification:
-    needs: build-notification
+    needs: [changes, build-notification]
     if: needs.changes.outputs.notification == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -347,7 +349,7 @@ jobs:
             docker compose up -d --no-deps notification-service
 
   deploy-cart:
-    needs: build-cart
+    needs: [changes, build-cart]
     if: needs.changes.outputs.cart == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -363,7 +365,7 @@ jobs:
             docker compose up -d --no-deps cart-service
 
   deploy-image:
-    needs: build-image
+    needs: [changes, build-image]
     if: needs.changes.outputs.image == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -379,7 +381,7 @@ jobs:
             docker compose up -d --no-deps image-service
 
   deploy-eureka:
-    needs: build-eureka
+    needs: [changes, build-eureka]
     if: needs.changes.outputs.eureka == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     steps:
