@@ -9,51 +9,96 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs: 
-      auth: ${{ steps.filter.outputs.auth }}
-      user: ${{ steps.filter.outputs.user }}
-      catalog: ${{ steps.filter.outputs.catalog }}
-      order: ${{ steps.filter.outputs.order }}
-      payment: ${{ steps.filter.outputs.payment }}
-      notification: ${{ steps.filter.outputs.notification }}
-      cart: ${{ steps.filter.outputs.cart }}
-      gateway: ${{ steps.filter.outputs.gateway }}
-      image: ${{ steps.filter.outputs.image }}
-      eureka: ${{ steps.filter.outputs.eureka }}
-      shared: ${{ steps.filter.outputs.shared }}
+      auth: ${{ steps.check.outputs.auth }}
+      user: ${{ steps.check.outputs.user }}
+      catalog: ${{ steps.check.outputs.catalog }}
+      order: ${{ steps.check.outputs.order }}
+      payment: ${{ steps.check.outputs.payment }}
+      notification: ${{ steps.check.outputs.notification }}
+      cart: ${{ steps.check.outputs.cart }}
+      gateway: ${{ steps.check.outputs.gateway }}
+      image: ${{ steps.check.outputs.image }}
+      eureka: ${{ steps.check.outputs.eureka }}
+      shared: ${{ steps.check.outputs.shared }}
     
     steps:
     - uses: actions/checkout@v3
-    - uses: dorny/paths-filter@v3
-      id: filter
       with:
-        base: HEAD~1
-        filters: |
-          auth:
-            - 'server/auth-service/**'
-          gateway:
-            - 'server/gateway/**'
-          order:
-            - 'server/order-service/**'
-          catalog:
-            - 'server/catalog-service/**'
-          user:
-            - 'server/user-service/**'
-          payment:
-            - 'server/payment-service/**'
-          notification:
-            - 'server/notification-service/**'
-          cart:
-            - 'server/cart-service/**'
-          image:
-            - 'server/image-service/**'
-          eureka:
-            - 'server/eureka-server/**'
-          shared:
-            - 'server/pom.xml'
-            - 'server/docker-compose.yml'
-            - 'server/mvnw'
-            - 'server/mvnw.cmd'
-            - 'server/.mvn/**'
+        fetch-depth: 2
+    - name: Check changes
+      id: check
+      run: |
+        echo "Checking file changes..."
+        git diff --name-only HEAD~1 HEAD > changed_files.txt
+        cat changed_files.txt
+        
+        # Check each service
+        if grep -q "^server/auth-service/" changed_files.txt; then
+          echo "auth=true" >> $GITHUB_OUTPUT
+        else
+          echo "auth=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/gateway/" changed_files.txt; then
+          echo "gateway=true" >> $GITHUB_OUTPUT
+        else
+          echo "gateway=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/user-service/" changed_files.txt; then
+          echo "user=true" >> $GITHUB_OUTPUT
+        else
+          echo "user=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/catalog-service/" changed_files.txt; then
+          echo "catalog=true" >> $GITHUB_OUTPUT
+        else
+          echo "catalog=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/order-service/" changed_files.txt; then
+          echo "order=true" >> $GITHUB_OUTPUT
+        else
+          echo "order=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/payment-service/" changed_files.txt; then
+          echo "payment=true" >> $GITHUB_OUTPUT
+        else
+          echo "payment=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/notification-service/" changed_files.txt; then
+          echo "notification=true" >> $GITHUB_OUTPUT
+        else
+          echo "notification=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/cart-service/" changed_files.txt; then
+          echo "cart=true" >> $GITHUB_OUTPUT
+        else
+          echo "cart=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/image-service/" changed_files.txt; then
+          echo "image=true" >> $GITHUB_OUTPUT
+        else
+          echo "image=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "^server/eureka-server/" changed_files.txt; then
+          echo "eureka=true" >> $GITHUB_OUTPUT
+        else
+          echo "eureka=false" >> $GITHUB_OUTPUT
+        fi
+        
+        # Check shared files
+        if grep -E "^server/(pom\.xml|docker-compose\.yml|mvnw|\.mvn/)" changed_files.txt; then
+          echo "shared=true" >> $GITHUB_OUTPUT
+        else
+          echo "shared=false" >> $GITHUB_OUTPUT
+        fi
 
   build-auth:
     needs: changes
