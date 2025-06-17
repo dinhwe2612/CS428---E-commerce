@@ -5,8 +5,9 @@ import com.microservice_ecommerce.cart.application.dto.CartItemDTO;
 
 import java.util.UUID;
 public interface CartService {
+    //Test2
     CartDTO addItemToCart(CartItemDTO itemDTO);
     CartDTO removeItemFromCart(UUID itemId);
     CartDTO getCart();
     void clearCart();
-} // Test with new git diff approach Tue Jun 17 08:04:23 +07 2025
+} 
