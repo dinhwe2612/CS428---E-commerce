@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentListener {
     private final OrderService orderService;
-    //Test3
     @RabbitListener(queues = "order.payment.queue")
     public void handlePaymentStatusUpdate(PaymentStatusUpdatedEvent event) {
         log.info("=== PAYMENT EVENT RECEIVED ===");
