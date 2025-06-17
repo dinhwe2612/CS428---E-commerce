@@ -26,7 +26,6 @@ jobs:
     - uses: dorny/paths-filter@v3
       id: filter
       with:
-        list-files: shell
         base: HEAD~1
         filters: |
           auth:
