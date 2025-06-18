@@ -2,6 +2,7 @@ package com.order.order_service.integration.catalog.client;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -27,7 +28,7 @@ public class CatalogServiceClient {
     @Value("${INTERNAL_API_KEY}")
     private String internalApiKey;
     
-    public CatalogServiceClient(RestTemplate restTemplate, CatalogServiceConfig config) {
+        public CatalogServiceClient(@Qualifier("catalogRestTemplate") RestTemplate restTemplate, CatalogServiceConfig config) {
         this.restTemplate = restTemplate;
         this.config = config;
     }
