@@ -57,7 +57,9 @@ management:
       exposure:
         include: health,info
 
-JWT_SECRET: ${JWT_SECRET}
+jwt:
+  secret: ${JWT_SECRET}
+
 INTERNAL_API_KEY: ${INTERNAL_API_KEY}
 
 integration:
