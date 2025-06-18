@@ -276,7 +276,7 @@ services:
   chatbot-service:
     build:
       context: ./chatbot-service
-      dockerfile: chatbot-service/Dockerfile
+      dockerfile: Dockerfile
     container_name: chatbot-service
     ports:
       - "5005:5005"

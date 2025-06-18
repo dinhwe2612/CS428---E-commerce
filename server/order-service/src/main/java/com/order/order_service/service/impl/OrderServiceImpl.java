@@ -1,5 +1,6 @@
 package com.order.order_service.service.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,8 +9,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.order.order_service.DTOs.ListProductResponseDTO;
 import com.order.order_service.DTOs.OrderItemResponseDTO;
 import com.order.order_service.DTOs.OrderRequestDTO;
 import com.order.order_service.DTOs.OrderResponseDTO;
@@ -22,6 +24,8 @@ import com.order.order_service.model.OrderItem;
 import com.order.order_service.repository.OrderRepository;
 import com.order.order_service.service.OrderMessageProducer;
 import com.order.order_service.service.OrderService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -38,15 +42,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequest) {
+        HttpServletRequest request=((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        final Long userId=Long.parseLong(request.getHeader("X-User-ID"));
         Order order = new Order();
-        order.setUserId(orderRequest.getUserId());
+        order.setUserId(userId.toString());
         order.setShippingAddress(orderRequest.getShippingAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setStatus("PENDING");
         order.setTotalAmount(orderRequest.getTotalAmount());
         //create a hashset of product ids
         Set<Long> productIds = new HashSet<>();
-
+HashMap<Long,ProductDTO> productMap = new HashMap<>();
         //validate productids optimizelyy
         List<OrderItem> orderItems = orderRequest.getOrderItems().stream()
                 .map(item -> {
@@ -59,6 +65,7 @@ public class OrderServiceImpl implements OrderService {
                     orderItem.setSubtotal(item.getQuantity() * 0.0); // Should be calculated based on unit price
                     orderItem.setInventoryId(item.getInventoryId());
                     productIds.add(Long.parseLong(item.getProductId()));
+                   
                     return orderItem;
                 })
                 .collect(Collectors.toList());
@@ -71,7 +78,14 @@ public class OrderServiceImpl implements OrderService {
                 if (!productIds.contains(productDTO.getId())) {
                     throw new ProductIDNotFoundException("Invalid product ids");
                 }
+                productMap.put(productDTO.getId(),productDTO);
             }
+        }
+        for(OrderItem orderItem : orderItems){
+            orderItem.setProductName(productMap.get(Long.parseLong(orderItem.getProductId())).getName());
+            orderItem.setUnitPrice(productMap.get(Long.parseLong(orderItem.getProductId())).getPrice());
+            orderItem.setSubtotal(orderItem.getQuantity() * productMap.get(Long.parseLong(orderItem.getProductId())).getPrice());
+    
         }
 
         order.setOrderItems(orderItems);

@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequestDTO {
-    @JsonProperty("user_id")
-    private String userId;
+  
 
     @JsonProperty("shipping_address")
     private String shippingAddress;
