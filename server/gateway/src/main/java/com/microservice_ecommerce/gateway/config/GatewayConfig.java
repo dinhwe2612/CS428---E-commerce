@@ -96,7 +96,6 @@ public class GatewayConfig {
                         // user
                         .route("user_service_all", r -> r.path("/api/v1/users/**")
                                 .filters(f -> f
-                                        .stripPrefix(3)
                                         .filter(authFilter.apply(new AuthenticationFilter.Config())))
                                 .uri("lb://USER-SERVICE")
                         )
