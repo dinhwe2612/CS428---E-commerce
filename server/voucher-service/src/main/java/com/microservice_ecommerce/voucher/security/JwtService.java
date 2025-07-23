@@ -24,7 +24,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    public String extractUserEmail(String token) {
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
     
@@ -50,9 +50,9 @@ public class JwtService {
     }
 
     public UserDetails createUserDetails(String token) {
-        String email = extractUserEmail(token);
+        String username = extractUsername(token);
         Collection<GrantedAuthority> authorities = extractAuthorities(token);
-        return new User(email, "", authorities);
+        return new User(username, "", authorities);
     }
 
     public boolean isTokenValid(String token) {

@@ -145,18 +145,21 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException("Password cannot be empty");
             }
 
+            User user = userRepository.findByEmail(signInRequest.getEmail())
+                    .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            signInRequest.getEmail(),
+                            user.getUsername(), 
                             signInRequest.getPassword()));
 
             if (authentication.isAuthenticated()) {
-                User user = (User) authentication.getPrincipal();
-                String token = jwtService.generateToken(user);
+                User authenticatedUser = (User) authentication.getPrincipal();
+                String token = jwtService.generateToken(authenticatedUser);
 
                 return AuthResponse.builder()
                         .token(token)
-                        .username(user.getUsername())
+                        .username(authenticatedUser.getUsername())
                         .build();
             } else {
                 throw new BadCredentialsException("Invalid email or password");

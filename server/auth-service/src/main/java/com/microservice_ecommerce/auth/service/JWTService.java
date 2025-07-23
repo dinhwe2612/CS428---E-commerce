@@ -46,11 +46,11 @@ public class JWTService {
         
         extraClaims.put("userId", user.getId().toString());
         extraClaims.put("role", user.getRole().name());
-        extraClaims.put("username", user.getUsername());
+        extraClaims.put("email", user.getEmail());
 
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(user.getEmail())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -59,7 +59,7 @@ public class JWTService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
-            final String email = extractUsername(token);
+            final String username = extractUsername(token);
             User user = (User) userDetails;
 
             Jwts.parserBuilder()
@@ -67,7 +67,7 @@ public class JWTService {
                     .build()
                     .parseClaimsJws(token);
 
-            return (email.equals(user.getEmail())) && !isTokenExpired(token);
+            return (username.equals(user.getUsername())) && !isTokenExpired(token);
         } catch (Exception e) {
             throw new InvalidTokenException("Invalid token: " + e.getMessage());
         }
@@ -107,6 +107,7 @@ public class JWTService {
     }
 
     public String extractUserEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+        Claims claims = extractAllClaims(token);
+        return claims.get("email", String.class);
     }
 }
