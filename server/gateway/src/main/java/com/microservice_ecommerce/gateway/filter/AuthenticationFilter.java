@@ -52,7 +52,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             if (isOpenEndpoint(path)) {
                 return chain.filter(exchange);
             }
-            System.out.println("Path2: " + path);
             if (config.isSecured) {
                 if (!request.getHeaders().containsKey("Authorization")) {
                     return onError(exchange, "No Authorization header", HttpStatus.UNAUTHORIZED);
