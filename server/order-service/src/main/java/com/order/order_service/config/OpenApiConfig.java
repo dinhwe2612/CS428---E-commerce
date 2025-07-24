@@ -32,9 +32,17 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public GroupedOpenApi ordersGroup() {
+    public GroupedOpenApi orderGroup() {
         return GroupedOpenApi.builder()
-                .group("orders")
+                .group("order")
+                .pathsToMatch("/api/v1/orders/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+                .group("public")
                 .pathsToMatch("/api/v1/orders/**")
                 .build();
     }

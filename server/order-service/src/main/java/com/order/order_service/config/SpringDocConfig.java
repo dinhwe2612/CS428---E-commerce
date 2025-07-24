@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.core.jackson.ModelResolver;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -23,17 +20,5 @@ public class SpringDocConfig {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return new ModelResolver(objectMapper);
-    }
-
-    @Bean
-    public OpenAPI orderServiceOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Order Service API")
-                        .description("API for managing orders in the e-commerce system")
-                        .version("1.0.0")
-                        .contact(new Contact()
-                                .name("Order Service Team")
-                                .email("orders@ecommerce.com")));
     }
 } 
