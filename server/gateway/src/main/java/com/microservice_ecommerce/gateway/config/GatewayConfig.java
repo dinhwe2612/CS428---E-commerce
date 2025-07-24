@@ -52,6 +52,7 @@ public class GatewayConfig {
                                 .uri("lb://order-service"))
                         .route("order_docs", r -> r
                                 .path("/v3/api-docs/order")
+                                .filters(f -> f.rewritePath("/v3/api-docs/order", "/v3/api-docs/order"))
                                 .uri("lb://order-service"))
                         //
                         .route("report_service_all", r -> r.path("/api/v1/reports/**")
@@ -75,6 +76,7 @@ public class GatewayConfig {
                                 .uri("lb://notification-service"))
                         .route("notification_docs", r -> r
                                 .path("/v3/api-docs/notification")
+                                .filters(f -> f.rewritePath("/v3/api-docs/notification", "/v3/api-docs/notification"))
                                 .uri("lb://notification-service"))
                         // recommend
                         .route("recommend_service_all", r -> r.path("/api/v1/recommend/**")
