@@ -22,7 +22,11 @@ public class OrderInternalController {
             @PathVariable Long id,
             @RequestHeader("X-Internal-Api-Key") String apiKey) {
 
+        System.out.println("Expected API Key: " + internalApiKey);
+        System.out.println("Received API Key: " + apiKey);
+        
         if (!internalApiKey.equals(apiKey)) {
+            System.out.println("API Key mismatch!");
             return ResponseEntity.status(401).build();
         }
         
