@@ -86,7 +86,7 @@ public class GatewayConfig {
                                 .uri("lb://RECOMMEND-SERVICE")
                         )
                         // payment
-                        .route("payment_service_all", r -> r.path("/api/v1/payments/")
+                        .route("payment_service_all", r -> r.path("/api/v1/payments", "/api/v1/payments/**")
                                 .filters(f -> f
                                         .stripPrefix(3)
                                         .filter(authFilter.apply(new AuthenticationFilter.Config())))
