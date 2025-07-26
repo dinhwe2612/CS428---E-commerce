@@ -39,6 +39,8 @@ public class OrderServiceClient {
     
     public OrderResponseDTO getOrderById(Long orderId) {
         String url = buildUrl(OrderEndpoints.getOrderById(orderId));
+        System.out.println("Calling URL: " + url);
+        System.out.println("Using API Key: " + internalApiKey);
         try {
             HttpEntity<Void> requestEntity = new HttpEntity<>(createHeaders());
             return restTemplate.exchange(
@@ -48,6 +50,7 @@ public class OrderServiceClient {
                 OrderResponseDTO.class
             ).getBody();
         } catch (Exception e) {
+            System.out.println("Error details: " + e.getMessage());
             throw new RuntimeException("Error connecting to order service: " + e.getMessage(), e);
         }
     }
