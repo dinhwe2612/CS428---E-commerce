@@ -8,7 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,8 +61,54 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageDTO<ProductDTO> getAllProducts(Pageable pageable, String name, Double minPrice, Double maxPrice, Long categoryId) {
-        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
-        Page<Product> productPage = productRepository.findAll(spec, pageable);
+        // Check if sorting by price is needed
+        boolean hasPriceSorting = pageable.getSort().stream()
+                .anyMatch(order -> "price".equalsIgnoreCase(order.getProperty()));
+        
+        Page<Product> productPage;
+        if (hasPriceSorting) {
+            // Create a pageable without price sorting for the database query
+            List<Sort.Order> sortOrders = pageable.getSort().stream()
+                    .filter(order -> !"price".equalsIgnoreCase(order.getProperty()))
+                    .collect(Collectors.toList());
+            
+            Sort sortWithoutPrice = Sort.by(sortOrders);
+            Pageable pageableWithoutPrice = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortWithoutPrice);
+            
+            // Use specification without price sorting
+            Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+            productPage = productRepository.findAll(spec, pageableWithoutPrice);
+            
+            // Apply price sorting manually to the results
+            List<Product> sortedProducts = productPage.getContent().stream()
+                    .sorted((p1, p2) -> {
+                        try {
+                            // Remove commas and convert to double
+                            double price1 = Double.parseDouble(p1.getPrice().replace(",", ""));
+                            double price2 = Double.parseDouble(p2.getPrice().replace(",", ""));
+                            
+                            Sort.Order priceOrder = pageable.getSort().stream()
+                                    .filter(order -> "price".equalsIgnoreCase(order.getProperty()))
+                                    .findFirst()
+                                    .orElse(Sort.Order.asc("price"));
+                            
+                            int comparison = Double.compare(price1, price2);
+                            return priceOrder.getDirection() == Sort.Direction.DESC ? -comparison : comparison;
+                        } catch (NumberFormatException e) {
+                            // If price parsing fails, keep original order
+                            return 0;
+                        }
+                    })
+                    .collect(Collectors.toList());
+            
+            // Create a new page with sorted content
+            productPage = new PageImpl<>(sortedProducts, pageable, productPage.getTotalElements());
+        } else {
+            // No price sorting, use normal specification
+            Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+            productPage = productRepository.findAll(spec, pageable);
+        }
+        
         List<ProductDTO> productDTOs = productPage.getContent().stream()
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());
