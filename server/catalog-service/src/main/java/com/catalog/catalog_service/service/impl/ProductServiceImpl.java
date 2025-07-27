@@ -1,5 +1,6 @@
 package com.catalog.catalog_service.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -67,20 +67,13 @@ public class ProductServiceImpl implements ProductService {
         
         Page<Product> productPage;
         if (hasPriceSorting) {
-            // Create a pageable without price sorting for the database query
-            List<Sort.Order> sortOrders = pageable.getSort().stream()
-                    .filter(order -> !"price".equalsIgnoreCase(order.getProperty()))
-                    .collect(Collectors.toList());
-            
-            Sort sortWithoutPrice = Sort.by(sortOrders);
-            Pageable pageableWithoutPrice = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortWithoutPrice);
-            
-            // Use specification without price sorting
+            // For price sorting, we need to fetch all products, sort them, then paginate
+            // Get all products without pagination
             Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
-            productPage = productRepository.findAll(spec, pageableWithoutPrice);
+            List<Product> allProducts = productRepository.findAll(spec);
             
-            // Apply price sorting manually to the results
-            List<Product> sortedProducts = productPage.getContent().stream()
+            // Apply price sorting to all products
+            List<Product> allSortedProducts = allProducts.stream()
                     .sorted((p1, p2) -> {
                         try {
                             // Remove commas and convert to double
@@ -101,8 +94,18 @@ public class ProductServiceImpl implements ProductService {
                     })
                     .collect(Collectors.toList());
             
-            // Create a new page with sorted content
-            productPage = new PageImpl<>(sortedProducts, pageable, productPage.getTotalElements());
+            // Apply pagination to the sorted list
+            int pageSize = pageable.getPageSize();
+            int pageNumber = pageable.getPageNumber();
+            int startIndex = pageNumber * pageSize;
+            int endIndex = Math.min(startIndex + pageSize, allSortedProducts.size());
+            
+            List<Product> pageContent = startIndex < allSortedProducts.size() 
+                ? allSortedProducts.subList(startIndex, endIndex) 
+                : new ArrayList<>();
+            
+            // Create a new page with the paginated sorted content
+            productPage = new PageImpl<>(pageContent, pageable, allSortedProducts.size());
         } else {
             // No price sorting, use normal specification
             Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
