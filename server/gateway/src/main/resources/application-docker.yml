@@ -16,6 +16,11 @@ spring:
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin
         - AddResponseHeader=Access-Control-Allow-Origin, *
+    httpserver:
+        access-log:
+          enabled: true
+          format: 'request="%r" status=%s bytes=%B duration=%D remote=%a'
+          
   data:
     redis:
       host: redis
