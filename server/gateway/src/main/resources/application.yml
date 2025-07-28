@@ -18,6 +18,10 @@ spring:
             redis-rate-limiter.burstCapacity: 40
             redis-rate-limiter.requestedTokens: 1
             key-resolver: '#{@ipKeyResolver}'
+      httpserver:
+        access-log:
+          enabled: true
+          format: 'request="%r" status=%s bytes=%B duration=%D remote=%a'
 
 eureka:
   client:
@@ -37,7 +41,7 @@ logging:
     org.springframework.cloud.gateway: INFO
     reactor.netty: INFO
     org.springframework.web: INFO
-    com.microservice_ecommerce.gateway: DEBUG
+    com.microservice_ecommerce.gateway: INFO
 
 management:
   endpoints:
