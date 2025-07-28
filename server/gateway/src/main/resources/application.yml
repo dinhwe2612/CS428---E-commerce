@@ -21,6 +21,7 @@ spring:
       httpserver:
         access-log:
           enabled: true
+          format: 'request="%r" status=%s bytes=%B duration=%D remote=%a'
 
 eureka:
   client:
