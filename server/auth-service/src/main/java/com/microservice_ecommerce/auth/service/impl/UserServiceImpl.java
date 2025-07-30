@@ -210,9 +210,9 @@ public class UserServiceImpl implements UserService {
                     "Password must be at least 8 characters long and contain at least one digit, one uppercase letter, one lowercase letter, and one special character");
         }
 
-        String email = jwtService.extractUsername(token);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        String username = jwtService.extractUsername(token);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             throw new InvalidPasswordException("New password cannot be same as old password");
