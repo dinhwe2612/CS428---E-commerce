@@ -1,6 +1,5 @@
 package com.catalog.catalog_service.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -32,6 +31,7 @@ import com.catalog.catalog_service.model.ProductImage;
 import com.catalog.catalog_service.producer.RabbitProducer;
 import com.catalog.catalog_service.repository.es.ProductSearchRepository;
 import com.catalog.catalog_service.repository.jpa.CategoryRepository;
+import com.catalog.catalog_service.repository.jpa.ProductImageRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
 import com.catalog.catalog_service.service.ProductService;
 import com.catalog.catalog_service.specification.ProductSpecification;
@@ -45,79 +45,114 @@ public class ProductServiceImpl implements ProductService {
     private final EntityMapper entityMapper;
     private final ProductSearchRepository productSearchRepository;
     private final RabbitProducer rabbitProducer;
+    private final ProductImageRepository productImageRepository;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, 
                             CategoryRepository categoryRepository,
                             EntityMapper entityMapper,
                             ProductSearchRepository productSearchRepository,
-                            RabbitProducer rabbitProducer) {
+                            RabbitProducer rabbitProducer,
+                            ProductImageRepository productImageRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.entityMapper = entityMapper;
         this.productSearchRepository = productSearchRepository;
         this.rabbitProducer = rabbitProducer;
+        this.productImageRepository = productImageRepository;
     }
-
     @Override
-    public PageDTO<ProductDTO> getAllProducts(Pageable pageable, String name, Double minPrice, Double maxPrice, Long categoryId) {
-        // Check if sorting by price is needed
+    public PageDTO<ProductDTO> getAllProducts(
+            Pageable pageable,
+            String name,
+            Double minPrice,
+            Double maxPrice,
+            Long categoryId) {
+    
         boolean hasPriceSorting = pageable.getSort().stream()
-                .anyMatch(order -> "price".equalsIgnoreCase(order.getProperty()));
-        
+            .anyMatch(o -> "price".equalsIgnoreCase(o.getProperty()));
+    
+        // only name & category in the DB
+        Specification<Product> spec =
+            ProductSpecification.withFilters(name, null, null, categoryId);
+    
         Page<Product> productPage;
+    
         if (hasPriceSorting) {
-            // For price sorting, we need to fetch all products, sort them, then paginate
-            // Get all products without pagination
-            Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+            // 1) load everything matching name/category
             List<Product> allProducts = productRepository.findAll(spec);
-            
-            // Apply price sorting to all products
-            List<Product> allSortedProducts = allProducts.stream()
-                    .sorted((p1, p2) -> {
-                        try {
-                            // Remove commas and convert to double
-                            double price1 = Double.parseDouble(p1.getPrice().replace(",", ""));
-                            double price2 = Double.parseDouble(p2.getPrice().replace(",", ""));
-                            
-                            Sort.Order priceOrder = pageable.getSort().stream()
-                                    .filter(order -> "price".equalsIgnoreCase(order.getProperty()))
-                                    .findFirst()
-                                    .orElse(Sort.Order.asc("price"));
-                            
-                            int comparison = Double.compare(price1, price2);
-                            return priceOrder.getDirection() == Sort.Direction.DESC ? -comparison : comparison;
-                        } catch (NumberFormatException e) {
-                            // If price parsing fails, keep original order
-                            return 0;
-                        }
-                    })
-                    .collect(Collectors.toList());
-            
-            // Apply pagination to the sorted list
-            int pageSize = pageable.getPageSize();
-            int pageNumber = pageable.getPageNumber();
-            int startIndex = pageNumber * pageSize;
-            int endIndex = Math.min(startIndex + pageSize, allSortedProducts.size());
-            
-            List<Product> pageContent = startIndex < allSortedProducts.size() 
-                ? allSortedProducts.subList(startIndex, endIndex) 
-                : new ArrayList<>();
-            
-            // Create a new page with the paginated sorted content
-            productPage = new PageImpl<>(pageContent, pageable, allSortedProducts.size());
-        } else {
-            // No price sorting, use normal specification
-            Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
-            productPage = productRepository.findAll(spec, pageable);
+    
+            // 2) APPLY numeric filter FIRST
+            List<Product> filtered = allProducts.stream()
+                .filter(p -> {
+                    try {
+                        double v = Double.parseDouble(p.getPrice().replace(",", ""));
+                        return (minPrice == null || v >= minPrice)
+                            && (maxPrice == null || v <= maxPrice);
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                })
+                .toList();
+    
+            // 3) SORT *that* filtered list (not the original allProducts)
+            Sort.Order priceOrder = pageable.getSort().stream()
+                .filter(o -> "price".equalsIgnoreCase(o.getProperty()))
+                .findFirst()
+                .orElse(Sort.Order.asc("price"));
+    
+            List<Product> sorted = filtered.stream()
+                .sorted((p1, p2) -> {
+                    double a = Double.parseDouble(p1.getPrice().replace(",", ""));
+                    double b = Double.parseDouble(p2.getPrice().replace(",", ""));
+                    int cmp = Double.compare(a, b);
+                    return priceOrder.isAscending() ? cmp : -cmp;
+                })
+                .toList();
+    
+            // 4) PAGINATE in Java
+            int pageSize  = pageable.getPageSize();
+            int pageNum   = pageable.getPageNumber();
+            int start     = pageNum * pageSize;
+            int end       = Math.min(start + pageSize, sorted.size());
+            List<Product> pageContent = start < sorted.size()
+                ? sorted.subList(start, end)
+                : List.of();
+    
+            productPage = new PageImpl<>(pageContent, pageable, sorted.size());
         }
-        
-        List<ProductDTO> productDTOs = productPage.getContent().stream()
-                .map(entityMapper::toProductDTO)
-                .collect(Collectors.toList());
-        
+        else {
+            // DB handles name/category and other sorts
+            Page<Product> rawPage = productRepository.findAll(spec, pageable);
+    
+            // NOW apply numeric filter on the page content
+            List<Product> filtered = rawPage.getContent().stream()
+                .filter(p -> {
+                    try {
+                        double v = Double.parseDouble(p.getPrice().replace(",", ""));
+                        return (minPrice == null || v >= minPrice)
+                            && (maxPrice == null || v <= maxPrice);
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                })
+                .toList();
+    
+            // wrap that filtered list into a new PageImpl
+            productPage = new PageImpl<>(
+                filtered,
+                pageable,
+                filtered.size()
+            );
+        }
+    
+        // map & return
+        List<ProductDTO> dtos = productPage.getContent().stream()
+            .map(entityMapper::toProductDTO)
+            .toList();
+    
         return new PageDTO<>(
-            productDTOs,
+            dtos,
             productPage.getNumber(),
             productPage.getSize(),
             productPage.getTotalElements(),
@@ -126,6 +161,8 @@ public class ProductServiceImpl implements ProductService {
             productPage.isFirst()
         );
     }
+    
+    
 
     @Override
     public ProductDTO getProductById(Long id) {
@@ -191,6 +228,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO updateProduct(Long id, UpdateProductRequest request) {
+        logger.debug("Starting updateProduct for id: {}", id);
+        logger.debug("UpdateProductRequest: {}", request);
+        
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
@@ -216,17 +256,30 @@ public class ProductServiceImpl implements ProductService {
         }
         List<String> imageUrls = request.getImageUrls();
         if (imageUrls != null) {
+            productImageRepository.deleteByProductId(product.getId());
+            productImageRepository.flush();
             AtomicInteger counter = new AtomicInteger(1);
+        
+            // 1) Clear out the old ones so orphanRemoval=true will delete them
+            product.getImages().clear();
+        
+            // 2) Build & wire each new image
             List<ProductImage> productImages = imageUrls.stream()
-                    .map(imageUrl -> {
-                        ProductImage productImage = new ProductImage();
-                        productImage.setImageUrl(imageUrl);
-                        productImage.setImageOrder(counter.getAndIncrement());
-                        return productImage;
-                    })
-                    .toList();
-            product.setImages(productImages);
+                .map(imageUrl -> {
+                    ProductImage pi = new ProductImage();
+                    pi.setImageUrl(imageUrl);
+                    pi.setImageOrder(counter.getAndIncrement());
+                    // ← set the FK so product_id isn’t null
+                    pi.setProduct(product);
+                    return pi;
+                })
+                .toList();
+        
+            // 3) Add them into the *managed* collection
+            product.getImages().addAll(productImages);
         }
+        
+        logger.debug("Product after update: {}", product);
 
         Product updatedProduct = productRepository.save(product);
         return entityMapper.toProductDTO(updatedProduct);

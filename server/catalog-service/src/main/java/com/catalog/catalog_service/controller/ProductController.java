@@ -1,5 +1,23 @@
 package com.catalog.catalog_service.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.catalog.catalog_service.dto.AutocompleteResponse;
 import com.catalog.catalog_service.dto.PageDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
@@ -9,20 +27,12 @@ import com.catalog.catalog_service.service.ProductService;
 import com.catalog.catalog_service.service.ProductSyncService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/products")
@@ -111,7 +121,19 @@ public class ProductController {
             @Parameter(description = "ID of the product", required = true, example = "1") @PathVariable Long id,
             @RequestBody UpdateProductRequest request
     ) {
-        return ResponseEntity.ok(productService.updateProduct(id, request));
+        System.out.println("=== UPDATE PRODUCT REQUEST ===");
+        System.out.println("Product ID: " + id);
+        System.out.println("Request: " + request);
+        try {
+            ProductDTO result = productService.updateProduct(id, request);
+            System.out.println("=== UPDATE PRODUCT SUCCESS ===");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("=== UPDATE PRODUCT ERROR ===");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Operation(summary = "Delete a product", description = "Deletes a product by ID (admin only)")

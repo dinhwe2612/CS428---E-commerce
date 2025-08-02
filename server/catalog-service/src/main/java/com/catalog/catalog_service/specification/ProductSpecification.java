@@ -3,8 +3,11 @@ package com.catalog.catalog_service.specification;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.catalog.catalog_service.model.Product;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.catalog.catalog_service.model.Product;
+
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 
 public class ProductSpecification {
@@ -37,19 +40,29 @@ public class ProductSpecification {
                 predicates.add(cb.or(namePredicates.toArray(new Predicate[0])));
             }
             
+      
             if (minPrice != null) {
-                predicates.add(cb.greaterThanOrEqualTo(
-                    cb.function("CAST", Double.class, root.get("price"), cb.literal(Double.class)),
-                    minPrice
-                ));
+                // Use MySQL’s CONVERT(price, DECIMAL(10,2)) instead of CAST
+                Expression<Double> priceAsNum = cb.function(
+                    "convert",               // <-- note change here
+                    Double.class,
+                    root.get("price"),
+                    cb.literal("DECIMAL(10,2)")
+                );
+                predicates.add(cb.greaterThanOrEqualTo(priceAsNum, minPrice));
             }
-            
+
             if (maxPrice != null) {
-                predicates.add(cb.lessThanOrEqualTo(
-                    cb.function("CAST", Double.class, root.get("price"), cb.literal(Double.class)),
-                    maxPrice
-                ));
+                Expression<Double> priceAsNum = cb.function(
+                    "convert",
+                    Double.class,
+                    root.get("price"),
+                    cb.literal("DECIMAL(10,2)")
+                );
+                predicates.add(cb.lessThanOrEqualTo(priceAsNum, maxPrice));
             }
+
+            
             
             if (categoryId != null) {
                 predicates.add(cb.equal(root.get("category").get("id"), categoryId));
