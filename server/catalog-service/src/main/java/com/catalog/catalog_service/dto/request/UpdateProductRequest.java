@@ -1,12 +1,11 @@
 package com.catalog.catalog_service.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import java.util.List;
+
+import com.catalog.catalog_service.model.ProductStatus;
+
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
@@ -17,6 +16,7 @@ public class UpdateProductRequest {
     private Long categoryId;
     private String productPath;
     private String name;
+    private ProductStatus status;
     private String price;
     private String descriptionHtml;
     private String descriptionText;

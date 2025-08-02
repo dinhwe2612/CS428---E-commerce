@@ -29,4 +29,6 @@ public interface ProductService {
     List<ProductDTO> getProductsByIds(List<Long> ids);
 
     AutocompleteResponse getAutocompleteSuggestions(String query, int limit);
+
+    void syncAllProductsToNewFlower();
 }

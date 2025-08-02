@@ -2,7 +2,7 @@ package com.catalog.catalog_service.dto.request;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.catalog.catalog_service.model.ProductStatus;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +24,8 @@ public class CreateProductRequest {
 
     @NotBlank(message = "Name is required")
     private String name;
+
+    private ProductStatus status = ProductStatus.NEW_FLOWER; // Default to NEW_FLOWER
 
     @NotBlank(message = "Price is required")
     @Positive(message = "Price must be greater than 0")

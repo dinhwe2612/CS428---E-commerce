@@ -64,6 +64,7 @@ public class EntityMapper {
         dto.setCategoryId(product.getCategory().getId());
         dto.setProductPath(product.getProductPath());
         dto.setName(product.getName());
+        dto.setStatus(product.getStatus());
         dto.setPrice(product.getPrice());
         dto.setDescriptionHtml(product.getDescriptionHtml());
         dto.setDescriptionText(product.getDescriptionText());

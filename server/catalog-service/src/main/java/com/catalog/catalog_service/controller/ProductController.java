@@ -189,4 +189,13 @@ public class ProductController {
         productSyncService.syncAllProducts();
         return ResponseEntity.ok("Product sync to Elasticsearch completed successfully");
     }
+
+    @Operation(summary = "Sync all products to New Flower status", description = "Updates all products status to NEW_FLOWER (admin only)")
+    @ApiResponse(responseCode = "200", description = "Status sync completed")
+    @PostMapping("/sync-status-to-new-flower")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> syncStatusToNewFlower() {
+        productService.syncAllProductsToNewFlower();
+        return ResponseEntity.ok("All products status synced to NEW_FLOWER successfully");
+    }
 }
