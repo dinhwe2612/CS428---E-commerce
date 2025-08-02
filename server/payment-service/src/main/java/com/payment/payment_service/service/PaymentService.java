@@ -2,6 +2,7 @@ package com.payment.payment_service.service;
 
 import com.payment.payment_service.dto.PaymentRequestDTO;
 import com.payment.payment_service.dto.PaymentResponseDTO;
+import com.payment.payment_service.dto.GuestPaymentRequestDTO;
 import com.payment.payment_service.model.PaymentStatus;
 
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.Map;
 public interface PaymentService {
     
     PaymentResponseDTO createPayment(PaymentRequestDTO paymentRequest, String userId);
+    
+    PaymentResponseDTO createGuestPayment(GuestPaymentRequestDTO paymentRequest);
     
     PaymentResponseDTO getPaymentById(Long id);
     

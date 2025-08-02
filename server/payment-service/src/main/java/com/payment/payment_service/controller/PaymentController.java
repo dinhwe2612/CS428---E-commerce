@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.payment.payment_service.dto.ApiResponse;
 import com.payment.payment_service.dto.PaymentRequestDTO;
 import com.payment.payment_service.dto.PaymentResponseDTO;
+import com.payment.payment_service.dto.GuestPaymentRequestDTO;
 import com.payment.payment_service.model.PaymentStatus;
 import com.payment.payment_service.security.UserDetailsWithUserId;
 import com.payment.payment_service.service.PaymentService;
@@ -50,6 +51,23 @@ public class PaymentController {
         String userId = extractUserIdFromAuthentication(authentication);
         PaymentResponseDTO response = paymentService.createPayment(paymentRequest, userId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Payment created successfully", response));
+    }
+
+    @Operation(
+            summary = "Create a guest payment",
+            description = "Creates a payment for an order for unregistered users",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Guest payment created successfully",
+                            content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+            }
+    )
+    @PostMapping("/guest")
+    public ResponseEntity<ApiResponse<PaymentResponseDTO>> createGuestPayment(
+            @Parameter(description = "Guest payment request payload", required = true)
+            @Valid @RequestBody GuestPaymentRequestDTO paymentRequest
+    ) {
+        PaymentResponseDTO response = paymentService.createGuestPayment(paymentRequest);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Guest payment created successfully", response));
     }
 
     @Operation(summary = "Get payment by ID", description = "Retrieve a single payment by its database ID")

@@ -50,6 +50,8 @@ public class GatewayConfig {
                         .route("order_service_all", r -> r.path("/api/v1/orders/**")
                                 .filters(f -> f.filter(authFilter.apply(new AuthenticationFilter.Config())))
                                 .uri("lb://order-service"))
+                        .route("guest_order_service_all", r -> r.path("/api/v1/guest-orders/**")
+                                .uri("lb://order-service"))
                         .route("order_docs", r -> r
                                 .path("/v3/api-docs/order")
                                 .filters(f -> f.rewritePath("/v3/api-docs/order", "/v3/api-docs/order"))

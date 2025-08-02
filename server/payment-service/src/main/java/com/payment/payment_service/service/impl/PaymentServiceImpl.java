@@ -5,6 +5,7 @@ import com.payment.integration.order.dto.OrderItemResponseDTO;
 import com.payment.integration.order.dto.OrderResponseDTO;
 import com.payment.payment_service.dto.PaymentRequestDTO;
 import com.payment.payment_service.dto.PaymentResponseDTO;
+import com.payment.payment_service.dto.GuestPaymentRequestDTO;
 import com.payment.payment_service.exception.PaymentNotFoundException;
 import com.payment.payment_service.exception.PaymentProcessingException;
 import com.payment.payment_service.model.Payment;
@@ -72,6 +73,39 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Override
+    @Transactional
+    public PaymentResponseDTO createGuestPayment(GuestPaymentRequestDTO paymentRequest) {
+        try {
+            OrderResponseDTO order = orderServiceClient.getOrderById(paymentRequest.getOrderId());
+            System.out.println("Order: " + order);
+
+            if (!order.getStatus().equals("PENDING")) {
+                throw new PaymentProcessingException("Order is not in pending status");
+            }
+            
+            if (!order.getPaymentMethod().equals("CARD")) {
+                throw new PaymentProcessingException("Order is not using card payment");
+            }
+
+            // Create payment entity for guest user (no userId)
+            Payment payment = createGuestPaymentEntity(order, paymentRequest);
+            Payment savedPayment = paymentRepository.save(payment);
+
+            PaymentResponseDTO response = convertToDTO(savedPayment);
+            
+            response = createGuestPayOSPayment(savedPayment, paymentRequest, order);
+
+            messageProducer.sendPaymentCreatedEvent(response);
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("Error creating guest payment: {}", e.getMessage(), e);
+            throw new PaymentProcessingException("Failed to create guest payment: " + e.getMessage());
+        }
+    }
+
     private Payment createPaymentEntity(OrderResponseDTO order, String userId) {
         Payment payment = new Payment();
         payment.setTransactionId(generateTransactionId());
@@ -82,6 +116,20 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus(PaymentStatus.PENDING);
         payment.setCurrency("VND");
         payment.setDescription("Payment for order #" + order.getId());
+        payment.setPaymentGateway("PayOS");
+        return payment;
+    }
+
+    private Payment createGuestPaymentEntity(OrderResponseDTO order, GuestPaymentRequestDTO paymentRequest) {
+        Payment payment = new Payment();
+        payment.setTransactionId(generateTransactionId());
+        payment.setOrderId(order.getId());
+        payment.setUserId(null); // Guest user has no userId
+        payment.setAmount(BigDecimal.valueOf(order.getTotalAmount()));
+        payment.setPaymentMethod(PaymentMethod.CARD);
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setCurrency("VND");
+        payment.setDescription("Guest payment for order #" + order.getId());
         payment.setPaymentGateway("PayOS");
         return payment;
     }
@@ -128,6 +176,51 @@ public class PaymentServiceImpl implements PaymentService {
             paymentRepository.save(payment);
             
             throw new PaymentProcessingException("Failed to create PayOS payment: " + e.getMessage());
+        }
+    }
+
+    private PaymentResponseDTO createGuestPayOSPayment(Payment payment, GuestPaymentRequestDTO request, OrderResponseDTO order) {
+        try {
+            log.info("Creating guest PayOS payment for order: {}", payment.getOrderId());
+            
+            ItemData itemData = ItemData.builder()
+                .name("Order #" + payment.getOrderId())
+                .quantity(1)
+                .price(payment.getAmount().intValue())
+                .build();
+
+            PaymentData.PaymentDataBuilder paymentDataBuilder = PaymentData.builder()
+                .orderCode(payment.getOrderId())
+                .amount(payment.getAmount().intValue())
+                .description("Guest payment for order #" + payment.getOrderId())
+                .item(itemData);
+            
+            if (request.getReturnUrl() != null) {
+                paymentDataBuilder.returnUrl(request.getReturnUrl());
+            }
+            if (request.getCancelUrl() != null) {
+                paymentDataBuilder.cancelUrl(request.getCancelUrl());
+            }
+            
+            PaymentData paymentData = paymentDataBuilder.build();
+
+            CheckoutResponseData createPaymentResult = payOS.createPaymentLink(paymentData);
+            
+            payment.setGatewayTransactionId(payment.getOrderId().toString());
+            payment.setStatus(PaymentStatus.PROCESSING);
+            payment = paymentRepository.save(payment);
+
+            PaymentResponseDTO response = convertToDTO(payment);
+            response.setPaymentUrl(createPaymentResult.getCheckoutUrl());
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("Error creating guest PayOS payment: {}", e.getMessage(), e);
+            payment.setStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+            
+            throw new PaymentProcessingException("Failed to create guest PayOS payment: " + e.getMessage());
         }
     }
 
