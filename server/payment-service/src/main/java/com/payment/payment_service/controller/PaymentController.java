@@ -9,6 +9,7 @@ import com.payment.payment_service.dto.GuestPaymentRequestDTO;
 import com.payment.payment_service.model.PaymentStatus;
 import com.payment.payment_service.security.UserDetailsWithUserId;
 import com.payment.payment_service.service.PaymentService;
+import com.payment.integration.order.client.OrderServiceClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +34,7 @@ import java.util.Map;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final OrderServiceClient orderServiceClient;
 
     @Operation(
             summary = "Create a new payment",
@@ -108,6 +110,16 @@ public class PaymentController {
         String userId = extractUserIdFromAuthentication(authentication);
         List<PaymentResponseDTO> responses = paymentService.getPaymentsByUserId(userId);
         return ResponseEntity.ok(new ApiResponse<>(true, "Payments retrieved successfully", responses));
+    }
+    
+    @Operation(summary = "List guest payments by email", description = "Returns all payments made by a guest user using their email")
+    @GetMapping("/guest/email/{email}")
+    public ResponseEntity<ApiResponse<List<PaymentResponseDTO>>> getGuestPaymentsByEmail(
+            @Parameter(description = "Guest email", required = true, example = "guest@example.com")
+            @PathVariable String email
+    ) {
+        List<PaymentResponseDTO> responses = paymentService.getGuestPaymentsByEmail(email);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Guest payments retrieved successfully", responses));
     }
 
     @Operation(summary = "List payments by status", description = "Filter payments by their current status")

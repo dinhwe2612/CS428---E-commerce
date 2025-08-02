@@ -22,6 +22,8 @@ public interface PaymentService {
     
     List<PaymentResponseDTO> getPaymentsByUserId(String userId);
     
+    List<PaymentResponseDTO> getGuestPaymentsByEmail(String email);
+    
     List<PaymentResponseDTO> getPaymentsByStatus(PaymentStatus status);
     
     PaymentResponseDTO updatePaymentStatus(String transactionId, PaymentStatus status);

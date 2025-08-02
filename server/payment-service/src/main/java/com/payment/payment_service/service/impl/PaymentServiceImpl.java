@@ -3,6 +3,7 @@ package com.payment.payment_service.service.impl;
 import com.payment.integration.order.client.OrderServiceClient;
 import com.payment.integration.order.dto.OrderItemResponseDTO;
 import com.payment.integration.order.dto.OrderResponseDTO;
+import com.payment.integration.order.dto.GuestOrderResponseDTO;
 import com.payment.payment_service.dto.PaymentRequestDTO;
 import com.payment.payment_service.dto.PaymentResponseDTO;
 import com.payment.payment_service.dto.GuestPaymentRequestDTO;
@@ -77,15 +78,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponseDTO createGuestPayment(GuestPaymentRequestDTO paymentRequest) {
         try {
-            OrderResponseDTO order = orderServiceClient.getOrderById(paymentRequest.getOrderId());
-            System.out.println("Order: " + order);
+            GuestOrderResponseDTO order = orderServiceClient.getGuestOrderById(paymentRequest.getOrderId());
+            System.out.println("Guest Order: " + order);
 
             if (!order.getStatus().equals("PENDING")) {
-                throw new PaymentProcessingException("Order is not in pending status");
+                throw new PaymentProcessingException("Guest order is not in pending status");
             }
             
             if (!order.getPaymentMethod().equals("CARD")) {
-                throw new PaymentProcessingException("Order is not using card payment");
+                // print the payment method
+                System.out.println("Guest order is not using card payment: " + order.getPaymentMethod());
+                throw new PaymentProcessingException("Guest order is not using card payment");
             }
 
             // Create payment entity for guest user (no userId)
@@ -120,11 +123,11 @@ public class PaymentServiceImpl implements PaymentService {
         return payment;
     }
 
-    private Payment createGuestPaymentEntity(OrderResponseDTO order, GuestPaymentRequestDTO paymentRequest) {
+    private Payment createGuestPaymentEntity(GuestOrderResponseDTO order, GuestPaymentRequestDTO paymentRequest) {
         Payment payment = new Payment();
         payment.setTransactionId(generateTransactionId());
         payment.setOrderId(order.getId());
-        payment.setUserId(null); // Guest user has no userId
+        payment.setUserId("GUEST_" + order.getCustomerEmail()); // Use email as guest identifier
         payment.setAmount(BigDecimal.valueOf(order.getTotalAmount()));
         payment.setPaymentMethod(PaymentMethod.CARD);
         payment.setStatus(PaymentStatus.PENDING);
@@ -179,7 +182,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private PaymentResponseDTO createGuestPayOSPayment(Payment payment, GuestPaymentRequestDTO request, OrderResponseDTO order) {
+    private PaymentResponseDTO createGuestPayOSPayment(Payment payment, GuestPaymentRequestDTO request, GuestOrderResponseDTO order) {
         try {
             log.info("Creating guest PayOS payment for order: {}", payment.getOrderId());
             
@@ -249,6 +252,15 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public List<PaymentResponseDTO> getPaymentsByUserId(String userId) {
         return paymentRepository.findByUserId(userId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<PaymentResponseDTO> getGuestPaymentsByEmail(String email) {
+        String guestUserId = "GUEST_" + email;
+        return paymentRepository.findByUserId(guestUserId)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
