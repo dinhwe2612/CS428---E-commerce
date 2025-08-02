@@ -1,14 +1,15 @@
 package com.order.order_service.config;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.Contact;
-import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
+
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class OpenApiConfig {
@@ -35,15 +36,17 @@ public class OpenApiConfig {
     public GroupedOpenApi orderGroup() {
         return GroupedOpenApi.builder()
                 .group("order")
-                .pathsToMatch("/api/v1/orders/**")
+                .pathsToMatch("/api/v1/orders/**", "/api/v1/guest-orders/**")
+           
                 .build();
     }
 
+
     @Bean
-    public GroupedOpenApi publicApi() {
+    public GroupedOpenApi guestOrderGroup() {
         return GroupedOpenApi.builder()
-                .group("public")
-                .pathsToMatch("/api/v1/orders/**")
+                .group("guest-order")
+                .pathsToMatch("/api/v1/guest-orders", "/api/v1/guest-orders/**")
                 .build();
     }
 }
