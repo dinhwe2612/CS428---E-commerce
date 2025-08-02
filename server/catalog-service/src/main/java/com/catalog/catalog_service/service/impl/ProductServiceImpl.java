@@ -63,70 +63,29 @@ public class ProductServiceImpl implements ProductService {
         this.productImageRepository = productImageRepository;
     }
     @Override
+    @Transactional(readOnly = true)
     public PageDTO<ProductDTO> getAllProducts(
             Pageable pageable,
             String name,
             Double minPrice,
             Double maxPrice,
             Long categoryId) {
-    
+
         boolean hasPriceSorting = pageable.getSort().stream()
             .anyMatch(o -> "price".equalsIgnoreCase(o.getProperty()));
-    
-        // only name & category in the DB
-        Specification<Product> spec =
-            ProductSpecification.withFilters(name, null, null, categoryId);
-    
+
+        // 1) Text & category filter in the DB
+        Specification<Product> spec = ProductSpecification.withFilters(name, null, null, categoryId);
+
         Page<Product> productPage;
-    
+
         if (hasPriceSorting) {
-            // 1) load everything matching name/category
-            List<Product> allProducts = productRepository.findAll(spec);
-    
-            // 2) APPLY numeric filter FIRST
-            List<Product> filtered = allProducts.stream()
-                .filter(p -> {
-                    try {
-                        double v = Double.parseDouble(p.getPrice().replace(",", ""));
-                        return (minPrice == null || v >= minPrice)
-                            && (maxPrice == null || v <= maxPrice);
-                    } catch (NumberFormatException e) {
-                        return false;
-                    }
-                })
-                .toList();
-    
-            // 3) SORT *that* filtered list (not the original allProducts)
-            Sort.Order priceOrder = pageable.getSort().stream()
-                .filter(o -> "price".equalsIgnoreCase(o.getProperty()))
-                .findFirst()
-                .orElse(Sort.Order.asc("price"));
-    
-            List<Product> sorted = filtered.stream()
-                .sorted((p1, p2) -> {
-                    double a = Double.parseDouble(p1.getPrice().replace(",", ""));
-                    double b = Double.parseDouble(p2.getPrice().replace(",", ""));
-                    int cmp = Double.compare(a, b);
-                    return priceOrder.isAscending() ? cmp : -cmp;
-                })
-                .toList();
-    
-            // 4) PAGINATE in Java
-            int pageSize  = pageable.getPageSize();
-            int pageNum   = pageable.getPageNumber();
-            int start     = pageNum * pageSize;
-            int end       = Math.min(start + pageSize, sorted.size());
-            List<Product> pageContent = start < sorted.size()
-                ? sorted.subList(start, end)
-                : List.of();
-    
-            productPage = new PageImpl<>(pageContent, pageable, sorted.size());
-        }
-        else {
-            // 1) Fetch *all* matching products (name & category only)
+            // PRICE-SORT branch: fetch all, then filter, sort, paginate in Java
+
+            // a) fetch all matching name/category
             List<Product> all = productRepository.findAll(spec);
-        
-            // 2) Apply min/max price filter in Java
+
+            // b) numeric filter
             List<Product> filtered = all.stream()
                 .filter(p -> {
                     try {
@@ -138,41 +97,83 @@ public class ProductServiceImpl implements ProductService {
                     }
                 })
                 .toList();
-        
-            // 3) Sort by name according to sortDirection
+
+            // c) sort by price
+            Sort.Order priceOrder = pageable.getSort().stream()
+                .filter(o -> "price".equalsIgnoreCase(o.getProperty()))
+                .findFirst()
+                .orElse(Sort.Order.asc("price"));
+
+            List<Product> sorted = filtered.stream()
+                .sorted((p1, p2) -> {
+                    double a = Double.parseDouble(p1.getPrice().replace(",", ""));
+                    double b = Double.parseDouble(p2.getPrice().replace(",", ""));
+                    int cmp = Double.compare(a, b);
+                    return priceOrder.isAscending() ? cmp : -cmp;
+                })
+                .toList();
+
+            // d) paginate
+            int size  = pageable.getPageSize();
+            int pageN = pageable.getPageNumber();
+            int start = pageN * size;
+            int end   = Math.min(start + size, sorted.size());
+            List<Product> content = start < sorted.size()
+                ? sorted.subList(start, end)
+                : List.of();
+
+            productPage = new PageImpl<>(content, pageable, sorted.size());
+        }
+        else {
+            // NAME-SORT (or other sorts) branch: fetch all, then filter, sort by name, paginate
+
+            // a) fetch all matching name/category
+            List<Product> all = productRepository.findAll(spec);
+
+            // b) numeric filter
+            List<Product> filtered = all.stream()
+                .filter(p -> {
+                    try {
+                        double v = Double.parseDouble(p.getPrice().replace(",", ""));
+                        return (minPrice == null || v >= minPrice)
+                            && (maxPrice == null || v <= maxPrice);
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                })
+                .toList();
+
+            // c) sort by name
             Sort.Order nameOrder = pageable.getSort().stream()
                 .filter(o -> "name".equalsIgnoreCase(o.getProperty()))
                 .findFirst()
                 .orElse(Sort.Order.asc("name"));
-        
 
-
-
-                
             List<Product> sorted = filtered.stream()
                 .sorted((p1, p2) -> {
                     int cmp = p1.getName().compareToIgnoreCase(p2.getName());
                     return nameOrder.isAscending() ? cmp : -cmp;
                 })
                 .toList();
-        
-            // 4) Paginate the sorted list in Java
+
+            // d) paginate
             int size  = pageable.getPageSize();
             int pageN = pageable.getPageNumber();
             int start = pageN * size;
             int end   = Math.min(start + size, sorted.size());
-            List<Product> pageContent = start < sorted.size()
+            List<Product> content = start < sorted.size()
                 ? sorted.subList(start, end)
                 : List.of();
-        
-            // 5) Wrap into a PageImpl—with the correct total = sorted.size()
-            productPage = new PageImpl<>(pageContent, pageable, sorted.size());
+
+            productPage = new PageImpl<>(content, pageable, sorted.size());
         }
-        // map & return
+
+        // map to DTOs
         List<ProductDTO> dtos = productPage.getContent().stream()
             .map(entityMapper::toProductDTO)
             .toList();
-    
+
+        // wrap in your PageDTO
         return new PageDTO<>(
             dtos,
             productPage.getNumber(),
@@ -183,7 +184,6 @@ public class ProductServiceImpl implements ProductService {
             productPage.isFirst()
         );
     }
-    
     
 
     @Override
