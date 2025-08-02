@@ -7,7 +7,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.catalog.catalog_service.model.Product;
 
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 
 public class ProductSpecification {
@@ -41,27 +40,6 @@ public class ProductSpecification {
             }
             
       
-            if (minPrice != null) {
-                // Use MySQL’s CONVERT(price, DECIMAL(10,2)) instead of CAST
-                Expression<Double> priceAsNum = cb.function(
-                    "convert",               // <-- note change here
-                    Double.class,
-                    root.get("price"),
-                    cb.literal("DECIMAL(10,2)")
-                );
-                predicates.add(cb.greaterThanOrEqualTo(priceAsNum, minPrice));
-            }
-
-            if (maxPrice != null) {
-                Expression<Double> priceAsNum = cb.function(
-                    "convert",
-                    Double.class,
-                    root.get("price"),
-                    cb.literal("DECIMAL(10,2)")
-                );
-                predicates.add(cb.lessThanOrEqualTo(priceAsNum, maxPrice));
-            }
-
             
             
             if (categoryId != null) {
