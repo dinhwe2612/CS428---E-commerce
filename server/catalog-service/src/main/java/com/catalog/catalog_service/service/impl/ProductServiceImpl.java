@@ -145,6 +145,10 @@ public class ProductServiceImpl implements ProductService {
                 .findFirst()
                 .orElse(Sort.Order.asc("name"));
         
+
+
+
+                
             List<Product> sorted = filtered.stream()
                 .sorted((p1, p2) -> {
                     int cmp = p1.getName().compareToIgnoreCase(p2.getName());
