@@ -14,4 +14,10 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
             nativeQuery = true
     )
     List<Inventory> findinventoriesByProductId(Long productId);
+    
+    @Query(
+            value = "SELECT COUNT(*) > 0 FROM inventories WHERE product_id = :productId",
+            nativeQuery = true
+    )
+    boolean existsByProductId(Long productId);
 } 

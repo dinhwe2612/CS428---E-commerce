@@ -22,6 +22,7 @@ import com.catalog.catalog_service.dto.request.CreateProductRequest;
 import com.catalog.catalog_service.dto.request.UpdateProductRequest;
 import com.catalog.catalog_service.event.ProductCreatedEvent;
 import com.catalog.catalog_service.event.ProductDeletedEvent;
+import com.catalog.catalog_service.exception.ProductDeletionException;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
 import com.catalog.catalog_service.model.Category;
@@ -32,6 +33,7 @@ import com.catalog.catalog_service.model.ProductStatus;
 import com.catalog.catalog_service.producer.RabbitProducer;
 import com.catalog.catalog_service.repository.es.ProductSearchRepository;
 import com.catalog.catalog_service.repository.jpa.CategoryRepository;
+import com.catalog.catalog_service.repository.jpa.InventoryRepository;
 import com.catalog.catalog_service.repository.jpa.ProductImageRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
 import com.catalog.catalog_service.service.ProductService;
@@ -47,6 +49,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductSearchRepository productSearchRepository;
     private final RabbitProducer rabbitProducer;
     private final ProductImageRepository productImageRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, 
@@ -54,13 +57,15 @@ public class ProductServiceImpl implements ProductService {
                             EntityMapper entityMapper,
                             ProductSearchRepository productSearchRepository,
                             RabbitProducer rabbitProducer,
-                            ProductImageRepository productImageRepository) {
+                            ProductImageRepository productImageRepository,
+                            InventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.entityMapper = entityMapper;
         this.productSearchRepository = productSearchRepository;
         this.rabbitProducer = rabbitProducer;
         this.productImageRepository = productImageRepository;
+        this.inventoryRepository = inventoryRepository;
     }
     @Override
     @Transactional(readOnly = true)
@@ -316,6 +321,9 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Product not found with id: " + id);
+        }
+        if (inventoryRepository.existsByProductId(id)) {
+            throw new ProductDeletionException("Cannot delete product with existing inventory.");
         }
         productRepository.deleteById(id);
         rabbitProducer.sendProductDeletedEvent(new ProductDeletedEvent(id
