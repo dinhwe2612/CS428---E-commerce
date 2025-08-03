@@ -4,12 +4,14 @@ import com.catalog.catalog_service.dto.CategoryDTO;
 import com.catalog.catalog_service.dto.ProductDTO;
 import com.catalog.catalog_service.dto.InventoryDTO;
 import com.catalog.catalog_service.dto.ProductImageDTO;
+import com.catalog.catalog_service.dto.PricingRuleDTO;
 import com.catalog.catalog_service.dto.request.CreateCategoryRequest;
 import com.catalog.catalog_service.dto.request.CreateProductImageRequest;
 import com.catalog.catalog_service.model.Category;
 import com.catalog.catalog_service.model.Inventory;
 import com.catalog.catalog_service.model.Product;
 import com.catalog.catalog_service.model.ProductImage;
+import com.catalog.catalog_service.model.PricingRule;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -165,6 +167,46 @@ public class EntityMapper {
         dto.setImageUrl(productImage.getImageUrl());
         dto.setImageOrder(productImage.getImageOrder());
         dto.setProductId(productImage.getProduct().getId());
+        return dto;
+    }
+
+    public PricingRuleDTO toPricingRuleDTO(PricingRule pricingRule) {
+        if (pricingRule == null) {
+            return null;
+        }
+        
+        PricingRuleDTO dto = new PricingRuleDTO();
+        dto.setId(pricingRule.getId());
+        
+        if (pricingRule.getInventory() != null) {
+            dto.setInventoryId(pricingRule.getInventory().getId());
+        }
+        
+        if (pricingRule.getProduct() != null) {
+            dto.setProductId(pricingRule.getProduct().getId());
+        }
+        
+        dto.setRuleName(pricingRule.getRuleName());
+        dto.setDescription(pricingRule.getDescription());
+        dto.setTriggerType(pricingRule.getTriggerType());
+        dto.setStartDate(pricingRule.getStartDate());
+        dto.setEndDate(pricingRule.getEndDate());
+        dto.setStartTime(pricingRule.getStartTime());
+        dto.setEndTime(pricingRule.getEndTime());
+        dto.setSpecialDayName(pricingRule.getSpecialDayName());
+        dto.setProductCondition(pricingRule.getProductCondition());
+        dto.setType(pricingRule.getType());
+        dto.setModifierValue(pricingRule.getModifierValue());
+        dto.setMaxDiscountAmount(pricingRule.getMaxDiscountAmount());
+        dto.setMinPrice(pricingRule.getMinPrice());
+        dto.setPriority(pricingRule.getPriority());
+        dto.setIsActive(pricingRule.getIsActive());
+        dto.setApplyToAllProducts(pricingRule.getApplyToAllProducts());
+        dto.setCategoryId(pricingRule.getCategoryId());
+        dto.setCreatedAt(pricingRule.getCreatedAt());
+        dto.setUpdatedAt(pricingRule.getUpdatedAt());
+        dto.setVersion(pricingRule.getVersion());
+        
         return dto;
     }
 }
