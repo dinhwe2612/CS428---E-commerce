@@ -1,5 +1,8 @@
 package com.catalog.catalog_service.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,36 +15,123 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PricingRule {
+    
     public enum RuleType {
         PERCENTAGE,
         FIXED,
         DECAY
+    }
+    
+    public enum TriggerType {
+        TIME_OF_DAY,
+        PRODUCT_CONDITION,
+        SPECIAL_DAY,
+        COMBINED
+    }
+    
+    public enum ProductCondition {
+        NEW,
+        OLD,
+        EXPIRING_SOON
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "inventory_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inventory_id")
     private Inventory inventory;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    @Column(name = "start_date", nullable = false)
-    private String startDate;
-
-    @Column(name = "end_date", nullable = false)
-    private String endDate;
-
-    @Column(name = "type", nullable = false)
+    @Column(name = "rule_name", nullable = false)
+    private String ruleName;
+    
+    @Column(name = "description")
+    private String description;
+    
     @Enumerated(EnumType.STRING)
+    @Column(name = "trigger_type", nullable = false)
+    private TriggerType triggerType;
+    
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+    
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+    
+    @Column(name = "start_time")
+    private LocalTime startTime;
+    
+    @Column(name = "end_time")
+    private LocalTime endTime;
+    
+    @Column(name = "special_day_name")
+    private String specialDayName;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "product_condition")
+    private ProductCondition productCondition;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
     private RuleType type;
 
-    @Column(name = "modifierValue", nullable = false)
-    private Double modifierValue;
-
-    @Column(name = "order_apply")
-    private Integer orderApply;
+    @Column(name = "modifier_value", nullable = false)
+    private BigDecimal modifierValue;
+    
+    @Column(name = "max_discount_amount")
+    private BigDecimal maxDiscountAmount;
+    
+    @Column(name = "min_price")
+    private BigDecimal minPrice;
+    
+    @Column(name = "priority", nullable = false)
+    private Integer priority;
+    
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+    
+    @Column(name = "apply_to_all_products")
+    private Boolean applyToAllProducts = false;
+    
+    @Column(name = "category_id")
+    private Long categoryId;
+    
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Version
     private Long version;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+    
+    public boolean isApplicableNow() {
+        LocalDateTime now = LocalDateTime.now();
+        
+        if (startDate != null && now.isBefore(startDate)) {
+            return false;
+        }
+        
+        if (endDate != null && now.isAfter(endDate)) {
+            return false;
+        }
+        
+        return true;
+    }
 }
