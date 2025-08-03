@@ -64,11 +64,19 @@ public class DynamicPricingController {
         description = "Calculates dynamic prices for a list of products"
     )
     @ApiResponse(responseCode = "200", description = "Dynamic prices calculated successfully")
-    @PostMapping("/products/prices")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
-        description = "List of product IDs. Example: [1, 2, 3]",
-        required = true
+        description = "List of product IDs for price calculation",
+        required = true,
+        content = @Content(
+            mediaType = "application/json", 
+            schema = @Schema(
+                type = "array", 
+                description = "Array of product IDs",
+                example = "[1, 2, 3]"
+            )
+        )
     )
+    @PostMapping("/products/prices")
     public ResponseEntity<List<DynamicPriceDTO>> calculateDynamicPrices(
             @RequestBody List<Long> productIds  
     ) {
@@ -164,10 +172,14 @@ public class DynamicPricingController {
     )
     @ApiResponse(responseCode = "201", description = "Pricing rule created successfully",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PricingRuleDTO.class)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Pricing rule creation request with all required fields",
+        required = true,
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = CreatePricingRuleRequest.class))
+    )
     @PostMapping("/rules")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PricingRuleDTO> createPricingRule(
-            @Parameter(description = "Pricing rule creation request", required = true)
             @Valid @RequestBody CreatePricingRuleRequest request
     ) {
         PricingRuleDTO rule = pricingRuleService.createPricingRule(request);
@@ -180,12 +192,16 @@ public class DynamicPricingController {
     )
     @ApiResponse(responseCode = "200", description = "Pricing rule updated successfully",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PricingRuleDTO.class)))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Pricing rule update request with fields to modify",
+        required = true,
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = UpdatePricingRuleRequest.class))
+    )
     @PutMapping("/rules/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PricingRuleDTO> updatePricingRule(
             @Parameter(description = "Pricing rule ID", required = true, example = "1")
             @PathVariable Long id,
-            @Parameter(description = "Pricing rule update request", required = true)
             @Valid @RequestBody UpdatePricingRuleRequest request
     ) {
         PricingRuleDTO rule = pricingRuleService.updatePricingRule(id, request);
