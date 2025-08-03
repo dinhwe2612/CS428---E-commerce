@@ -123,7 +123,11 @@ public class EntityMapper {
 
         InventoryDTO dto = new InventoryDTO();
         dto.setId(inventory.getId());
-        dto.setProductId(inventory.getProduct().getId());
+        
+        if (inventory.getProduct() != null) {
+            dto.setProductId(inventory.getProduct().getId());
+        }
+        
         dto.setQuantity(inventory.getQuantity());
         dto.setArrivalDate(inventory.getArrivalDate());
         dto.setDescription(inventory.getDescription());
