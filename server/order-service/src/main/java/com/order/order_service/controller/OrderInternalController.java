@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/internal/orders")
 @RequiredArgsConstructor
@@ -33,5 +35,43 @@ public class OrderInternalController {
         OrderResponseDTO order = orderService.getOrderById(id);
         System.out.println("Order: " + order);
         return ResponseEntity.ok(order);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<OrderResponseDTO>> getOrdersByStatus(
+            @PathVariable String status,
+            @RequestHeader("X-Internal-Api-Key") String apiKey) {
+
+        if (!internalApiKey.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        List<OrderResponseDTO> orders = orderService.getOrdersByStatus(status);
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrders(
+            @RequestHeader("X-Internal-Api-Key") String apiKey) {
+
+        if (!internalApiKey.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        List<OrderResponseDTO> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<OrderResponseDTO>> getOrdersByUserId(
+            @PathVariable String userId,
+            @RequestHeader("X-Internal-Api-Key") String apiKey) {
+
+        if (!internalApiKey.equals(apiKey)) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        List<OrderResponseDTO> orders = orderService.getOrdersByUserId(userId);
+        return ResponseEntity.ok(orders);
     }
 } 
