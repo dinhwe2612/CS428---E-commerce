@@ -23,7 +23,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Catalog Service API")
                         .version("1.0.0")
-                        .description("All catalog endpoints: categories, inventory, products, internal APIs, sync, and reports")
+                        .description("All catalog endpoints: categories, inventory, products, internal APIs, sync, reports, and dynamic pricing")
                         .contact(new Contact()
                                 .name("Catalog Team")
                                 .email("catalog@example.com")
@@ -41,7 +41,8 @@ public class OpenApiConfig {
                         "/products/**",
                         "/api/v1/internal/products/**",
                         "/products/sync/**",
-                        "/api/v1/reports/**"
+                        "/api/v1/reports/**",
+                        "/dynamic-pricing/**"
                 )
                 .build();
     }
