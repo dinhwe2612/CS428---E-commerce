@@ -51,4 +51,12 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
                                      @Param("isActive") Boolean isActive,
                                      @Param("triggerType") PricingRule.TriggerType triggerType,
                                      Pageable pageable);
+
+    @Query("SELECT pr FROM PricingRule pr WHERE pr.isActive = true " +
+           "AND (pr.applyToAllProducts = true " +
+           "OR pr.product.id IN :productIds " +
+           "OR pr.categoryId IN :categoryIds) " +
+           "ORDER BY pr.priority ASC")
+    List<PricingRule> findApplicableRulesForProducts(@Param("productIds") List<Long> productIds,
+                                                    @Param("categoryIds") List<Long> categoryIds);
 }

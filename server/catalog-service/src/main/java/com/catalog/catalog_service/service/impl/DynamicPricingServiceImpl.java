@@ -6,7 +6,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -97,8 +100,11 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     @Override
     public List<DynamicPriceDTO> calculateDynamicPricesForProducts(List<Long> productIds) {
         List<Product> products = productRepository.findAllById(productIds);
-        return products.stream()
-            .map(this::calculateDynamicPrice)
+        
+        Map<Long, List<PricingRule>> rulesByProduct = getApplicableRulesForProducts(products);
+        
+        return (products.size() >= 30 ? products.parallelStream() : products.stream())
+            .map(product -> calculateDynamicPriceWithRules(product, rulesByProduct.getOrDefault(product.getId(), Collections.emptyList())))
             .collect(Collectors.toList());
     }
     
@@ -310,5 +316,96 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             "Error calculating price",
             false
         );
+    }
+    
+    private Map<Long, List<PricingRule>> getApplicableRulesForProducts(List<Product> products) {
+        if (products.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        List<Long> productIds = products.stream()
+            .map(Product::getId)
+            .collect(Collectors.toList());
+            
+        List<Long> categoryIds = products.stream()
+            .map(product -> product.getCategory().getId())
+            .distinct()
+            .collect(Collectors.toList());
+        
+        List<PricingRule> allRules = pricingRuleRepository.findApplicableRulesForProducts(productIds, categoryIds);
+        
+        Map<Long, List<PricingRule>> rulesByProduct = new HashMap<>();
+        
+        for (Product product : products) {
+            List<PricingRule> applicableRules = allRules.stream()
+                .filter(rule -> isRuleApplicableToProduct(rule, product))
+                .sorted((r1, r2) -> r1.getPriority().compareTo(r2.getPriority()))
+                .collect(Collectors.toList());
+            
+            rulesByProduct.put(product.getId(), applicableRules);
+        }
+        
+        return rulesByProduct;
+    }
+    
+    
+    private boolean isRuleApplicableToProduct(PricingRule rule, Product product) {
+        if (Boolean.TRUE.equals(rule.getApplyToAllProducts())) {
+            return true;
+        }
+        
+        if (rule.getProduct() != null && rule.getProduct().getId().equals(product.getId())) {
+            return true;
+        }
+        
+        if (rule.getCategoryId() != null && rule.getCategoryId().equals(product.getCategory().getId())) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private DynamicPriceDTO calculateDynamicPriceWithRules(Product product, List<PricingRule> applicableRules) {
+        try {
+            BigDecimal originalPrice = new BigDecimal(product.getPrice().replace(",", ""));
+
+            BigDecimal finalPrice = originalPrice;
+            List<String> appliedRules = new ArrayList<>();
+            
+            for (PricingRule rule : applicableRules) {
+                if (isRuleApplicable(rule, product)) {
+                    BigDecimal rulePrice = applyPricingRule(finalPrice, rule);
+                    
+                    if (rule.getMinPrice() != null && rulePrice.compareTo(rule.getMinPrice()) < 0) {
+                        rulePrice = rule.getMinPrice();
+                    }
+                    
+                    if (!rulePrice.equals(finalPrice)) {
+                        finalPrice = rulePrice;
+                        appliedRules.add(rule.getRuleName());
+                    }
+                }
+            }
+            
+            BigDecimal discountAmount = originalPrice.subtract(finalPrice);
+            Double discountPercentage = originalPrice.compareTo(BigDecimal.ZERO) > 0 ? 
+                discountAmount.divide(originalPrice, 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100)).doubleValue() : 0.0;
+            
+            return new DynamicPriceDTO(
+                product.getId(),
+                originalPrice,
+                finalPrice,
+                discountAmount,
+                discountPercentage,
+                appliedRules,
+                generatePriceReason(appliedRules),
+                !originalPrice.equals(finalPrice)
+            );
+            
+        } catch (NumberFormatException e) {
+            logger.error("Error parsing price for product {}: {}", product.getId(), product.getPrice());
+            return createErrorPriceDTO(product);
+        }
     }
 }
