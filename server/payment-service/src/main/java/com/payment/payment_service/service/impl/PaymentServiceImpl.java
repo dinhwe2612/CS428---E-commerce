@@ -195,7 +195,7 @@ public class PaymentServiceImpl implements PaymentService {
             PaymentData.PaymentDataBuilder paymentDataBuilder = PaymentData.builder()
                 .orderCode(payment.getOrderId())
                 .amount(payment.getAmount().intValue())
-                .description("Guest payment for order #" + payment.getOrderId())
+                .description("payment for order #" + payment.getOrderId())
                 .item(itemData);
             
             if (request.getReturnUrl() != null) {
