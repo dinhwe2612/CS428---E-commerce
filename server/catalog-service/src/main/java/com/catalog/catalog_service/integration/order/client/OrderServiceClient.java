@@ -68,4 +68,40 @@ public class OrderServiceClient {
             throw new RuntimeException("Error connecting to order service: " + e.getMessage(), e);
         }
     }
+    
+    public List<OrderResponseDTO> getAllOrders() {
+        String url = buildUrl(OrderEndpoints.getAllOrders());
+        try {
+            HttpEntity<Void> requestEntity = new HttpEntity<>(createHeaders());
+            ParameterizedTypeReference<List<OrderResponseDTO>> responseType = 
+                new ParameterizedTypeReference<List<OrderResponseDTO>>() {};
+            
+            return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                requestEntity,
+                responseType
+            ).getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error connecting to order service: " + e.getMessage(), e);
+        }
+    }
+    
+    public List<OrderResponseDTO> getOrdersByUserId(String userId) {
+        String url = buildUrl(OrderEndpoints.getOrdersByUserId(userId));
+        try {
+            HttpEntity<Void> requestEntity = new HttpEntity<>(createHeaders());
+            ParameterizedTypeReference<List<OrderResponseDTO>> responseType = 
+                new ParameterizedTypeReference<List<OrderResponseDTO>>() {};
+            
+            return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                requestEntity,
+                responseType
+            ).getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error connecting to order service: " + e.getMessage(), e);
+        }
+    }
 } 

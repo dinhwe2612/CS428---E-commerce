@@ -9,11 +9,15 @@ public final class OrderEndpoints {
     }
     
     public static String getOrdersByStatus(String status) {
-        return "/api/v1/orders/status/" + status;
+        return ORDERS_PATH + "/status/" + status;
+    }
+    
+    public static String getOrdersByUserId(String userId) {
+        return ORDERS_PATH + "/user/" + userId;
     }
     
     public static String getAllOrders() {
-        return "/api/v1/orders";
+        return ORDERS_PATH;
     }
     
     private OrderEndpoints() {

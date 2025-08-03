@@ -26,9 +26,12 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public SalesReportDTO generateSalesReport(LocalDate startDate, LocalDate endDate) {
         List<OrderResponseDTO> completedOrders = orderServiceClient.getOrdersByStatus("COMPLETED");
-        
+
         List<OrderResponseDTO> filteredOrders = completedOrders.stream()
                 .filter(order -> {
+                    if (order.getCreatedAt() == null) {
+                        return false;
+                    }   
                     LocalDate orderDate = order.getCreatedAt().toLocalDate();
                     return !orderDate.isBefore(startDate) && !orderDate.isAfter(endDate);
                 })
@@ -62,6 +65,10 @@ public class ReportServiceImpl implements ReportService {
         
         List<OrderResponseDTO> filteredOrders = completedOrders.stream()
                 .filter(order -> {
+                    if (order.getCreatedAt() == null) {
+                        log.warn("Order with ID {} has null createdAt, skipping from best selling products report", order.getId());
+                        return false;
+                    }
                     LocalDate orderDate = order.getCreatedAt().toLocalDate();
                     return !orderDate.isBefore(startDate) && !orderDate.isAfter(endDate);
                 })
@@ -70,6 +77,7 @@ public class ReportServiceImpl implements ReportService {
         Map<String, ProductSalesData> productSalesMap = new HashMap<>();
         
         filteredOrders.stream()
+                .filter(order -> order.getOrderItems() != null)
                 .flatMap(order -> order.getOrderItems().stream())
                 .forEach(item -> {
                     String productId = item.getProductId();
@@ -101,6 +109,7 @@ public class ReportServiceImpl implements ReportService {
         report.setPeriod(startDate.toString() + " to " + endDate.toString());
         
         double totalRevenue = orders.stream()
+                .filter(order -> order.getTotalAmount() != null)
                 .mapToDouble(OrderResponseDTO::getTotalAmount)
                 .sum();
         report.setTotalRevenue(totalRevenue);
@@ -109,6 +118,7 @@ public class ReportServiceImpl implements ReportService {
         report.setTotalOrders(totalOrders);
         
         int totalProductsSold = orders.stream()
+                .filter(order -> order.getOrderItems() != null)
                 .flatMap(order -> order.getOrderItems().stream())
                 .mapToInt(OrderItemResponseDTO::getQuantity)
                 .sum();
@@ -120,6 +130,7 @@ public class ReportServiceImpl implements ReportService {
         Map<String, ProductSalesData> productSalesMap = new HashMap<>();
         
         orders.stream()
+                .filter(order -> order.getOrderItems() != null)
                 .flatMap(order -> order.getOrderItems().stream())
                 .forEach(item -> {
                     String productId = item.getProductId();
@@ -148,9 +159,15 @@ public class ReportServiceImpl implements ReportService {
         Map<LocalDate, DailySalesData> dailySalesMap = new HashMap<>();
         
         orders.forEach(order -> {
+            if (order.getCreatedAt() == null) {
+                log.warn("Order with ID {} has null createdAt, skipping from daily sales calculation", order.getId());
+                return;
+            }
             LocalDate orderDate = order.getCreatedAt().toLocalDate();
+            int orderItemsCount = order.getOrderItems() != null ? order.getOrderItems().size() : 0;
+            Double orderAmount = order.getTotalAmount() != null ? order.getTotalAmount() : 0.0;
             dailySalesMap.computeIfAbsent(orderDate, k -> new DailySalesData())
-                    .addOrder(order.getTotalAmount(), order.getOrderItems().size());
+                    .addOrder(orderAmount, orderItemsCount);
         });
 
         List<DailySalesDTO> dailySales = dailySalesMap.entrySet().stream()
