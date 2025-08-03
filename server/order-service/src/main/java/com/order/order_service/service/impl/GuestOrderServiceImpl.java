@@ -147,6 +147,14 @@ public class GuestOrderServiceImpl implements GuestOrderService {
         return convertToDTO(updatedOrder);
     }
 
+    @Override
+    public List<GuestOrderResponseDTO> getAllGuestOrders() {
+        return guestOrderRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     private GuestOrderResponseDTO convertToDTO(GuestOrder order) {
         GuestOrderResponseDTO dto = new GuestOrderResponseDTO();
         dto.setId(order.getId());

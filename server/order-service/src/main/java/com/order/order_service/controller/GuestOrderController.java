@@ -122,4 +122,15 @@ public class GuestOrderController {
         GuestOrderResponseDTO orderResponse = guestOrderService.updateGuestOrderDeliveryStatus(id, deliveryStatus);
         return ResponseEntity.ok(new ApiResponse<>(true, "Guest order delivery status updated", orderResponse));
     }
+
+    @Operation(
+            summary = "Get all guest orders",
+            description = "Retrieves all guest orders in the system (admin only)"
+    )
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ApiResponse<List<GuestOrderResponseDTO>>> getAllGuestOrders() {
+        List<GuestOrderResponseDTO> orderResponses = guestOrderService.getAllGuestOrders();
+        return ResponseEntity.ok(new ApiResponse<>(true, "All guest orders retrieved", orderResponses));
+    }
 } 

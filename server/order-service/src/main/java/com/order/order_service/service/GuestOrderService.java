@@ -12,4 +12,5 @@ public interface GuestOrderService {
     List<GuestOrderResponseDTO> getGuestOrdersByEmail(String email);
     GuestOrderResponseDTO updateGuestOrderStatus(Long id, String status);
     GuestOrderResponseDTO updateGuestOrderDeliveryStatus(Long id, String deliveryStatus);
+    List<GuestOrderResponseDTO> getAllGuestOrders();
 } 
