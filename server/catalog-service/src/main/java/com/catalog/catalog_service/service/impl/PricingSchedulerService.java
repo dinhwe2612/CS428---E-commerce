@@ -43,15 +43,4 @@ public class PricingSchedulerService {
             logger.error("Error during special day price update: {}", e.getMessage(), e);
         }
     }
-    
-    @Scheduled(cron = "0 0 1 * * ?")
-    public void updatePricesBasedOnInventoryAge() {
-        try {
-            logger.info("Starting daily price update based on inventory age");
-            dynamicPricingService.updateAllProductPrices();
-            logger.info("Completed inventory age-based price update");
-        } catch (Exception e) {
-            logger.error("Error during inventory age price update: {}", e.getMessage(), e);
-        }
-    }
 }
