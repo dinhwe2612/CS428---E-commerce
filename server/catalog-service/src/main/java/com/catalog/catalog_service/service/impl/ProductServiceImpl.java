@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -94,25 +95,30 @@ public class ProductServiceImpl implements ProductService {
                 .findFirst()
                 .orElse(Sort.Order.asc("price"));
             
+            Pageable paginationOnly = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            
             if (name != null || categoryId != null) {
                 if (priceOrder.isAscending()) {
                     productPage = productRepository.findAllWithPriceFiltersAndSorting(
-                        name, categoryId, minPriceBD, maxPriceBD, pageable);
+                        name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
                 } else {
                     productPage = productRepository.findAllWithPriceFiltersAndSortingDesc(
-                        name, categoryId, minPriceBD, maxPriceBD, pageable);
+                        name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
                 }
             } else {
                 if (priceOrder.isAscending()) {
-                    productPage = productRepository.findAllSortByPrice(minPriceBD, maxPriceBD, pageable);
+                    productPage = productRepository.findAllSortByPrice(minPriceBD, maxPriceBD, paginationOnly);
                 } else {
-                    productPage = productRepository.findAllSortByPriceDesc(minPriceBD, maxPriceBD, pageable);
+                    productPage = productRepository.findAllSortByPriceDesc(minPriceBD, maxPriceBD, paginationOnly);
                 }
             }
         } else {
             if (hasPriceFilters) {
                 boolean hasNameSorting = pageable.getSort().stream()
                     .anyMatch(o -> "name".equalsIgnoreCase(o.getProperty()));
+                
+                // Create pagination-only pageable (no sorting)
+                Pageable paginationOnly = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
                 
                 if (hasNameSorting) {
                     Sort.Order nameOrder = pageable.getSort().stream()
@@ -122,10 +128,10 @@ public class ProductServiceImpl implements ProductService {
                     
                     if (nameOrder.isAscending()) {
                         productPage = productRepository.findAllWithPriceFiltersOrderByNameAsc(
-                            name, categoryId, minPriceBD, maxPriceBD, pageable);
+                            name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
                     } else {
                         productPage = productRepository.findAllWithPriceFiltersOrderByNameDesc(
-                            name, categoryId, minPriceBD, maxPriceBD, pageable);
+                            name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
                     }
                 } else {
                     Specification<Product> specWithPrice = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
