@@ -132,7 +132,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentMethod(PaymentMethod.CARD);
         payment.setStatus(PaymentStatus.PENDING);
         payment.setCurrency("VND");
-        payment.setDescription("Guest payment for order #" + order.getId());
+        payment.setDescription("payment for order #" + order.getId());
         payment.setPaymentGateway("PayOS");
         return payment;
     }
