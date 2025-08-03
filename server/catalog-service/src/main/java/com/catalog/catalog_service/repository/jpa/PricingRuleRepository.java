@@ -19,8 +19,6 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
     
     List<PricingRule> findByProductIdAndIsActiveTrueOrderByPriorityAsc(Long productId);
     
-    List<PricingRule> findByInventoryIdAndIsActiveTrueOrderByPriorityAsc(Long inventoryId);
-    
     List<PricingRule> findByApplyToAllProductsTrueAndIsActiveTrueOrderByPriorityAsc();
     
     List<PricingRule> findByCategoryIdAndIsActiveTrueOrderByPriorityAsc(Long categoryId);

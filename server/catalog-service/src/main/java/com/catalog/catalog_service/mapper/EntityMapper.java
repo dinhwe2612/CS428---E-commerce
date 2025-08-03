@@ -178,10 +178,6 @@ public class EntityMapper {
         PricingRuleDTO dto = new PricingRuleDTO();
         dto.setId(pricingRule.getId());
         
-        if (pricingRule.getInventory() != null) {
-            dto.setInventoryId(pricingRule.getInventory().getId());
-        }
-        
         if (pricingRule.getProduct() != null) {
             dto.setProductId(pricingRule.getProduct().getId());
         }

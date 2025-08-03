@@ -18,8 +18,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdatePricingRuleRequest {
     
-    private Long inventoryId;
-    
     private Long productId;
     
     private String ruleName;

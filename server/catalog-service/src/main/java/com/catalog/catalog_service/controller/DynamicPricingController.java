@@ -65,8 +65,11 @@ public class DynamicPricingController {
     )
     @ApiResponse(responseCode = "200", description = "Dynamic prices calculated successfully")
     @PostMapping("/products/prices")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "List of product IDs. Example: [1, 2, 3]",
+        required = true
+    )
     public ResponseEntity<List<DynamicPriceDTO>> calculateDynamicPrices(
-            @Parameter(description = "List of product IDs", required = true)
             @RequestBody List<Long> productIds  
     ) {
         List<DynamicPriceDTO> prices = dynamicPricingService.calculateDynamicPricesForProducts(productIds);

@@ -16,10 +16,8 @@ import com.catalog.catalog_service.dto.request.CreatePricingRuleRequest;
 import com.catalog.catalog_service.dto.request.UpdatePricingRuleRequest;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
-import com.catalog.catalog_service.model.Inventory;
 import com.catalog.catalog_service.model.PricingRule;
 import com.catalog.catalog_service.model.Product;
-import com.catalog.catalog_service.repository.jpa.InventoryRepository;
 import com.catalog.catalog_service.repository.jpa.PricingRuleRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
 import com.catalog.catalog_service.service.PricingRuleService;
@@ -35,7 +33,6 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     
     private final PricingRuleRepository pricingRuleRepository;
     private final ProductRepository productRepository;
-    private final InventoryRepository inventoryRepository;
     private final EntityMapper entityMapper;
     
     @Override
@@ -76,12 +73,6 @@ public class PricingRuleServiceImpl implements PricingRuleService {
             pricingRule.setProduct(product);
         }
         
-        if (request.getInventoryId() != null) {
-            Inventory inventory = inventoryRepository.findById(request.getInventoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with id: " + request.getInventoryId()));
-            pricingRule.setInventory(inventory);
-        }
-        
         PricingRule savedPricingRule = pricingRuleRepository.save(pricingRule);
         logger.info("Created pricing rule with id: {}", savedPricingRule.getId());
         
@@ -100,12 +91,6 @@ public class PricingRuleServiceImpl implements PricingRuleService {
             Product product = productRepository.findById(request.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
             pricingRule.setProduct(product);
-        }
-        
-        if (request.getInventoryId() != null) {
-            Inventory inventory = inventoryRepository.findById(request.getInventoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with id: " + request.getInventoryId()));
-            pricingRule.setInventory(inventory);
         }
         
         PricingRule savedPricingRule = pricingRuleRepository.save(pricingRule);

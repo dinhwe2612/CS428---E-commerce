@@ -20,8 +20,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreatePricingRuleRequest {
     
-    private Long inventoryId;
-    
     private Long productId;
     
     @NotBlank(message = "Rule name is required")

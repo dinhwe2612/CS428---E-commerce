@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PricingRuleDTO {
     private Long id;
-    private Long inventoryId;
     private Long productId;
     private String ruleName;
     private String description;
