@@ -1,5 +1,6 @@
 package com.catalog.catalog_service.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -79,98 +79,61 @@ public class ProductServiceImpl implements ProductService {
         boolean hasPriceSorting = pageable.getSort().stream()
             .anyMatch(o -> "price".equalsIgnoreCase(o.getProperty()));
 
+        BigDecimal minPriceBD = minPrice != null ? BigDecimal.valueOf(minPrice) : null;
+        BigDecimal maxPriceBD = maxPrice != null ? BigDecimal.valueOf(maxPrice) : null;
+        boolean hasPriceFilters = minPrice != null || maxPrice != null;
+
         // 1) Text & category filter in the DB
         Specification<Product> spec = ProductSpecification.withFilters(name, null, null, categoryId);
 
         Page<Product> productPage;
 
         if (hasPriceSorting) {
-            // PRICE-SORT branch: fetch all, then filter, sort, paginate in Java
-
-            // a) fetch all matching name/category
-            List<Product> all = productRepository.findAll(spec);
-
-            // b) numeric filter
-            List<Product> filtered = all.stream()
-                .filter(p -> {
-                    try {
-                        double v = Double.parseDouble(p.getPrice().replace(",", ""));
-                        return (minPrice == null || v >= minPrice)
-                            && (maxPrice == null || v <= maxPrice);
-                    } catch (NumberFormatException e) {
-                        return false;
-                    }
-                })
-                .toList();
-
-            // c) sort by price
             Sort.Order priceOrder = pageable.getSort().stream()
                 .filter(o -> "price".equalsIgnoreCase(o.getProperty()))
                 .findFirst()
                 .orElse(Sort.Order.asc("price"));
-
-            List<Product> sorted = filtered.stream()
-                .sorted((p1, p2) -> {
-                    double a = Double.parseDouble(p1.getPrice().replace(",", ""));
-                    double b = Double.parseDouble(p2.getPrice().replace(",", ""));
-                    int cmp = Double.compare(a, b);
-                    return priceOrder.isAscending() ? cmp : -cmp;
-                })
-                .toList();
-
-            // d) paginate
-            int size  = pageable.getPageSize();
-            int pageN = pageable.getPageNumber();
-            int start = pageN * size;
-            int end   = Math.min(start + size, sorted.size());
-            List<Product> content = start < sorted.size()
-                ? sorted.subList(start, end)
-                : List.of();
-
-            productPage = new PageImpl<>(content, pageable, sorted.size());
-        }
-        else {
-            // NAME-SORT (or other sorts) branch: fetch all, then filter, sort by name, paginate
-
-            // a) fetch all matching name/category
-            List<Product> all = productRepository.findAll(spec);
-
-            // b) numeric filter
-            List<Product> filtered = all.stream()
-                .filter(p -> {
-                    try {
-                        double v = Double.parseDouble(p.getPrice().replace(",", ""));
-                        return (minPrice == null || v >= minPrice)
-                            && (maxPrice == null || v <= maxPrice);
-                    } catch (NumberFormatException e) {
-                        return false;
+            
+            if (name != null || categoryId != null) {
+                if (priceOrder.isAscending()) {
+                    productPage = productRepository.findAllWithPriceFiltersAndSorting(
+                        name, categoryId, minPriceBD, maxPriceBD, pageable);
+                } else {
+                    productPage = productRepository.findAllWithPriceFiltersAndSortingDesc(
+                        name, categoryId, minPriceBD, maxPriceBD, pageable);
+                }
+            } else {
+                if (priceOrder.isAscending()) {
+                    productPage = productRepository.findAllSortByPrice(minPriceBD, maxPriceBD, pageable);
+                } else {
+                    productPage = productRepository.findAllSortByPriceDesc(minPriceBD, maxPriceBD, pageable);
+                }
+            }
+        } else {
+            if (hasPriceFilters) {
+                boolean hasNameSorting = pageable.getSort().stream()
+                    .anyMatch(o -> "name".equalsIgnoreCase(o.getProperty()));
+                
+                if (hasNameSorting) {
+                    Sort.Order nameOrder = pageable.getSort().stream()
+                        .filter(o -> "name".equalsIgnoreCase(o.getProperty()))
+                        .findFirst()
+                        .orElse(Sort.Order.asc("name"));
+                    
+                    if (nameOrder.isAscending()) {
+                        productPage = productRepository.findAllWithPriceFiltersOrderByNameAsc(
+                            name, categoryId, minPriceBD, maxPriceBD, pageable);
+                    } else {
+                        productPage = productRepository.findAllWithPriceFiltersOrderByNameDesc(
+                            name, categoryId, minPriceBD, maxPriceBD, pageable);
                     }
-                })
-                .toList();
-
-            // c) sort by name
-            Sort.Order nameOrder = pageable.getSort().stream()
-                .filter(o -> "name".equalsIgnoreCase(o.getProperty()))
-                .findFirst()
-                .orElse(Sort.Order.asc("name"));
-
-            List<Product> sorted = filtered.stream()
-                .sorted((p1, p2) -> {
-                    int cmp = p1.getName().compareToIgnoreCase(p2.getName());
-                    return nameOrder.isAscending() ? cmp : -cmp;
-                })
-                .toList();
-
-            // d) paginate
-            int size  = pageable.getPageSize();
-            int pageN = pageable.getPageNumber();
-            int start = pageN * size;
-            int end   = Math.min(start + size, sorted.size());
-            List<Product> content = start < sorted.size()
-                ? sorted.subList(start, end)
-                : List.of();
-
-            productPage = new PageImpl<>(content, pageable, sorted.size());
+                } else {
+                    Specification<Product> specWithPrice = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+                    productPage = productRepository.findAll(specWithPrice, pageable);
+                }
+            } else {
+                productPage = productRepository.findAll(spec, pageable);
+            }
         }
 
         // map to DTOs
