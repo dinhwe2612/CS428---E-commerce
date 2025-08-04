@@ -1,7 +1,11 @@
 package com.catalog.catalog_service.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -182,7 +186,6 @@ public class ProductServiceImpl implements ProductService {
             throw e;
         }
     }
-
     @Override
     @Transactional
     public ProductDTO updateProduct(Long id, UpdateProductRequest request) {
@@ -191,7 +194,8 @@ public class ProductServiceImpl implements ProductService {
         
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-
+    
+        // --- simple field updates ---
         if (request.getName() != null) {
             product.setName(request.getName());
         }
@@ -212,42 +216,51 @@ public class ProductServiceImpl implements ProductService {
         }
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Category not found with id: " + request.getCategoryId()));
             product.setCategory(category);
         }
+    
         List<String> imageUrls = request.getImageUrls();
         if (imageUrls != null) {
-            productImageRepository.deleteByProductId(product.getId());
-            productImageRepository.flush();
-            AtomicInteger counter = new AtomicInteger(1);
-        
-            // 1) Clear out the old ones so orphanRemoval=true will delete them
-            product.getImages().clear();
-        
-            // 2) Build & wire each new image
-            List<ProductImage> productImages = imageUrls.stream()
-                .map(imageUrl -> {
+            // 1) Snapshot the current images
+            List<ProductImage> existing = new ArrayList<>(product.getImages());
+    
+            // 2) Build a Set of incoming URLs
+            Set<String> newUrls = new HashSet<>(imageUrls);
+    
+            // 3) Remove any images not in the new list
+            for (ProductImage img : existing) {
+                if (!newUrls.contains(img.getImageUrl())) {
+                    product.removeImage(img);      // orphanRemoval=true → schedules DELETE
+                }
+            }
+    
+            // 4) Re-order existing + add brand-new ones
+            AtomicInteger order = new AtomicInteger(1);
+            for (String url : imageUrls) {
+                Optional<ProductImage> found = product.getImages().stream()
+                    .filter(img -> url.equals(img.getImageUrl()))
+                    .findFirst();
+    
+                if (found.isPresent()) {
+                    // just update the ordering
+                    found.get().setImageOrder(order.getAndIncrement());
+                } else {
+                    // create & attach a new one
                     ProductImage pi = new ProductImage();
-                    pi.setImageUrl(imageUrl);
-                    pi.setImageOrder(counter.getAndIncrement());
-                    // ← set the FK so product_id isn’t null
-                    pi.setProduct(product);
-                    return pi;
-                })
-                .toList();
-        
-            // 3) Add them into the *managed* collection
-            product.getImages().addAll(productImages);
+                    pi.setImageUrl(url);
+                    pi.setImageOrder(order.getAndIncrement());
+                    product.addImage(pi);
+                }
+            }
         }
-        
+    
         logger.debug("Product after update: {}", product);
-
-
-        
-
-        Product updatedProduct = productRepository.save(product);
-        return entityMapper.toProductDTO(updatedProduct);
+        Product updated = productRepository.save(product);
+        return entityMapper.toProductDTO(updated);
     }
+    
 
     @Override
     @Transactional
