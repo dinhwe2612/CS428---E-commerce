@@ -1,6 +1,7 @@
 package com.catalog.catalog_service.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.catalog.catalog_service.model.Product;
 import org.springframework.data.domain.Page;
@@ -24,5 +25,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<Product> findByNameContaining(String name, Pageable pageable);
 
     List<Product> findAll();
+
     List<Product> findByIdIn(List<Long> ids);
+
+    @EntityGraph(attributePaths = {"images"})
+    Optional<Product> findById(Long id);
 }
