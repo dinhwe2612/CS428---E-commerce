@@ -242,6 +242,9 @@ public class ProductServiceImpl implements ProductService {
         
         logger.debug("Product after update: {}", product);
 
+
+        
+
         Product updatedProduct = productRepository.save(product);
         return entityMapper.toProductDTO(updatedProduct);
     }
