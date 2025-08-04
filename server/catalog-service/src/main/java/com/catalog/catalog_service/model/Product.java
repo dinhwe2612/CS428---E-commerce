@@ -1,5 +1,6 @@
 package com.catalog.catalog_service.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,9 @@ public class Product {
 
     @Column(name = "price", length = 50)
     private String price;
+
+    @Column(name = "price_value", insertable = false, updatable = false)
+    private BigDecimal priceValue;  
 
     @Column(name = "description_html", columnDefinition = "TEXT")
     private String descriptionHtml;

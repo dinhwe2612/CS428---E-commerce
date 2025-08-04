@@ -2,6 +2,8 @@ package com.catalog.catalog_service.specification;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.math.BigDecimal;
+
 import com.catalog.catalog_service.model.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,8 +14,8 @@ public class ProductSpecificationTest {
     void withFilters_ShouldCreateSpecificationWithNameFilter() {
         // Arrange
         String name = "test";
-        Double minPrice = null;
-        Double maxPrice = null;
+        BigDecimal minPrice = null;
+        BigDecimal maxPrice = null;
         Long categoryId = null;
 
         // Act
@@ -28,8 +30,8 @@ public class ProductSpecificationTest {
     void withFilters_ShouldCreateSpecificationWithPriceRange() {
         // Arrange
         String name = null;
-        Double minPrice = 10.0;
-        Double maxPrice = 100.0;
+        BigDecimal minPrice = BigDecimal.valueOf(10.0);
+        BigDecimal maxPrice = BigDecimal.valueOf(100.0);
         Long categoryId = null;
 
         // Act
@@ -43,8 +45,8 @@ public class ProductSpecificationTest {
     void withFilters_ShouldCreateSpecificationWithCategoryId() {
         // Arrange
         String name = null;
-        Double minPrice = null;
-        Double maxPrice = null;
+        BigDecimal minPrice = null;
+        BigDecimal maxPrice = null;
         Long categoryId = 1L;
 
         // Act
@@ -63,7 +65,7 @@ public class ProductSpecificationTest {
         Long categoryId = 1L;
 
         // Act
-        Specification<Product> spec = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, BigDecimal.valueOf(minPrice), BigDecimal.valueOf(maxPrice), categoryId);
 
         // Assert
         assertNotNull(spec);
@@ -73,8 +75,8 @@ public class ProductSpecificationTest {
     void withFilters_ShouldCreateEmptySpecification() {
         // Arrange
         String name = null;
-        Double minPrice = null;
-        Double maxPrice = null;
+        BigDecimal minPrice = null;
+        BigDecimal maxPrice = null;
         Long categoryId = null;
 
         // Act

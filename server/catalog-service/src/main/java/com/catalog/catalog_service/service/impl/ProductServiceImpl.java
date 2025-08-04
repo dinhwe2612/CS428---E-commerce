@@ -71,83 +71,26 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public PageDTO<ProductDTO> getAllProducts(
-            Pageable pageable,
-            String name,
-            Double minPrice,
-            Double maxPrice,
-            Long categoryId) {
-
-        boolean hasPriceSorting = pageable.getSort().stream()
-            .anyMatch(o -> "price".equalsIgnoreCase(o.getProperty()));
+        Pageable pageable,
+        String name,
+        Double minPrice,
+        Double maxPrice,
+        Long categoryId
+    ) {
 
         BigDecimal minPriceBD = minPrice != null ? BigDecimal.valueOf(minPrice) : null;
         BigDecimal maxPriceBD = maxPrice != null ? BigDecimal.valueOf(maxPrice) : null;
-        boolean hasPriceFilters = minPrice != null || maxPrice != null;
 
-        // 1) Text & category filter in the DB
-        Specification<Product> spec = ProductSpecification.withFilters(name, null, null, categoryId);
+        Specification<Product> spec = ProductSpecification.withFilters(name, minPriceBD, maxPriceBD, categoryId);
 
-        Page<Product> productPage;
+        Pageable processedPageable = mapPriceSortTopriceValue(pageable);
 
-        if (hasPriceSorting) {
-            Sort.Order priceOrder = pageable.getSort().stream()
-                .filter(o -> "price".equalsIgnoreCase(o.getProperty()))
-                .findFirst()
-                .orElse(Sort.Order.asc("price"));
-            
-            Pageable paginationOnly = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-            
-            if (name != null || categoryId != null) {
-                if (priceOrder.isAscending()) {
-                    productPage = productRepository.findAllWithPriceFiltersAndSorting(
-                        name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
-                } else {
-                    productPage = productRepository.findAllWithPriceFiltersAndSortingDesc(
-                        name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
-                }
-            } else {
-                if (priceOrder.isAscending()) {
-                    productPage = productRepository.findAllSortByPrice(minPriceBD, maxPriceBD, paginationOnly);
-                } else {
-                    productPage = productRepository.findAllSortByPriceDesc(minPriceBD, maxPriceBD, paginationOnly);
-                }
-            }
-        } else {
-            if (hasPriceFilters) {
-                boolean hasNameSorting = pageable.getSort().stream()
-                    .anyMatch(o -> "name".equalsIgnoreCase(o.getProperty()));
-                
-                // Create pagination-only pageable (no sorting)
-                Pageable paginationOnly = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-                
-                if (hasNameSorting) {
-                    Sort.Order nameOrder = pageable.getSort().stream()
-                        .filter(o -> "name".equalsIgnoreCase(o.getProperty()))
-                        .findFirst()
-                        .orElse(Sort.Order.asc("name"));
-                    
-                    if (nameOrder.isAscending()) {
-                        productPage = productRepository.findAllWithPriceFiltersOrderByNameAsc(
-                            name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
-                    } else {
-                        productPage = productRepository.findAllWithPriceFiltersOrderByNameDesc(
-                            name, categoryId, minPriceBD, maxPriceBD, paginationOnly);
-                    }
-                } else {
-                    Specification<Product> specWithPrice = ProductSpecification.withFilters(name, minPrice, maxPrice, categoryId);
-                    productPage = productRepository.findAll(specWithPrice, pageable);
-                }
-            } else {
-                productPage = productRepository.findAll(spec, pageable);
-            }
-        }
+        Page<Product> productPage = productRepository.findAll(spec, processedPageable);
 
-        // map to DTOs
         List<ProductDTO> dtos = productPage.getContent().stream()
             .map(entityMapper::toProductDTO)
             .toList();
 
-        // wrap in your PageDTO
         return new PageDTO<>(
             dtos,
             productPage.getNumber(),
@@ -157,6 +100,24 @@ public class ProductServiceImpl implements ProductService {
             productPage.isLast(),
             productPage.isFirst()
         );
+    }
+
+    private Pageable mapPriceSortTopriceValue(Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) {
+            return pageable;
+        }
+
+        List<Sort.Order> mappedOrders = pageable.getSort().stream()
+            .map(order -> {
+                if ("price".equalsIgnoreCase(order.getProperty())) {
+                    return new Sort.Order(order.getDirection(), "priceValue");
+                }
+                return order;
+            })
+            .collect(Collectors.toList());
+
+        Sort mappedSort = Sort.by(mappedOrders);
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
     }
     
 
