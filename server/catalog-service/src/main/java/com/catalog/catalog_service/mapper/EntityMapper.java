@@ -82,6 +82,30 @@ public class EntityMapper {
         return dto;
     }
 
+    public ProductDTO toProductDTOForList(Product product) {
+        if (product == null) {
+            return null;
+        }
+
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setCategoryId(product.getCategory().getId());
+        dto.setProductPath(product.getProductPath());
+        dto.setName(product.getName());
+        dto.setStatus(product.getStatus());
+        dto.setPrice(product.getPrice());
+
+        List<String> urls = new ArrayList<>();
+        if (product.getImages() != null) {
+            for (ProductImage img : product.getImages()) {
+                urls.add(img.getImageUrl());
+            }
+        }
+        dto.setImageUrls(urls);
+
+        return dto;
+    }
+
     public Product toProduct(ProductDTO dto) {
         if (dto == null) {
             return null;

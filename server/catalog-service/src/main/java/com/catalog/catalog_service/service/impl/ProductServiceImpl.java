@@ -88,7 +88,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = productRepository.findAll(spec, processedPageable);
 
         List<ProductDTO> dtos = productPage.getContent().stream()
-            .map(entityMapper::toProductDTO)
+            .map(entityMapper::toProductDTOForList)
             .toList();
 
         return new PageDTO<>(
