@@ -89,6 +89,20 @@
             <version>3.6.1</version>
         </dependency>
         
+        <!-- Apache Mahout for ML-based recommendations -->
+        <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-core</artifactId>
+            <version>0.9</version>
+        </dependency>
+        
+        <!-- Apache Commons Math for additional ML utilities -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+        
         <!-- Cache for recommendations -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
