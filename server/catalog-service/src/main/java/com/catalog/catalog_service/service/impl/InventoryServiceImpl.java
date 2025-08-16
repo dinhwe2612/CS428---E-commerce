@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 @Service
 public class InventoryServiceImpl implements InventoryService {
@@ -60,7 +59,6 @@ public class InventoryServiceImpl implements InventoryService {
         newInventory.setDescription(request.getDescription());
         newInventory.setQuantity(request.getQuantity());
         newInventory.setArrivalDate(request.getArrivalDate());
-        newInventory.setPricingRules(new ArrayList<>());
         
         Inventory savedInventory = inventoryRepository.save(newInventory);
         return entityMapper.toInventoryDTO(savedInventory);

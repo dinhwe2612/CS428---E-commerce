@@ -74,7 +74,6 @@ public class InventoryServiceTest {
         sampleInventory.setArrivalDate(fixedArrival);
         sampleInventory.setDescription("Initial stock");
         sampleInventory.setVersion(1L);
-        sampleInventory.setPricingRules(Collections.emptyList());
 
         // Prepare the corresponding DTO
         sampleInventoryDTO = new InventoryDTO();
