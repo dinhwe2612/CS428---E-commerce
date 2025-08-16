@@ -39,9 +39,7 @@ public class PricingRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id")
-    private Inventory inventory;
+
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")

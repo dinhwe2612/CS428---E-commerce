@@ -1,8 +1,6 @@
 package com.catalog.catalog_service.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,23 +33,6 @@ public class Inventory {
     @Version
     private Long version;
 
-    @OneToMany(
-            mappedBy = "inventory",
-            cascade = CascadeType.REMOVE,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private List<PricingRule> pricingRules = new ArrayList<>();
-    
-    // Helper method to ensure pricingRules is never null
-    public List<PricingRule> getPricingRules() {
-        if (pricingRules == null) {
-            pricingRules = new ArrayList<>();
-        }
-        return pricingRules;
-    }
-    
-    public void setPricingRules(List<PricingRule> pricingRules) {
-        this.pricingRules = pricingRules != null ? pricingRules : new ArrayList<>();
-    }
+
+
 }
