@@ -49,21 +49,26 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
 
             logger.debug("List applicable rules for product {}: {}", 
                 product.getId(), applicableRules.stream().map(PricingRule::getRuleName).collect(Collectors.joining(", ")));
-            
+
             BigDecimal finalPrice = originalPrice;
             List<String> appliedRules = new ArrayList<>();
             
             for (PricingRule rule : applicableRules) {
                 if (isRuleApplicable(rule, product)) {
-                    BigDecimal rulePrice = applyPricingRule(finalPrice, rule);
+                    BigDecimal originalRulePrice = applyPricingRule(finalPrice, rule);
+                    BigDecimal rulePrice = originalRulePrice;
+                    boolean minPriceApplied = false;
                     
                     if (rule.getMinPrice() != null && rulePrice.compareTo(rule.getMinPrice()) < 0) {
                         rulePrice = rule.getMinPrice();
+                        minPriceApplied = true;
                     }
                     
-                    if (!rulePrice.equals(finalPrice)) {
+                    if (!originalRulePrice.equals(finalPrice) || minPriceApplied) {
                         finalPrice = rulePrice;
                         appliedRules.add(rule.getRuleName());
+                        logger.debug("Applied rule {} - original calculation: {}, final price: {}, minPrice enforced: {}", 
+                            rule.getRuleName(), originalRulePrice, rulePrice, minPriceApplied);
                     }
                 }
             }
@@ -404,15 +409,20 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             
             for (PricingRule rule : applicableRules) {
                 if (isRuleApplicable(rule, product)) {
-                    BigDecimal rulePrice = applyPricingRule(finalPrice, rule);
+                    BigDecimal originalRulePrice = applyPricingRule(finalPrice, rule);
+                    BigDecimal rulePrice = originalRulePrice;
+                    boolean minPriceApplied = false;
                     
                     if (rule.getMinPrice() != null && rulePrice.compareTo(rule.getMinPrice()) < 0) {
                         rulePrice = rule.getMinPrice();
+                        minPriceApplied = true;
                     }
                     
-                    if (!rulePrice.equals(finalPrice)) {
+                    if (!originalRulePrice.equals(finalPrice) || minPriceApplied) {
                         finalPrice = rulePrice;
                         appliedRules.add(rule.getRuleName());
+                        logger.debug("Applied rule {} - original calculation: {}, final price: {}, minPrice enforced: {}", 
+                            rule.getRuleName(), originalRulePrice, rulePrice, minPriceApplied);
                     }
                 }
             }
