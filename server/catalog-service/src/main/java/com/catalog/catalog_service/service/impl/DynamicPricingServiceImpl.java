@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,62 +111,9 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             .collect(Collectors.toList());
     }
     
-    @Override
-    @Transactional
-    public void updateAllProductPrices() {
-        logger.info("Starting bulk price update for all products");
-        List<Product> products = productRepository.findAll();
-        int updatedCount = 0;
-        
-        for (Product product : products) {
-            try {
-                DynamicPriceDTO priceDTO = calculateDynamicPrice(product);
-                if (priceDTO.isPriceChanged()) {
-                    String newPriceString = priceDTO.getDynamicPrice().toString();
-                    product.setPrice(newPriceString);
-                    productRepository.save(product);
-                    
-                    logger.debug("Updated price for product {}: {} -> {}", 
-                        product.getId(), priceDTO.getOriginalPrice(), priceDTO.getDynamicPrice());
-                    updatedCount++;
-                }
-            } catch (Exception e) {
-                logger.error("Error updating price for product {}: {}", product.getId(), e.getMessage());
-            }
-        }
-        
-        logger.info("Completed bulk price update: {} products updated out of {} total", updatedCount, products.size());
-    }
+
     
-    @Override
-    @Transactional
-    public void updateProductPricesForCategory(Long categoryId) {
-        logger.info("Starting price update for category {}", categoryId);
-        Page<Product> productPage = productRepository.findByCategoryId(categoryId, Pageable.unpaged());
-        List<Product> products = productPage.getContent();
-        int updatedCount = 0;
-        
-        for (Product product : products) {
-            try {
-                DynamicPriceDTO priceDTO = calculateDynamicPrice(product);
-                if (priceDTO.isPriceChanged()) {
-                    String newPriceString = priceDTO.getDynamicPrice().toString();
-                    product.setPrice(newPriceString);
-                    productRepository.save(product);
-                    
-                    logger.debug("Updated price for product {} in category {}: {} -> {}", 
-                        product.getId(), categoryId, priceDTO.getOriginalPrice(), priceDTO.getDynamicPrice());
-                    updatedCount++;
-                }
-            } catch (Exception e) {
-                logger.error("Error updating price for product {} in category {}: {}", 
-                    product.getId(), categoryId, e.getMessage());
-            }
-        }
-        
-        logger.info("Completed price update for category {}: {} products updated out of {} total", 
-            categoryId, updatedCount, products.size());
-    }
+
     
     @Override
     public BigDecimal getEffectivePrice(Product product) {

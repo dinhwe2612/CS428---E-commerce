@@ -14,10 +14,6 @@ public interface DynamicPricingService {
     
     List<DynamicPriceDTO> calculateDynamicPricesForProducts(List<Long> productIds);
     
-    void updateAllProductPrices();
-    
-    void updateProductPricesForCategory(Long categoryId);
-    
     BigDecimal getEffectivePrice(Product product);
     
     String checkSpecialDay();

@@ -17,30 +17,19 @@ public class PricingSchedulerService {
     
     private final DynamicPricingService dynamicPricingService;
     
-    @Scheduled(fixedRate = 300000)
-    public void updatePricesBasedOnTimeOfDay() {
-        try {
-            logger.info("Starting scheduled price update based on time of day");
-            dynamicPricingService.updateAllProductPrices();
-            logger.info("Completed scheduled price update");
-        } catch (Exception e) {
-            logger.error("Error during scheduled price update: {}", e.getMessage(), e);
-        }
-    }
     
     @Scheduled(cron = "0 0 0 * * ?")
-    public void updatePricesBasedOnSpecialDays() {
+    public void logSpecialDayStatus() {
         try {
-            logger.info("Starting daily price update for special days");
+            logger.info("Checking special day status");
             String specialDay = dynamicPricingService.checkSpecialDay();
             if (specialDay != null) {
-                logger.info("Special day detected: {}. Updating all product prices.", specialDay);
-                dynamicPricingService.updateAllProductPrices();
+                logger.info("Special day detected: {}. Dynamic pricing rules will be applied on-demand.", specialDay);
             } else {
-                logger.info("No special day detected. Regular pricing applies.");
+                logger.info("No special day detected. Regular pricing rules will be applied on-demand.");
             }
         } catch (Exception e) {
-            logger.error("Error during special day price update: {}", e.getMessage(), e);
+            logger.error("Error during special day check: {}", e.getMessage(), e);
         }
     }
 }

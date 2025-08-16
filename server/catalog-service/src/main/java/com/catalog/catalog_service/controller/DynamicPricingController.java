@@ -84,32 +84,6 @@ public class DynamicPricingController {
         return ResponseEntity.ok(prices);
     }
     
-    @Operation(
-        summary = "Update all product prices",
-        description = "Triggers bulk price update for all products based on active pricing rules (Admin only)"
-    )
-    @ApiResponse(responseCode = "200", description = "Bulk price update completed")
-    @PostMapping("/update-all-prices")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> updateAllProductPrices() {
-        dynamicPricingService.updateAllProductPrices();
-        return ResponseEntity.ok("Bulk price update completed successfully");
-    }
-    
-    @Operation(
-        summary = "Update product prices for a category",
-        description = "Triggers price update for all products in a specific category (Admin only)"
-    )
-    @ApiResponse(responseCode = "200", description = "Category price update completed")
-    @PostMapping("/categories/{categoryId}/update-prices")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> updateProductPricesForCategory(
-            @Parameter(description = "Category ID", required = true, example = "1")
-            @PathVariable Long categoryId
-    ) {
-        dynamicPricingService.updateProductPricesForCategory(categoryId);
-        return ResponseEntity.ok("Category price update completed successfully");
-    }
     
     @Operation(
         summary = "Check current special day",
