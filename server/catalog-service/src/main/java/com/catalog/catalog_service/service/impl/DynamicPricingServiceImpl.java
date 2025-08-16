@@ -113,20 +113,26 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     public void updateAllProductPrices() {
         logger.info("Starting bulk price update for all products");
         List<Product> products = productRepository.findAll();
+        int updatedCount = 0;
         
         for (Product product : products) {
             try {
                 DynamicPriceDTO priceDTO = calculateDynamicPrice(product);
                 if (priceDTO.isPriceChanged()) {
-                    logger.debug("Updating price for product {}: {} -> {}", 
+                    String newPriceString = priceDTO.getDynamicPrice().toString();
+                    product.setPrice(newPriceString);
+                    productRepository.save(product);
+                    
+                    logger.debug("Updated price for product {}: {} -> {}", 
                         product.getId(), priceDTO.getOriginalPrice(), priceDTO.getDynamicPrice());
+                    updatedCount++;
                 }
             } catch (Exception e) {
                 logger.error("Error updating price for product {}: {}", product.getId(), e.getMessage());
             }
         }
         
-        logger.info("Completed bulk price update for {} products", products.size());
+        logger.info("Completed bulk price update: {} products updated out of {} total", updatedCount, products.size());
     }
     
     @Override
@@ -135,13 +141,19 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
         logger.info("Starting price update for category {}", categoryId);
         Page<Product> productPage = productRepository.findByCategoryId(categoryId, Pageable.unpaged());
         List<Product> products = productPage.getContent();
+        int updatedCount = 0;
         
         for (Product product : products) {
             try {
                 DynamicPriceDTO priceDTO = calculateDynamicPrice(product);
                 if (priceDTO.isPriceChanged()) {
-                    logger.debug("Updating price for product {} in category {}: {} -> {}", 
+                    String newPriceString = priceDTO.getDynamicPrice().toString();
+                    product.setPrice(newPriceString);
+                    productRepository.save(product);
+                    
+                    logger.debug("Updated price for product {} in category {}: {} -> {}", 
                         product.getId(), categoryId, priceDTO.getOriginalPrice(), priceDTO.getDynamicPrice());
+                    updatedCount++;
                 }
             } catch (Exception e) {
                 logger.error("Error updating price for product {} in category {}: {}", 
@@ -149,7 +161,8 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             }
         }
         
-        logger.info("Completed price update for {} products in category {}", products.size(), categoryId);
+        logger.info("Completed price update for category {}: {} products updated out of {} total", 
+            categoryId, updatedCount, products.size());
     }
     
     @Override
@@ -193,7 +206,13 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     private boolean isRuleApplicable(PricingRule rule, Product product) {
         logger.debug("Rule information: ruleName={}, triggerType={}, isActive={}", 
             rule.getRuleName(), rule.getTriggerType(), rule.getIsActive());
+        
         if (!rule.getIsActive()) {
+            return false;
+        }
+        
+        if (!rule.isApplicableNow()) {
+            logger.debug("Rule {} is not applicable now due to date constraints", rule.getRuleName());
             return false;
         }
         
@@ -205,8 +224,14 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             case SPECIAL_DAY:
                 return isSpecialDayApplicable(rule);
             case COMBINED:
-                return isTimeOfDayApplicable(rule) || isProductConditionApplicable(rule, product) || 
-                       isSpecialDayApplicable(rule);
+                boolean timeCondition = isTimeOfDayApplicable(rule);
+                boolean productCondition = isProductConditionApplicable(rule, product);
+                boolean specialDayCondition = isSpecialDayApplicable(rule);
+                
+                logger.debug("COMBINED rule {} conditions - time: {}, product: {}, specialDay: {}", 
+                    rule.getRuleName(), timeCondition, productCondition, specialDayCondition);
+                
+                return timeCondition && productCondition && specialDayCondition;
             default:
                 return true;
         }
@@ -222,13 +247,16 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
         LocalTime start = rule.getStartTime();
         LocalTime end = rule.getEndTime();
 
-        logger.debug("Time's rule: {}", rule.getStartTime() + " - " + rule.getEndTime());
-        logger.debug("Current time: {}", now);
+        logger.debug("Time rule: {} - {}, Current time: {}", start, end, now);
         
-        if (start.isBefore(end)) { 
-            return !now.isBefore(start) && !now.isAfter(end);
+        if (start.isBefore(end)) {
+            boolean applicable = !now.isBefore(start) && !now.isAfter(end);
+            logger.debug("Normal time range: applicable = {}", applicable);
+            return applicable;
         } else {
-            return !now.isBefore(start) || !now.isAfter(end);
+            boolean applicable = now.compareTo(start) >= 0 || now.compareTo(end) <= 0;
+            logger.debug("Cross-midnight time range: applicable = {}", applicable);
+            return applicable;
         }
     }
     
@@ -264,29 +292,31 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     
     private BigDecimal applyPricingRule(BigDecimal currentPrice, PricingRule rule) {
         BigDecimal newPrice = currentPrice;
+        BigDecimal modifierValue = rule.getModifierValue();
         
         switch (rule.getType()) {
             case PERCENTAGE:
-                BigDecimal discountMultiplier = BigDecimal.ONE.subtract(
-                    rule.getModifierValue().divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
-                newPrice = currentPrice.multiply(discountMultiplier);
+                BigDecimal multiplier = BigDecimal.ONE.subtract(
+                    modifierValue.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
+                newPrice = currentPrice.multiply(multiplier);
                 break;
             case FIXED:
-                newPrice = currentPrice.subtract(rule.getModifierValue());
+                newPrice = currentPrice.subtract(modifierValue);
                 break;
             case DECAY:
-                BigDecimal decayFactor = rule.getModifierValue().divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                BigDecimal decayFactor = modifierValue.abs().divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
                 newPrice = currentPrice.multiply(BigDecimal.ONE.subtract(decayFactor));
                 break;
         }
 
-        logger.debug("Applying rule {}: current price {}, new price {}", 
-            rule.getRuleName(), currentPrice, newPrice);
+        logger.debug("Applying rule {}: current price {}, modifier {}, new price {}", 
+            rule.getRuleName(), currentPrice, modifierValue, newPrice);
         
-        if (rule.getMaxDiscountAmount() != null) {
+        if (rule.getMaxDiscountAmount() != null && newPrice.compareTo(currentPrice) < 0) {
             BigDecimal discount = currentPrice.subtract(newPrice);
             if (discount.compareTo(rule.getMaxDiscountAmount()) > 0) {
                 newPrice = currentPrice.subtract(rule.getMaxDiscountAmount());
+                logger.debug("Applied max discount constraint: limited discount to {}", rule.getMaxDiscountAmount());
             }
         }
 
