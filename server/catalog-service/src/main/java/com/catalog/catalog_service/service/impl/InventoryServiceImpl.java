@@ -103,7 +103,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (!productRepository.existsById(productId)) {
             throw new ResourceNotFoundException("Product not found with id: " + productId);
         }
-        return inventoryRepository.findinventoriesByProductId(productId).stream()
+        return inventoryRepository.findByProductId(productId).stream()
                 .map(entityMapper::toInventoryDTO)
                 .collect(Collectors.toList());
     }

@@ -13,7 +13,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
             value = "SELECT * FROM inventories WHERE product_id = :productId",
             nativeQuery = true
     )
-    List<Inventory> findinventoriesByProductId(Long productId);
+    List<Inventory> findByProductId(Long productId);
     
     boolean existsByProductId(Long productId);
 } 

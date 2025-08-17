@@ -31,6 +31,7 @@ import com.catalog.catalog_service.exception.ProductDeletionException;
 import com.catalog.catalog_service.exception.ResourceNotFoundException;
 import com.catalog.catalog_service.mapper.EntityMapper;
 import com.catalog.catalog_service.model.Category;
+import com.catalog.catalog_service.model.Inventory;
 import com.catalog.catalog_service.model.Product;
 import com.catalog.catalog_service.model.ProductDocument;
 import com.catalog.catalog_service.model.ProductImage;
@@ -127,9 +128,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO getProductById(Long id) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findByIdWithCategory(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        return entityMapper.toProductDTO(product);
+        
+        List<Inventory> inventories = inventoryRepository.findByProductId(id);
+        
+        return entityMapper.toProductDTOWithInventory(product, inventories);
     }
 
     @Override

@@ -64,6 +64,7 @@ public class EntityMapper {
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId());
         dto.setCategoryId(product.getCategory().getId());
+        dto.setCategoryName(product.getCategory().getName());
         dto.setProductPath(product.getProductPath());
         dto.setName(product.getName());
         dto.setStatus(product.getStatus());
@@ -82,6 +83,41 @@ public class EntityMapper {
         return dto;
     }
 
+    public ProductDTO toProductDTOWithInventory(Product product, List<Inventory> inventories) {
+        if (product == null) {
+            return null;
+        }
+
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setCategoryId(product.getCategory().getId());
+        dto.setCategoryName(product.getCategory().getName());
+        dto.setProductPath(product.getProductPath());
+        dto.setName(product.getName());
+        dto.setStatus(product.getStatus());
+        dto.setPrice(product.getPrice());
+        dto.setDescriptionHtml(product.getDescriptionHtml());
+        dto.setDescriptionText(product.getDescriptionText());
+
+        List<String> urls = new ArrayList<>();
+        if (product.getImages() != null) {
+            for (ProductImage img : product.getImages()) {
+                urls.add(img.getImageUrl());
+            }
+        }
+        dto.setImageUrls(urls);
+
+        List<InventoryDTO> inventoryDTOs = new ArrayList<>();
+        if (inventories != null) {
+            for (Inventory inventory : inventories) {
+                inventoryDTOs.add(toInventoryDTO(inventory));
+            }
+        }
+        dto.setInventories(inventoryDTOs);
+
+        return dto;
+    }
+
     public ProductDTO toProductDTOForList(Product product) {
         if (product == null) {
             return null;
@@ -90,6 +126,7 @@ public class EntityMapper {
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId());
         dto.setCategoryId(product.getCategory().getId());
+        dto.setCategoryName(product.getCategory().getName());
         dto.setProductPath(product.getProductPath());
         dto.setName(product.getName());
         dto.setStatus(product.getStatus());

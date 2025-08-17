@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class ProductDTO {
     private Long id;
     private Long categoryId;
+    private String categoryName;
     private String productPath;
     private String name;
     private ProductStatus status;
@@ -21,4 +22,5 @@ public class ProductDTO {
     private String descriptionHtml;
     private String descriptionText;
     private List<String> imageUrls;
+    private List<InventoryDTO> inventories;
 }
