@@ -62,6 +62,10 @@ jwt:
 
 INTERNAL_API_KEY: ${INTERNAL_API_KEY}
 
+services:
+  cart:
+    base-url: http://cart-service:8088
+
 integration:
   order:
     base-url: http://order-service
