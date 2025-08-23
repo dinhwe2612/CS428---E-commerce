@@ -8,8 +8,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -303,18 +305,71 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             return Collections.emptyMap();
         }
         
+        Set<Long> productIds = products.stream()
+            .map(Product::getId)
+            .collect(Collectors.toSet());
+            
+        Set<Long> categoryIds = products.stream()
+            .map(product -> product.getCategory().getId())
+            .collect(Collectors.toSet());
+        
+        List<PricingRule> productRules = new ArrayList<>();
+        List<PricingRule> categoryRules = new ArrayList<>();
+        List<PricingRule> globalRules = pricingRuleRepository.findByApplyToAllProductsTrueAndIsActiveTrueOrderByPriorityAsc();
+        
+        if (!productIds.isEmpty()) {
+            productRules = pricingRuleRepository.findByProductIdsWithRelationships(new ArrayList<>(productIds));
+        }
+        
+        if (!categoryIds.isEmpty()) {
+            categoryRules = pricingRuleRepository.findByCategoryIdsWithRelationships(new ArrayList<>(categoryIds));
+        }
+        
+        Set<PricingRule> allRulesSet = new HashSet<>();
+        allRulesSet.addAll(productRules);
+        allRulesSet.addAll(categoryRules);
+        allRulesSet.addAll(globalRules);
+        
+        List<PricingRule> allRules = allRulesSet.stream()
+            .sorted((r1, r2) -> r1.getPriority().compareTo(r2.getPriority()))
+            .collect(Collectors.toList());
+        
         Map<Long, List<PricingRule>> rulesByProduct = new HashMap<>();
         
         for (Product product : products) {
-            List<PricingRule> applicableRules = getApplicableRules(product);
+            List<PricingRule> applicableRules = allRules.stream()
+                .filter(rule -> isRuleApplicableToProduct(rule, product))
+                .collect(Collectors.toList());
+            
             rulesByProduct.put(product.getId(), applicableRules);
         }
         
         return rulesByProduct;
     }
     
-    
-
+    private boolean isRuleApplicableToProduct(PricingRule rule, Product product) {
+        if (Boolean.TRUE.equals(rule.getApplyToAllProducts())) {
+            return true;
+        }
+        
+        if (rule.getPricingRuleProducts() != null) {
+            boolean hasProductRule = rule.getPricingRuleProducts().stream()
+                    .anyMatch(prp -> prp.getProduct().getId().equals(product.getId()));
+            if (hasProductRule) {
+                return true;
+            }
+        }
+        
+        if (rule.getPricingRuleCategories() != null) {
+            boolean hasCategoryRule = rule.getPricingRuleCategories().stream()
+                    .anyMatch(prc -> prc.getCategoryId().equals(product.getCategory().getId()));
+            if (hasCategoryRule) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
     
     private DynamicPriceDTO calculateDynamicPriceWithRules(Product product, List<PricingRule> applicableRules) {
         try {

@@ -68,6 +68,12 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
            "WHERE pr.isActive = true " +
            "ORDER BY pr.priority ASC")
     List<PricingRule> findByIsActiveTrueWithRelationshipsOrderByPriorityAsc();
-
-
+    
+    @Query("SELECT DISTINCT pr FROM PricingRule pr LEFT JOIN FETCH pr.pricingRuleProducts prp LEFT JOIN FETCH pr.pricingRuleCategories " +
+           "WHERE prp.product.id IN :productIds AND pr.isActive = true ORDER BY pr.priority ASC")
+    List<PricingRule> findByProductIdsWithRelationships(@Param("productIds") List<Long> productIds);
+    
+    @Query("SELECT DISTINCT pr FROM PricingRule pr LEFT JOIN FETCH pr.pricingRuleProducts LEFT JOIN FETCH pr.pricingRuleCategories prc " +
+           "WHERE prc.categoryId IN :categoryIds AND pr.isActive = true ORDER BY pr.priority ASC")
+    List<PricingRule> findByCategoryIdsWithRelationships(@Param("categoryIds") List<Long> categoryIds);
 }
