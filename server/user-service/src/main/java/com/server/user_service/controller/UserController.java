@@ -44,7 +44,7 @@ public class UserController {
             }
     )
     @PostMapping("/update/{id}")
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse<?>> update(
             @Parameter(description = "ID of the user to update", required = true) @PathVariable("id") Long id,
             @Parameter(description = "Fields to update", required = true) @RequestBody UpdateRequest updateRequest
@@ -62,7 +62,7 @@ public class UserController {
             }
     )
     @GetMapping("/user/{id}")
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(
             @Parameter(description = "ID of the user", required = true) @PathVariable Long id
     ) {
@@ -106,7 +106,7 @@ public class UserController {
             summary = "List users by role",
             description = "Retrieves users filtered by role (admin only)",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Users by role retrieved successfully",
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Users retrieved successfully",
                             content = @Content(schema = @Schema(implementation = UserResponse.class)))
             }
     )
@@ -116,7 +116,7 @@ public class UserController {
             @Parameter(description = "Role to filter by", required = true) @PathVariable Role role
     ) {
         List<UserResponse> users = userService.getUsersByRole(role);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Users by role retrieved successfully", users));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Users retrieved successfully", users));
     }
 
     @Operation(
@@ -127,11 +127,11 @@ public class UserController {
                             content = @Content(schema = @Schema(implementation = ApiResponse.class)))
             }
     )
-    @PutMapping("/admin/role/{id}")
+    @PostMapping("/admin/role/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateUserRole(
             @Parameter(description = "ID of the user", required = true) @PathVariable("id") Long id,
-            @Parameter(description = "New role", required = true) @RequestParam Role role
+            @Parameter(description = "New role for the user", required = true) @RequestParam Role role
     ) {
         userService.updateUserRole(id, role);
         return ResponseEntity.ok(new ApiResponse<>(true, "User role updated successfully", null));
