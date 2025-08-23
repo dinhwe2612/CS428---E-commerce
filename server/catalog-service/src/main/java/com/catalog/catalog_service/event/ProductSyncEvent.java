@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Data
 @AllArgsConstructor
-
+//
 @Getter
 @Setter
 public class ProductSyncEvent {
