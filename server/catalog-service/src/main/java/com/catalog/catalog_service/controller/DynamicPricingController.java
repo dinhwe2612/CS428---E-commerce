@@ -1,6 +1,10 @@
 package com.catalog.catalog_service.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +27,9 @@ import com.catalog.catalog_service.dto.PricingRuleDTO;
 import com.catalog.catalog_service.dto.request.CreatePricingRuleRequest;
 import com.catalog.catalog_service.dto.request.UpdatePricingRuleRequest;
 import com.catalog.catalog_service.model.PricingRule;
+import com.catalog.catalog_service.model.Product;
+import com.catalog.catalog_service.repository.jpa.PricingRuleRepository;
+import com.catalog.catalog_service.repository.jpa.ProductRepository;
 import com.catalog.catalog_service.service.DynamicPricingService;
 import com.catalog.catalog_service.service.PricingRuleService;
 
@@ -43,6 +50,8 @@ public class DynamicPricingController {
     
     private final DynamicPricingService dynamicPricingService;
     private final PricingRuleService pricingRuleService;
+    private final ProductRepository productRepository;
+    private final PricingRuleRepository pricingRuleRepository;
     
     @Operation(
         summary = "Calculate dynamic price for a product",
@@ -264,5 +273,62 @@ public class DynamicPricingController {
     ) {
         List<PricingRuleDTO> rules = pricingRuleService.getPricingRulesByCategoryId(categoryId);
         return ResponseEntity.ok(rules);
+    }
+    
+    @Operation(
+        summary = "Debug: Get applicable rules for a product",
+        description = "Debug endpoint to check which rules apply to a specific product"
+    )
+    @GetMapping("/debug/products/{productId}/applicable-rules")
+    public ResponseEntity<Map<String, Object>> getApplicableRulesForProduct(
+            @Parameter(description = "Product ID", required = true, example = "3")
+            @PathVariable Long productId
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // Get product
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            result.put("error", "Product not found");
+            return ResponseEntity.ok(result);
+        }
+        
+        // Get all active rules
+        List<PricingRule> allRules = pricingRuleRepository.findByIsActiveTrueOrderByPriorityAsc();
+        
+        result.put("productId", productId);
+        result.put("categoryId", product.getCategory().getId());
+        result.put("totalActiveRules", allRules.size());
+        
+        List<Map<String, Object>> ruleDetails = new ArrayList<>();
+        for (PricingRule rule : allRules) {
+            Map<String, Object> ruleInfo = new HashMap<>();
+            ruleInfo.put("id", rule.getId());
+            ruleInfo.put("name", rule.getRuleName());
+            ruleInfo.put("applyToAll", rule.getApplyToAllProducts());
+            
+            // Check products
+            List<Long> ruleProductIds = new ArrayList<>();
+            if (rule.getPricingRuleProducts() != null) {
+                ruleProductIds = rule.getPricingRuleProducts().stream()
+                    .map(prp -> prp.getProduct().getId())
+                    .collect(Collectors.toList());
+            }
+            ruleInfo.put("productIds", ruleProductIds);
+            
+            // Check categories  
+            List<Long> ruleCategoryIds = new ArrayList<>();
+            if (rule.getPricingRuleCategories() != null) {
+                ruleCategoryIds = rule.getPricingRuleCategories().stream()
+                    .map(prc -> prc.getCategoryId())
+                    .collect(Collectors.toList());
+            }
+            ruleInfo.put("categoryIds", ruleCategoryIds);
+            
+            ruleDetails.add(ruleInfo);
+        }
+        
+        result.put("rules", ruleDetails);
+        return ResponseEntity.ok(result);
     }
 }

@@ -303,25 +303,10 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             return Collections.emptyMap();
         }
         
-        List<Long> productIds = products.stream()
-            .map(Product::getId)
-            .collect(Collectors.toList());
-            
-        List<Long> categoryIds = products.stream()
-            .map(product -> product.getCategory().getId())
-            .distinct()
-            .collect(Collectors.toList());
-        
-        List<PricingRule> allRules = pricingRuleRepository.findByProductIdsOrCategoryIdsAndIsActiveTrueOrderByPriorityAsc(productIds, categoryIds);
-        
         Map<Long, List<PricingRule>> rulesByProduct = new HashMap<>();
         
         for (Product product : products) {
-            List<PricingRule> applicableRules = allRules.stream()
-                .filter(rule -> isRuleApplicableToProduct(rule, product))
-                .sorted((r1, r2) -> r1.getPriority().compareTo(r2.getPriority()))
-                .collect(Collectors.toList());
-            
+            List<PricingRule> applicableRules = getApplicableRules(product);
             rulesByProduct.put(product.getId(), applicableRules);
         }
         
@@ -329,29 +314,7 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     }
     
     
-    private boolean isRuleApplicableToProduct(PricingRule rule, Product product) {
-        if (Boolean.TRUE.equals(rule.getApplyToAllProducts())) {
-            return true;
-        }
-        
-        if (rule.getPricingRuleProducts() != null) {
-            boolean hasProductRule = rule.getPricingRuleProducts().stream()
-                    .anyMatch(prp -> prp.getProduct().getId().equals(product.getId()));
-            if (hasProductRule) {
-                return true;
-            }
-        }
-        
-        if (rule.getPricingRuleCategories() != null) {
-            boolean hasCategoryRule = rule.getPricingRuleCategories().stream()
-                    .anyMatch(prc -> prc.getCategoryId().equals(product.getCategory().getId()));
-            if (hasCategoryRule) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
+
     
     private DynamicPriceDTO calculateDynamicPriceWithRules(Product product, List<PricingRule> applicableRules) {
         try {
