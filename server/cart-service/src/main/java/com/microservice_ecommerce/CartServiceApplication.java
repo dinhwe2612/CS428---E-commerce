@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 public class CartServiceApplication {
     public static void main(String[] args) {
 		SpringApplication.run(CartServiceApplication.class, args);
