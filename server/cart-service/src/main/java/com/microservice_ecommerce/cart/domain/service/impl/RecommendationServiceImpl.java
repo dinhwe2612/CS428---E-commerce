@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.microservice_ecommerce.cart.domain.dto.RecommendationRequest;
@@ -49,7 +51,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         this.cartAnalysisRepository = cartAnalysisRepository;
         this.catalogServiceClient = catalogServiceClient;
         this.orderServiceClient = orderServiceClient;
-        warmupCache();
     }
     
     @Override
@@ -434,18 +435,34 @@ public class RecommendationServiceImpl implements RecommendationService {
             return cachedProducts;
         }
         
-        List<ProductResponseSnakeCase> products = catalogServiceClient.getAllProductsSnakeCase();
-        if (products != null) {
-            cache.put(cacheKey, new CacheEntry(products, System.currentTimeMillis()));
+        try {
+            List<ProductResponseSnakeCase> products = catalogServiceClient.getAllProductsSnakeCase();
+            if (products != null && !products.isEmpty()) {
+                cache.put(cacheKey, new CacheEntry(products, System.currentTimeMillis()));
+                return products;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch products from catalog service: {}", e.getMessage());
+            if (cachedEntry != null) {
+                log.info("Using stale cache data due to service unavailability");
+                @SuppressWarnings("unchecked")
+                List<ProductResponseSnakeCase> staleProducts = (List<ProductResponseSnakeCase>) cachedEntry.data;
+                return staleProducts;
+            }
         }
-        return products;
+        
+        return new ArrayList<>();
     }
     
     @Async
+    @EventListener(ApplicationReadyEvent.class)
     public void warmupCache() {
         try {
+            Thread.sleep(5000);
+            log.info("Starting cache warmup...");
             getCachedProducts();
             getPopularProducts(8);
+            log.info("Cache warmup completed successfully");
         } catch (Exception e) {
             log.warn("Cache warmup failed: {}", e.getMessage());
         }
