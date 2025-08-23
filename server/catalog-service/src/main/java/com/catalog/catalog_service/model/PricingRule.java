@@ -3,6 +3,8 @@ package com.catalog.catalog_service.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -41,9 +43,11 @@ public class PricingRule {
 
 
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PricingRuleProduct> pricingRuleProducts;
+    
+    @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PricingRuleCategory> pricingRuleCategories;
 
     @Column(name = "rule_name", nullable = false)
     private String ruleName;
@@ -96,8 +100,7 @@ public class PricingRule {
     @Column(name = "apply_to_all_products")
     private Boolean applyToAllProducts = false;
     
-    @Column(name = "category_id")
-    private Long categoryId;
+
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

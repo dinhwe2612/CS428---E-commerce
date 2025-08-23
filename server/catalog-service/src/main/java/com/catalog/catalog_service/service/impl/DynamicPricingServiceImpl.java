@@ -312,7 +312,7 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             .distinct()
             .collect(Collectors.toList());
         
-        List<PricingRule> allRules = pricingRuleRepository.findApplicableRulesForProducts(productIds, categoryIds);
+        List<PricingRule> allRules = pricingRuleRepository.findByProductIdsOrCategoryIdsAndIsActiveTrueOrderByPriorityAsc(productIds, categoryIds);
         
         Map<Long, List<PricingRule>> rulesByProduct = new HashMap<>();
         
@@ -334,12 +334,20 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
             return true;
         }
         
-        if (rule.getProduct() != null && rule.getProduct().getId().equals(product.getId())) {
-            return true;
+        if (rule.getPricingRuleProducts() != null) {
+            boolean hasProductRule = rule.getPricingRuleProducts().stream()
+                    .anyMatch(prp -> prp.getProduct().getId().equals(product.getId()));
+            if (hasProductRule) {
+                return true;
+            }
         }
         
-        if (rule.getCategoryId() != null && rule.getCategoryId().equals(product.getCategory().getId())) {
-            return true;
+        if (rule.getPricingRuleCategories() != null) {
+            boolean hasCategoryRule = rule.getPricingRuleCategories().stream()
+                    .anyMatch(prc -> prc.getCategoryId().equals(product.getCategory().getId()));
+            if (hasCategoryRule) {
+                return true;
+            }
         }
         
         return false;

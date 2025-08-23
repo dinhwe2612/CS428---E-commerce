@@ -17,15 +17,18 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
     
     List<PricingRule> findByIsActiveTrueOrderByPriorityAsc();
     
-    List<PricingRule> findByProductIdAndIsActiveTrueOrderByPriorityAsc(Long productId);
-    
     List<PricingRule> findByApplyToAllProductsTrueAndIsActiveTrueOrderByPriorityAsc();
     
-    List<PricingRule> findByCategoryIdAndIsActiveTrueOrderByPriorityAsc(Long categoryId);
+    @Query("SELECT DISTINCT pr FROM PricingRule pr JOIN pr.pricingRuleProducts prp WHERE prp.product.id = :productId AND pr.isActive = true ORDER BY pr.priority ASC")
+    List<PricingRule> findByProductIdAndIsActiveTrueOrderByPriorityAsc(@Param("productId") Long productId);
     
-    @Query("SELECT pr FROM PricingRule pr WHERE pr.isActive = true " +
-           "AND (pr.applyToAllProducts = true OR pr.product.id = :productId OR pr.product.category.id = :categoryId) " +
-           "ORDER BY pr.priority ASC")
+    @Query("SELECT DISTINCT pr FROM PricingRule pr JOIN pr.pricingRuleCategories prc WHERE prc.categoryId = :categoryId AND pr.isActive = true ORDER BY pr.priority ASC")
+    List<PricingRule> findByCategoryIdAndIsActiveTrueOrderByPriorityAsc(@Param("categoryId") Long categoryId);
+    
+    @Query("SELECT DISTINCT pr FROM PricingRule pr LEFT JOIN pr.pricingRuleProducts prp LEFT JOIN pr.pricingRuleCategories prc WHERE pr.isActive = true AND (pr.applyToAllProducts = true OR prp.product.id IN :productIds OR prc.categoryId IN :categoryIds) ORDER BY pr.priority ASC")
+    List<PricingRule> findByProductIdsOrCategoryIdsAndIsActiveTrueOrderByPriorityAsc(@Param("productIds") List<Long> productIds, @Param("categoryIds") List<Long> categoryIds);
+    
+    @Query("SELECT DISTINCT pr FROM PricingRule pr LEFT JOIN pr.pricingRuleProducts prp LEFT JOIN pr.pricingRuleCategories prc WHERE pr.isActive = true AND (pr.applyToAllProducts = true OR prp.product.id = :productId OR prc.categoryId = :categoryId) ORDER BY pr.priority ASC")
     List<PricingRule> findApplicableRulesForProduct(@Param("productId") Long productId, 
                                                    @Param("categoryId") Long categoryId);
     
@@ -52,11 +55,5 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
                                      @Param("triggerType") PricingRule.TriggerType triggerType,
                                      Pageable pageable);
 
-    @Query("SELECT pr FROM PricingRule pr WHERE pr.isActive = true " +
-           "AND (pr.applyToAllProducts = true " +
-           "OR pr.product.id IN :productIds " +
-           "OR pr.categoryId IN :categoryIds) " +
-           "ORDER BY pr.priority ASC")
-    List<PricingRule> findApplicableRulesForProducts(@Param("productIds") List<Long> productIds,
-                                                    @Param("categoryIds") List<Long> categoryIds);
+
 }

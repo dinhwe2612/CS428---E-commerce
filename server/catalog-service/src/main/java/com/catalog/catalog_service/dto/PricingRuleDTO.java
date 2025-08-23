@@ -3,6 +3,7 @@ package com.catalog.catalog_service.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.catalog.catalog_service.model.PricingRule;
 
@@ -20,8 +21,8 @@ public class PricingRuleDTO {
     @Schema(description = "Unique identifier of the pricing rule", example = "1")
     private Long id;
     
-    @Schema(description = "Product ID this rule applies to", example = "1")
-    private Long productId;
+    @Schema(description = "Product IDs this rule applies to", example = "[1, 2, 3]")
+    private List<Long> productIds;
     
     @Schema(description = "Name of the pricing rule", example = "Valentine's Day Discount")
     private String ruleName;
@@ -74,8 +75,8 @@ public class PricingRuleDTO {
     @Schema(description = "Whether the rule applies to all products", example = "false")
     private Boolean applyToAllProducts;
     
-    @Schema(description = "Category ID this rule applies to", example = "2")
-    private Long categoryId;
+    @Schema(description = "Category IDs this rule applies to", example = "[1, 2, 3]")
+    private List<Long> categoryIds;
     
     @Schema(description = "Rule creation timestamp", example = "2024-01-15T10:30:00")
     private LocalDateTime createdAt;

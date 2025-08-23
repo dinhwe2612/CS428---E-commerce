@@ -1,6 +1,8 @@
 package com.catalog.catalog_service.service.impl;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,6 +22,10 @@ import com.catalog.catalog_service.model.PricingRule;
 import com.catalog.catalog_service.model.Product;
 import com.catalog.catalog_service.repository.jpa.PricingRuleRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
+import com.catalog.catalog_service.repository.jpa.PricingRuleProductRepository;
+import com.catalog.catalog_service.repository.jpa.PricingRuleCategoryRepository;
+import com.catalog.catalog_service.model.PricingRuleProduct;
+import com.catalog.catalog_service.model.PricingRuleCategory;
 import com.catalog.catalog_service.service.PricingRuleService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +39,8 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     
     private final PricingRuleRepository pricingRuleRepository;
     private final ProductRepository productRepository;
+    private final PricingRuleProductRepository pricingRuleProductRepository;
+    private final PricingRuleCategoryRepository pricingRuleCategoryRepository;
     private final EntityMapper entityMapper;
     
     @Override
@@ -67,13 +75,11 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         PricingRule pricingRule = new PricingRule();
         mapRequestToEntity(request, pricingRule);
         
-        if (request.getProductId() != null) {
-            Product product = productRepository.findById(request.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
-            pricingRule.setProduct(product);
-        }
-        
         PricingRule savedPricingRule = pricingRuleRepository.save(pricingRule);
+        
+        createProductRelationships(savedPricingRule, request.getProductIds());
+        createCategoryRelationships(savedPricingRule, request.getCategoryIds());
+        
         logger.info("Created pricing rule with id: {}", savedPricingRule.getId());
         
         return entityMapper.toPricingRuleDTO(savedPricingRule);
@@ -87,10 +93,14 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         
         mapUpdateRequestToEntity(request, pricingRule);
         
-        if (request.getProductId() != null) {
-            Product product = productRepository.findById(request.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
-            pricingRule.setProduct(product);
+        if (request.getProductIds() != null) {
+            pricingRuleProductRepository.deleteByPricingRuleId(id);
+            createProductRelationships(pricingRule, request.getProductIds());
+        }
+        
+        if (request.getCategoryIds() != null) {
+            pricingRuleCategoryRepository.deleteByPricingRuleId(id);
+            createCategoryRelationships(pricingRule, request.getCategoryIds());
         }
         
         PricingRule savedPricingRule = pricingRuleRepository.save(pricingRule);
@@ -178,7 +188,6 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         pricingRule.setPriority(request.getPriority());
         pricingRule.setIsActive(request.getIsActive());
         pricingRule.setApplyToAllProducts(request.getApplyToAllProducts());
-        pricingRule.setCategoryId(request.getCategoryId());
     }
     
     private void mapUpdateRequestToEntity(UpdatePricingRuleRequest request, PricingRule pricingRule) {
@@ -230,8 +239,30 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         if (request.getApplyToAllProducts() != null) {
             pricingRule.setApplyToAllProducts(request.getApplyToAllProducts());
         }
-        if (request.getCategoryId() != null) {
-            pricingRule.setCategoryId(request.getCategoryId());
+    }
+    
+    private void createProductRelationships(PricingRule pricingRule, List<Long> productIds) {
+        if (productIds != null && !productIds.isEmpty()) {
+            for (Long productId : productIds) {
+                Product product = productRepository.findById(productId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+                
+                PricingRuleProduct pricingRuleProduct = new PricingRuleProduct();
+                pricingRuleProduct.setPricingRule(pricingRule);
+                pricingRuleProduct.setProduct(product);
+                pricingRuleProductRepository.save(pricingRuleProduct);
+            }
+        }
+    }
+    
+    private void createCategoryRelationships(PricingRule pricingRule, List<Long> categoryIds) {
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            for (Long categoryId : categoryIds) {
+                PricingRuleCategory pricingRuleCategory = new PricingRuleCategory();
+                pricingRuleCategory.setPricingRule(pricingRule);
+                pricingRuleCategory.setCategoryId(categoryId);
+                pricingRuleCategoryRepository.save(pricingRuleCategory);
+            }
         }
     }
 }

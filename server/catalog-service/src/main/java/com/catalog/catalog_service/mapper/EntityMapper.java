@@ -12,10 +12,13 @@ import com.catalog.catalog_service.model.Inventory;
 import com.catalog.catalog_service.model.Product;
 import com.catalog.catalog_service.model.ProductImage;
 import com.catalog.catalog_service.model.PricingRule;
+import com.catalog.catalog_service.model.PricingRuleProduct;
+import com.catalog.catalog_service.model.PricingRuleCategory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class EntityMapper {
@@ -239,8 +242,18 @@ public class EntityMapper {
         PricingRuleDTO dto = new PricingRuleDTO();
         dto.setId(pricingRule.getId());
         
-        if (pricingRule.getProduct() != null) {
-            dto.setProductId(pricingRule.getProduct().getId());
+        if (pricingRule.getPricingRuleProducts() != null) {
+            List<Long> productIds = pricingRule.getPricingRuleProducts().stream()
+                    .map(prp -> prp.getProduct().getId())
+                    .collect(Collectors.toList());
+            dto.setProductIds(productIds);
+        }
+        
+        if (pricingRule.getPricingRuleCategories() != null) {
+            List<Long> categoryIds = pricingRule.getPricingRuleCategories().stream()
+                    .map(PricingRuleCategory::getCategoryId)
+                    .collect(Collectors.toList());
+            dto.setCategoryIds(categoryIds);
         }
         
         dto.setRuleName(pricingRule.getRuleName());
@@ -259,7 +272,6 @@ public class EntityMapper {
         dto.setPriority(pricingRule.getPriority());
         dto.setIsActive(pricingRule.getIsActive());
         dto.setApplyToAllProducts(pricingRule.getApplyToAllProducts());
-        dto.setCategoryId(pricingRule.getCategoryId());
         dto.setCreatedAt(pricingRule.getCreatedAt());
         dto.setUpdatedAt(pricingRule.getUpdatedAt());
         dto.setVersion(pricingRule.getVersion());

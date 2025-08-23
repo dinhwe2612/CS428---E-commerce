@@ -3,6 +3,7 @@ package com.catalog.catalog_service.dto.request;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.catalog.catalog_service.model.PricingRule;
 
@@ -22,8 +23,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Request to create a new pricing rule")
 public class CreatePricingRuleRequest {
     
-    @Schema(description = "Product ID to apply the rule to (optional if applying to category or all products)", example = "1")
-    private Long productId;
+    @Schema(description = "Product IDs to apply the rule to (optional if applying to categories or all products)", example = "[1, 2, 3]")
+    private List<Long> productIds;
     
     @NotBlank(message = "Rule name is required")
     @Schema(description = "Name of the pricing rule", example = "Valentine's Day Discount", required = true)
@@ -87,7 +88,7 @@ public class CreatePricingRuleRequest {
     @Schema(description = "Whether to apply to all products", example = "false", defaultValue = "false")
     private Boolean applyToAllProducts = false;
     
-    @Schema(description = "Category ID to apply the rule to (optional if applying to specific product or all products)", 
-            example = "2")
-    private Long categoryId;
+    @Schema(description = "Category IDs to apply the rule to (optional if applying to specific products or all products)", 
+            example = "[1, 2, 3]")
+    private List<Long> categoryIds;
 }
