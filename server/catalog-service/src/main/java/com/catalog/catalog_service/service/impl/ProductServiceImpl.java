@@ -91,6 +91,23 @@ public class ProductServiceImpl implements ProductService {
         Double maxPrice,
         Long categoryId
     ) {
+        String sortKey = pageable.getSort().toString();
+        String cacheKey = new StringBuilder("page_products_")
+            .append(pageable.getPageNumber()).append('_')
+            .append(pageable.getPageSize()).append('_')
+            .append(sortKey).append('_')
+            .append(name != null ? name : "").append('_')
+            .append(minPrice != null ? minPrice : "").append('_')
+            .append(maxPrice != null ? maxPrice : "").append('_')
+            .append(categoryId != null ? categoryId : "")
+            .toString();
+
+        CacheEntry cached = (CacheEntry) cache.get(cacheKey);
+        if (cached != null && System.currentTimeMillis() - cached.timestamp < CACHE_TTL) {
+            @SuppressWarnings("unchecked")
+            PageDTO<ProductDTO> cachedPage = (PageDTO<ProductDTO>) cached.data;
+            return cachedPage;
+        }
 
         BigDecimal minPriceBD = minPrice != null ? BigDecimal.valueOf(minPrice) : null;
         BigDecimal maxPriceBD = maxPrice != null ? BigDecimal.valueOf(maxPrice) : null;
@@ -105,7 +122,7 @@ public class ProductServiceImpl implements ProductService {
             .map(entityMapper::toProductDTOForList)
             .toList();
 
-        return new PageDTO<>(
+        PageDTO<ProductDTO> result = new PageDTO<>(
             dtos,
             productPage.getNumber(),
             productPage.getSize(),
@@ -114,6 +131,9 @@ public class ProductServiceImpl implements ProductService {
             productPage.isLast(),
             productPage.isFirst()
         );
+
+        cache.put(cacheKey, new CacheEntry(result, System.currentTimeMillis()));
+        return result;
     }
 
     private Pageable mapPriceSortTopriceValue(Pageable pageable) {
@@ -375,7 +395,7 @@ public class ProductServiceImpl implements ProductService {
     }
     
     private void invalidateCatalogCache() {
-        cache.remove("all_products_catalog");
+        cache.keySet().removeIf(k -> k.startsWith("all_products_catalog") || k.startsWith("page_products_"));
         logger.info("Catalog cache invalidated");
     }
     
