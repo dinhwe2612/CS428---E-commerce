@@ -6,10 +6,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.microservice_ecommerce.cart.domain.dto.RecommendationRequest;
@@ -36,6 +40,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final CartAnalysisRepository cartAnalysisRepository;
     private final CatalogServiceClient catalogServiceClient;
     private final OrderServiceClient orderServiceClient;
+    
+    private final Map<String, Object> cache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL = 1800000; // 30 minutes
     
     @Autowired
     public RecommendationServiceImpl(CartAnalysisRepository cartAnalysisRepository,
@@ -72,68 +79,31 @@ public class RecommendationServiceImpl implements RecommendationService {
             // Get user's order history
             List<OrderResponseDTO> userOrders = orderServiceClient.getOrdersByUserId(userId.toString());
             
-            // Debug logging for orders
-            log.info("User {} - Found {} orders", userId, userOrders.size());
-            for (OrderResponseDTO order : userOrders) {
-                log.info("Order {} - Items: {}", order.getId(), 
-                    order.getOrder_items() != null ? order.getOrder_items().size() : "null");
-                if (order.getOrder_items() != null) {
-                    for (OrderItemResponseDTO item : order.getOrder_items()) {
-                        log.info("  - Item: ProductId={}, Quantity={}, Name={}", 
-                            item.getProduct_id(), item.getQuantity(), item.getProduct_name());
-                    }
-                }
-            }
+
             
             List<OrderItemResponseDTO> orderItems = userOrders.stream()
                 .filter(order -> order.getOrder_items() != null) // Filter out orders with null order items
                 .flatMap(order -> order.getOrder_items().stream())
                 .collect(Collectors.toList());
             
-            // Debug logging
-            log.info("User {} - Cart items: {}, Orders: {}, Order items: {}", 
-                userId, cartItems.size(), userOrders.size(), orderItems.size());
+
             
-            // Get all available products in snake_case format
-            List<ProductResponseSnakeCase> allProductResponses = catalogServiceClient.getAllProductsSnakeCase();
+            List<ProductResponseSnakeCase> allProductResponses = getCachedProducts();
             if (allProductResponses == null || allProductResponses.isEmpty()) {
                 return createEmptyResponse(userId, "CART_BASED", "No products available");
             }
             
-            // Debug logging for raw product responses
-            log.info("Received {} product responses from catalog service", allProductResponses.size());
-            for (ProductResponseSnakeCase product : allProductResponses.stream().limit(3).collect(Collectors.toList())) {
-                log.info("Raw Product {} - Name: {}, Price: {}, CategoryId: {}, ImageUrls: {}", 
-                    product.getId(), product.getName(), product.getPrice(), product.getCategory_id(), product.getImage_urls());
-            }
+
             
             // Convert to ProductDTO
             List<ProductDTO> allProducts = convertToProductDTOsSnakeCase(allProductResponses);
             
-            // Debug logging for products
-            log.info("Converted {} products", allProducts.size());
-            for (ProductDTO product : allProducts.stream().limit(3).collect(Collectors.toList())) {
-                log.info("Product {} - Name: {}, Price: {}, CategoryId: {}, ImageUrls: {}", 
-                    product.getId(), product.getName(), product.getPrice(), 
-                    product.getCategoryId(), product.getImageUrls());
-            }
+
             
             // Calculate product scores based on cart and order data
             Map<Long, Double> productScores = calculateProductScores(cartItems, orderItems, allProducts);
             
-            // Debug: Check what products are being filtered out
-            List<Long> userProductIds = new ArrayList<>();
-            for (CartItem item : cartItems) {
-                userProductIds.add(item.getProductId());
-            }
-            for (OrderItemResponseDTO item : orderItems) {
-                try {
-                    userProductIds.add(Long.parseLong(item.getProduct_id()));
-                } catch (NumberFormatException e) {
-                    // Skip invalid IDs
-                }
-            }
-            log.info("User's products (to be filtered out): {}", userProductIds);
+
             
             // Get top recommended products
             List<ProductDTO> recommendedProducts = allProducts.stream()
@@ -142,12 +112,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .limit(limit)
                 .collect(Collectors.toList());
             
-            // Debug logging for scoring
-            log.info("Product scores for top 5 products:");
-            recommendedProducts.stream().limit(5).forEach(product -> {
-                double score = productScores.getOrDefault(product.getId(), 0.0);
-                log.info("Product {} - Score: {}", product.getId(), score);
-            });
+
             
             String reasoning = generateReasoning(cartItems, orderItems, userOrders.size());
             double confidence = calculateConfidence(cartItems.size(), orderItems.size());
@@ -172,8 +137,7 @@ public class RecommendationServiceImpl implements RecommendationService {
             // Convert to ProductDTO
             ProductDTO targetProduct = convertToProductDTO(targetProductResponse);
             
-            // Get all products in snake_case format
-            List<ProductResponseSnakeCase> allProductResponses = catalogServiceClient.getAllProductsSnakeCase();
+            List<ProductResponseSnakeCase> allProductResponses = getCachedProducts();
             if (allProductResponses == null || allProductResponses.isEmpty()) {
                 return createEmptyResponse(null, "SIMILAR", "No products available");
             }
@@ -201,24 +165,25 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Override
     public RecommendationResponse getPopularProducts(int limit) {
         try {
-            // Get most frequently added products from cart data (last 30 days)
+            String cacheKey = "popular_products_" + limit;
+            CacheEntry cachedEntry = (CacheEntry) cache.get(cacheKey);
+            
+            if (cachedEntry != null && System.currentTimeMillis() - cachedEntry.timestamp < CACHE_TTL) {
+                return (RecommendationResponse) cachedEntry.data;
+            }
+            
             LocalDateTime since = LocalDateTime.now().minusDays(30);
             List<Object[]> popularProductIds = cartAnalysisRepository.findMostFrequentProducts(since);
             
-            // Get all products in snake_case format
-            List<ProductResponseSnakeCase> allProductResponses = catalogServiceClient.getAllProductsSnakeCase();
+            List<ProductResponseSnakeCase> allProductResponses = getCachedProducts();
             if (allProductResponses == null || allProductResponses.isEmpty()) {
                 return createEmptyResponse(null, "POPULAR", "No products available");
             }
             
-            // Convert to ProductDTO
             List<ProductDTO> allProducts = convertToProductDTOsSnakeCase(allProductResponses);
-            
-            // Map product IDs to products
             Map<Long, ProductDTO> productMap = allProducts.stream()
                 .collect(Collectors.toMap(ProductDTO::getId, product -> product));
             
-            // Get popular products
             List<ProductDTO> popularProducts = popularProductIds.stream()
                 .map(result -> {
                     Long productId = (Long) result[0];
@@ -229,7 +194,10 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .collect(Collectors.toList());
             
             String reasoning = "Most frequently added products in the last 30 days";
-            return new RecommendationResponse(null, "POPULAR", popularProducts, reasoning, 0.9);
+            RecommendationResponse response = new RecommendationResponse(null, "POPULAR", popularProducts, reasoning, 0.9);
+            
+            cache.put(cacheKey, new CacheEntry(response, System.currentTimeMillis()));
+            return response;
             
         } catch (Exception e) {
             log.error("Error getting popular products: {}", e.getMessage());
@@ -246,47 +214,35 @@ public class RecommendationServiceImpl implements RecommendationService {
         allProducts.forEach(product -> scores.put(product.getId(), 0.0));
         
         // PRIORITY 1: Quantity-based scoring (higher weights for quantity)
-        // Score based on cart items (current interest) - PRIORITIZE QUANTITY
         for (CartItem cartItem : cartItems) {
             Long productId = cartItem.getProductId();
-            // Higher weight for quantity: quantity * 1.0 (was 0.3)
             double cartScore = cartItem.getQuantity() * 1.0;
             scores.merge(productId, cartScore, Double::sum);
-            log.info("Cart scoring product {}: quantity={}, score=+{}", productId, cartItem.getQuantity(), cartScore);
         }
         
-        // Score based on order history (past purchases) - PRIORITIZE QUANTITY
         for (OrderItemResponseDTO orderItem : orderItems) {
             try {
                 Long productId = Long.parseLong(orderItem.getProduct_id());
-                // Higher weight for quantity: quantity * 1.5 (was 0.5)
                 double orderScore = orderItem.getQuantity() * 1.5;
                 scores.merge(productId, orderScore, Double::sum);
-                log.info("Order scoring product {}: quantity={}, score=+{}", productId, orderItem.getQuantity(), orderScore);
             } catch (NumberFormatException e) {
-                log.warn("Invalid product ID in order: {}", orderItem.getProduct_id());
             }
         }
         
         // PRIORITY 2: Category-based scoring (much higher weights for category preferences)
         Map<String, Double> categoryScores = new HashMap<>();
         
-        // Calculate category scores from cart - PRIORITIZE CATEGORY
         for (CartItem cartItem : cartItems) {
             ProductDTO product = allProducts.stream()
                 .filter(p -> p.getId().equals(cartItem.getProductId()))
                 .findFirst()
                 .orElse(null);
             if (product != null && product.getCategoryId() != null) {
-                // Higher weight for category: quantity * 2.0 (was 0.2)
                 double categoryScore = cartItem.getQuantity() * 2.0;
                 categoryScores.merge(product.getCategoryId().toString(), categoryScore, Double::sum);
-                log.info("Category scoring from cart: category={}, quantity={}, score=+{}", 
-                    product.getCategoryId(), cartItem.getQuantity(), categoryScore);
             }
         }
         
-        // Calculate category scores from orders - PRIORITIZE CATEGORY
         for (OrderItemResponseDTO orderItem : orderItems) {
             try {
                 Long productId = Long.parseLong(orderItem.getProduct_id());
@@ -295,35 +251,21 @@ public class RecommendationServiceImpl implements RecommendationService {
                     .findFirst()
                     .orElse(null);
                 if (product != null && product.getCategoryId() != null) {
-                    // Higher weight for category: quantity * 3.0 (was 0.3)
                     double categoryScore = orderItem.getQuantity() * 3.0;
                     categoryScores.merge(product.getCategoryId().toString(), categoryScore, Double::sum);
-                    log.info("Category scoring from order: category={}, quantity={}, score=+{}", 
-                        product.getCategoryId(), orderItem.getQuantity(), categoryScore);
                 }
             } catch (NumberFormatException e) {
-                // Skip invalid product IDs
             }
         }
         
-        // Apply category bonus to products - PRIORITIZE CATEGORY
         for (ProductDTO product : allProducts) {
             if (product.getCategoryId() != null) {
-                // Higher category bonus multiplier: 0.5 (was 0.1)
                 double categoryBonus = categoryScores.getOrDefault(product.getCategoryId().toString(), 0.0) * 0.5;
                 scores.merge(product.getId(), categoryBonus, Double::sum);
-                if (categoryBonus > 0) {
-                    log.info("Category bonus for product {} (category {}): +{} points", 
-                        product.getId(), product.getCategoryId(), categoryBonus);
-                }
             }
         }
         
-        // Only add fallback scoring if no category preferences exist
         if (categoryScores.isEmpty()) {
-            log.info("No category preferences found, adding fallback scoring");
-            
-            // Add price-based scoring (prefer mid-range products)
             for (ProductDTO product : allProducts) {
                 if (product.getPrice() != null) {
                     double priceScore = calculatePriceScore(product.getPrice().doubleValue());
@@ -331,23 +273,11 @@ public class RecommendationServiceImpl implements RecommendationService {
                 }
             }
             
-            // Add popularity based on product ID (simulate popularity)
             for (ProductDTO product : allProducts) {
                 double popularityScore = calculatePopularityScore(product.getId());
                 scores.merge(product.getId(), popularityScore, Double::sum);
             }
-        } else {
-            log.info("Category preferences found, skipping fallback scoring to prioritize category-based recommendations");
         }
-        
-        log.info("Category scores: {}", categoryScores);
-        
-        // Debug: Show top 10 scores
-        log.info("Top 10 product scores:");
-        scores.entrySet().stream()
-            .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
-            .limit(10)
-            .forEach(entry -> log.info("Product {}: {} points", entry.getKey(), entry.getValue()));
         
         return scores;
     }
@@ -371,9 +301,6 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
     
     private String generateReasoning(List<CartItem> cartItems, List<OrderItemResponseDTO> orderItems, int totalOrders) {
-        // Debug logging
-        log.info("Generating reasoning - Cart items: {}, Order items: {}, Total orders: {}", 
-            cartItems.size(), orderItems.size(), totalOrders);
         
         if (cartItems.isEmpty() && orderItems.isEmpty()) {
             if (totalOrders > 0) {
@@ -439,11 +366,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         );
     }
     
-    private List<ProductDTO> convertToProductDTOs(List<ProductResponse> productResponses) {
-        return productResponses.stream()
-            .map(this::convertToProductDTO)
-            .collect(Collectors.toList());
-    }
+
     
     private ProductDTO convertToProductDTOSnakeCase(ProductResponseSnakeCase productResponse) {
         // Handle null categoryId by providing a default
@@ -491,16 +414,86 @@ public class RecommendationServiceImpl implements RecommendationService {
     private double calculatePopularityScore(Long productId) {
         if (productId == null) return 0.0;
         
-        // Simulate popularity based on product ID (lower IDs are more popular)
-        // This is a simple heuristic - in real world, you'd use actual popularity data
         if (productId <= 20) {
-            return 0.4; // Very popular (first 20 products)
+            return 0.4;
         } else if (productId <= 50) {
-            return 0.3; // Popular (products 21-50)
+            return 0.3;
         } else if (productId <= 100) {
-            return 0.2; // Moderately popular
+            return 0.2;
         } else {
-            return 0.1; // Less popular
+            return 0.1;
+        }
+    }
+    
+    private List<ProductResponseSnakeCase> getCachedProducts() {
+        String cacheKey = "all_products";
+        CacheEntry cachedEntry = (CacheEntry) cache.get(cacheKey);
+        
+        if (cachedEntry != null && System.currentTimeMillis() - cachedEntry.timestamp < CACHE_TTL) {
+            @SuppressWarnings("unchecked")
+            List<ProductResponseSnakeCase> cachedProducts = (List<ProductResponseSnakeCase>) cachedEntry.data;
+            return cachedProducts;
+        }
+        
+        try {
+            List<ProductResponseSnakeCase> products = catalogServiceClient.getAllProductsSnakeCase();
+            if (products != null && !products.isEmpty()) {
+                cache.put(cacheKey, new CacheEntry(products, System.currentTimeMillis()));
+                return products;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch products from catalog service: {}", e.getMessage());
+            if (cachedEntry != null) {
+                log.info("Using stale cache data due to service unavailability");
+                @SuppressWarnings("unchecked")
+                List<ProductResponseSnakeCase> staleProducts = (List<ProductResponseSnakeCase>) cachedEntry.data;
+                return staleProducts;
+            }
+        }
+        
+        return new ArrayList<>();
+    }
+    
+    @Async
+    @EventListener(ApplicationReadyEvent.class)
+    public void warmupCache() {
+        try {
+            Thread.sleep(5000);
+            log.info("Starting cache warmup...");
+            getCachedProducts();
+            getPopularProducts(8);
+            log.info("Cache warmup completed successfully");
+        } catch (Exception e) {
+            log.warn("Cache warmup failed: {}", e.getMessage());
+        }
+    }
+    
+    public void invalidateAllCache() {
+        cache.clear();
+        log.info("All cache invalidated");
+    }
+    
+    public void invalidateProductsCache() {
+        cache.remove("all_products");
+        log.info("Products cache invalidated");
+    }
+    
+    public void invalidatePopularProductsCache() {
+        cache.entrySet().removeIf(entry -> entry.getKey().startsWith("popular_products_"));
+        log.info("Popular products cache invalidated");
+    }
+    
+    public int getCacheSize() {
+        return cache.size();
+    }
+    
+    private static class CacheEntry {
+        final Object data;
+        final long timestamp;
+        
+        CacheEntry(Object data, long timestamp) {
+            this.data = data;
+            this.timestamp = timestamp;
         }
     }
 } 

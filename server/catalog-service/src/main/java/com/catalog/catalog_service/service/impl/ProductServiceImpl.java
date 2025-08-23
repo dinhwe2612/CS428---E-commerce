@@ -44,6 +44,9 @@ import com.catalog.catalog_service.repository.jpa.ProductImageRepository;
 import com.catalog.catalog_service.repository.jpa.ProductRepository;
 import com.catalog.catalog_service.service.ProductService;
 import com.catalog.catalog_service.specification.ProductSpecification;
+import com.catalog.catalog_service.client.CartServiceClient;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -56,6 +59,10 @@ public class ProductServiceImpl implements ProductService {
     private final RabbitProducer rabbitProducer;
     private final ProductImageRepository productImageRepository;
     private final InventoryRepository inventoryRepository;
+    private final CartServiceClient cartServiceClient;
+    
+    private final Map<String, Object> cache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL = 1800000;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, 
@@ -64,7 +71,8 @@ public class ProductServiceImpl implements ProductService {
                             ProductSearchRepository productSearchRepository,
                             RabbitProducer rabbitProducer,
                             ProductImageRepository productImageRepository,
-                            InventoryRepository inventoryRepository) {
+                            InventoryRepository inventoryRepository,
+                            CartServiceClient cartServiceClient) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.entityMapper = entityMapper;
@@ -72,6 +80,7 @@ public class ProductServiceImpl implements ProductService {
         this.rabbitProducer = rabbitProducer;
         this.productImageRepository = productImageRepository;
         this.inventoryRepository = inventoryRepository;
+        this.cartServiceClient = cartServiceClient;
     }
     @Override
     @Transactional(readOnly = true)
@@ -182,6 +191,9 @@ public class ProductServiceImpl implements ProductService {
             //productSearchRepository.save(document);
             rabbitProducer.sendProductCreatedEvent(new ProductCreatedEvent(savedProduct.getId(), savedProduct.getName(), savedProduct.getDescriptionText(), Double.valueOf(savedProduct.getPrice()), category.getId(), category.getName(), savedProduct.getProductPath()));
             
+            cartServiceClient.invalidateProductsCache();
+            invalidateCatalogCache();
+            
             logger.debug("Product saved successfully with id: {}", savedProduct.getId());  
             
             return entityMapper.toProductDTO(savedProduct);
@@ -262,6 +274,10 @@ public class ProductServiceImpl implements ProductService {
     
         logger.debug("Product after update: {}", product);
         Product updated = productRepository.save(product);
+        
+        cartServiceClient.invalidateProductsCache();
+        invalidateCatalogCache();
+        
         return entityMapper.toProductDTO(updated);
     }
     
@@ -279,6 +295,9 @@ public class ProductServiceImpl implements ProductService {
         rabbitProducer.sendProductDeletedEvent(new ProductDeletedEvent(id
         )
         );
+        
+        cartServiceClient.invalidateProductsCache();
+        invalidateCatalogCache();
     }
 
     @Override
@@ -293,10 +312,22 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
      public List<ProductDTO> getAll(){
+        String cacheKey = "all_products_catalog";
+        CacheEntry cachedEntry = (CacheEntry) cache.get(cacheKey);
+        
+        if (cachedEntry != null && System.currentTimeMillis() - cachedEntry.timestamp < CACHE_TTL) {
+            @SuppressWarnings("unchecked")
+            List<ProductDTO> cachedProducts = (List<ProductDTO>) cachedEntry.data;
+            return cachedProducts;
+        }
+        
         List<Product> products = productRepository.findAll();
-        return products.stream()
+        List<ProductDTO> productDTOs = products.stream()
                 .map(entityMapper::toProductDTO)
                 .collect(Collectors.toList());
+                
+        cache.put(cacheKey, new CacheEntry(productDTOs, System.currentTimeMillis()));
+        return productDTOs;
     }
 
     @Override
@@ -339,6 +370,22 @@ public class ProductServiceImpl implements ProductService {
         }
         
         productRepository.saveAll(allProducts);
+        invalidateCatalogCache();
         logger.info("Successfully synced {} products to NEW_FLOWER status", allProducts.size());
+    }
+    
+    private void invalidateCatalogCache() {
+        cache.remove("all_products_catalog");
+        logger.info("Catalog cache invalidated");
+    }
+    
+    private static class CacheEntry {
+        final Object data;
+        final long timestamp;
+        
+        CacheEntry(Object data, long timestamp) {
+            this.data = data;
+            this.timestamp = timestamp;
+        }
     }
 }
