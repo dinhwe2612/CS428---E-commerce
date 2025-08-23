@@ -247,6 +247,8 @@ public class EntityMapper {
                     .map(prp -> prp.getProduct().getId())
                     .collect(Collectors.toList());
             dto.setProductIds(productIds);
+        } else {
+            dto.setProductIds(new ArrayList<>());
         }
         
         if (pricingRule.getPricingRuleCategories() != null) {
@@ -254,6 +256,8 @@ public class EntityMapper {
                     .map(PricingRuleCategory::getCategoryId)
                     .collect(Collectors.toList());
             dto.setCategoryIds(categoryIds);
+        } else {
+            dto.setCategoryIds(new ArrayList<>());
         }
         
         dto.setRuleName(pricingRule.getRuleName());

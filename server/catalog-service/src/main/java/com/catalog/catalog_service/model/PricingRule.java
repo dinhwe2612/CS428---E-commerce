@@ -3,6 +3,7 @@ package com.catalog.catalog_service.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,11 +44,11 @@ public class PricingRule {
 
 
     
-    @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PricingRuleProduct> pricingRuleProducts;
+    @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<PricingRuleProduct> pricingRuleProducts = new HashSet<>();
     
-    @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PricingRuleCategory> pricingRuleCategories;
+    @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<PricingRuleCategory> pricingRuleCategories = new HashSet<>();
 
     @Column(name = "rule_name", nullable = false)
     private String ruleName;

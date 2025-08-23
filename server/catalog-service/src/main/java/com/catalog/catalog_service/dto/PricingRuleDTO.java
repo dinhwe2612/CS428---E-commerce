@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import com.catalog.catalog_service.model.PricingRule;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class PricingRuleDTO {
     private Long id;
     
     @Schema(description = "Product IDs this rule applies to", example = "[1, 2, 3]")
+    @JsonProperty("product_ids")
     private List<Long> productIds;
     
     @Schema(description = "Name of the pricing rule", example = "Valentine's Day Discount")
@@ -76,6 +78,7 @@ public class PricingRuleDTO {
     private Boolean applyToAllProducts;
     
     @Schema(description = "Category IDs this rule applies to", example = "[1, 2, 3]")
+    @JsonProperty("category_ids")
     private List<Long> categoryIds;
     
     @Schema(description = "Rule creation timestamp", example = "2024-01-15T10:30:00")

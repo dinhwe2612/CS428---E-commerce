@@ -66,7 +66,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     public PricingRuleDTO getPricingRuleById(Long id) {
         PricingRule pricingRule = pricingRuleRepository.findByIdWithRelationships(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pricing rule not found with id: " + id));
-        return entityMapper.toPricingRuleDTO(pricingRule);
+        return mapPricingRuleToDTO(pricingRule);
     }
     
     @Override
@@ -84,7 +84,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         
         PricingRule pricingRuleWithRelationships = pricingRuleRepository.findByIdWithRelationships(savedPricingRule.getId())
                 .orElse(savedPricingRule);
-        return entityMapper.toPricingRuleDTO(pricingRuleWithRelationships);
+        return mapPricingRuleToDTO(pricingRuleWithRelationships);
     }
     
     @Override
@@ -110,7 +110,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         
         PricingRule pricingRuleWithRelationships = pricingRuleRepository.findByIdWithRelationships(savedPricingRule.getId())
                 .orElse(savedPricingRule);
-        return entityMapper.toPricingRuleDTO(pricingRuleWithRelationships);
+        return mapPricingRuleToDTO(pricingRuleWithRelationships);
     }
     
     @Override
@@ -127,7 +127,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     public List<PricingRuleDTO> getActivePricingRules() {
         List<PricingRule> pricingRules = pricingRuleRepository.findByIsActiveTrueWithRelationshipsOrderByPriorityAsc();
         return pricingRules.stream()
-                .map(entityMapper::toPricingRuleDTO)
+                .map(this::mapPricingRuleToDTO)
                 .collect(Collectors.toList());
     }
     
