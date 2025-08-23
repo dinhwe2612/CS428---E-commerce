@@ -2,6 +2,7 @@ package com.catalog.catalog_service.repository.jpa;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +55,19 @@ public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> 
                                      @Param("isActive") Boolean isActive,
                                      @Param("triggerType") PricingRule.TriggerType triggerType,
                                      Pageable pageable);
+    
+    @Query("SELECT DISTINCT pr FROM PricingRule pr " +
+           "LEFT JOIN FETCH pr.pricingRuleProducts " +
+           "LEFT JOIN FETCH pr.pricingRuleCategories " +
+           "WHERE pr.id = :id")
+    Optional<PricingRule> findByIdWithRelationships(@Param("id") Long id);
+    
+    @Query("SELECT DISTINCT pr FROM PricingRule pr " +
+           "LEFT JOIN FETCH pr.pricingRuleProducts " +
+           "LEFT JOIN FETCH pr.pricingRuleCategories " +
+           "WHERE pr.isActive = true " +
+           "ORDER BY pr.priority ASC")
+    List<PricingRule> findByIsActiveTrueWithRelationshipsOrderByPriorityAsc();
 
 
 }
