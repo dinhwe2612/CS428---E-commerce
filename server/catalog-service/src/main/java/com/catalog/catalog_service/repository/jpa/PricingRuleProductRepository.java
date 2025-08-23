@@ -22,4 +22,7 @@ public interface PricingRuleProductRepository extends JpaRepository<PricingRuleP
     
     @Query("SELECT prp FROM PricingRuleProduct prp WHERE prp.product.id IN :productIds")
     List<PricingRuleProduct> findByProductIdIn(@Param("productIds") List<Long> productIds);
+    
+    @Query("SELECT prp.product.id FROM PricingRuleProduct prp WHERE prp.pricingRule.id = :pricingRuleId")
+    List<Long> findProductIdsByPricingRuleId(@Param("pricingRuleId") Long pricingRuleId);
 }

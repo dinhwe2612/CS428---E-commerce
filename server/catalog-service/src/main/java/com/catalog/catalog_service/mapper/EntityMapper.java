@@ -242,23 +242,8 @@ public class EntityMapper {
         PricingRuleDTO dto = new PricingRuleDTO();
         dto.setId(pricingRule.getId());
         
-        if (pricingRule.getPricingRuleProducts() != null) {
-            List<Long> productIds = pricingRule.getPricingRuleProducts().stream()
-                    .map(prp -> prp.getProduct().getId())
-                    .collect(Collectors.toList());
-            dto.setProductIds(productIds);
-        } else {
-            dto.setProductIds(new ArrayList<>());
-        }
-        
-        if (pricingRule.getPricingRuleCategories() != null) {
-            List<Long> categoryIds = pricingRule.getPricingRuleCategories().stream()
-                    .map(PricingRuleCategory::getCategoryId)
-                    .collect(Collectors.toList());
-            dto.setCategoryIds(categoryIds);
-        } else {
-            dto.setCategoryIds(new ArrayList<>());
-        }
+        dto.setProductIds(new ArrayList<>());
+        dto.setCategoryIds(new ArrayList<>());
         
         dto.setRuleName(pricingRule.getRuleName());
         dto.setDescription(pricingRule.getDescription());

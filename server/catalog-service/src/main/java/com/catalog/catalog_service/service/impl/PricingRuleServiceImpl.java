@@ -131,7 +131,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     public List<PricingRuleDTO> getPricingRulesByProductId(Long productId) {
         List<PricingRule> pricingRules = pricingRuleRepository.findByProductIdAndIsActiveTrueOrderByPriorityAsc(productId);
         return pricingRules.stream()
-                .map(entityMapper::toPricingRuleDTO)
+                .map(this::mapPricingRuleToDTO)
                 .collect(Collectors.toList());
     }
     
@@ -139,7 +139,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     public List<PricingRuleDTO> getPricingRulesByCategoryId(Long categoryId) {
         List<PricingRule> pricingRules = pricingRuleRepository.findByCategoryIdAndIsActiveTrueOrderByPriorityAsc(categoryId);
         return pricingRules.stream()
-                .map(entityMapper::toPricingRuleDTO)
+                .map(this::mapPricingRuleToDTO)
                 .collect(Collectors.toList());
     }
     
@@ -167,7 +167,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     public List<PricingRuleDTO> getApplicableRulesForProduct(Long productId, Long categoryId) {
         List<PricingRule> pricingRules = pricingRuleRepository.findApplicableRulesForProduct(productId, categoryId);
         return pricingRules.stream()
-                .map(entityMapper::toPricingRuleDTO)
+                .map(this::mapPricingRuleToDTO)
                 .collect(Collectors.toList());
     }
     
@@ -269,16 +269,10 @@ public class PricingRuleServiceImpl implements PricingRuleService {
     private PricingRuleDTO mapPricingRuleToDTO(PricingRule pricingRule) {
         PricingRuleDTO dto = entityMapper.toPricingRuleDTO(pricingRule);
         
-        List<PricingRuleProduct> ruleProducts = pricingRuleProductRepository.findByPricingRuleId(pricingRule.getId());
-        List<Long> productIds = ruleProducts.stream()
-                .map(prp -> prp.getProduct().getId())
-                .collect(Collectors.toList());
+        List<Long> productIds = pricingRuleProductRepository.findProductIdsByPricingRuleId(pricingRule.getId());
         dto.setProductIds(productIds);
         
-        List<PricingRuleCategory> ruleCategories = pricingRuleCategoryRepository.findByPricingRuleId(pricingRule.getId());
-        List<Long> categoryIds = ruleCategories.stream()
-                .map(PricingRuleCategory::getCategoryId)
-                .collect(Collectors.toList());
+        List<Long> categoryIds = pricingRuleCategoryRepository.findCategoryIdsByPricingRuleId(pricingRule.getId());
         dto.setCategoryIds(categoryIds);
         
         return dto;

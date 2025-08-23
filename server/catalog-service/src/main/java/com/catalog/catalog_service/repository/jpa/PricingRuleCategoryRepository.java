@@ -22,4 +22,7 @@ public interface PricingRuleCategoryRepository extends JpaRepository<PricingRule
     
     @Query("SELECT prc FROM PricingRuleCategory prc WHERE prc.categoryId IN :categoryIds")
     List<PricingRuleCategory> findByCategoryIdIn(@Param("categoryIds") List<Long> categoryIds);
+    
+    @Query("SELECT prc.categoryId FROM PricingRuleCategory prc WHERE prc.pricingRule.id = :pricingRuleId")
+    List<Long> findCategoryIdsByPricingRuleId(@Param("pricingRuleId") Long pricingRuleId);
 }
