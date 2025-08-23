@@ -331,4 +331,46 @@ public class DynamicPricingController {
         result.put("rules", ruleDetails);
         return ResponseEntity.ok(result);
     }
+    
+    @Operation(
+        summary = "Debug: Get rule details by ID",
+        description = "Debug endpoint to check rule relationships"
+    )
+    @GetMapping("/debug/rules/{ruleId}")
+    public ResponseEntity<Map<String, Object>> getRuleDetails(
+            @Parameter(description = "Rule ID", required = true, example = "1")
+            @PathVariable Long ruleId
+    ) {
+        Map<String, Object> result = new HashMap<>();
+        
+        PricingRule rule = pricingRuleRepository.findByIdWithRelationships(ruleId).orElse(null);
+        if (rule == null) {
+            result.put("error", "Rule not found");
+            return ResponseEntity.ok(result);
+        }
+        
+        result.put("ruleId", ruleId);
+        result.put("ruleName", rule.getRuleName());
+        result.put("applyToAll", rule.getApplyToAllProducts());
+        
+        // Check products
+        List<Long> ruleProductIds = new ArrayList<>();
+        if (rule.getPricingRuleProducts() != null) {
+            ruleProductIds = rule.getPricingRuleProducts().stream()
+                .map(prp -> prp.getProduct().getId())
+                .collect(Collectors.toList());
+        }
+        result.put("productIds", ruleProductIds);
+        
+        // Check categories  
+        List<Long> ruleCategoryIds = new ArrayList<>();
+        if (rule.getPricingRuleCategories() != null) {
+            ruleCategoryIds = rule.getPricingRuleCategories().stream()
+                .map(prc -> prc.getCategoryId())
+                .collect(Collectors.toList());
+        }
+        result.put("categoryIds", ruleCategoryIds);
+        
+        return ResponseEntity.ok(result);
+    }
 }

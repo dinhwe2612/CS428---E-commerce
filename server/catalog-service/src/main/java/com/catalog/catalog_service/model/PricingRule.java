@@ -11,12 +11,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "pricing_rules")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"pricingRuleProducts", "pricingRuleCategories"})
 public class PricingRule {
     
     public enum RuleType {

@@ -145,9 +145,15 @@ public class DynamicPricingServiceImpl implements DynamicPricingService {
     private List<PricingRule> getApplicableRules(Product product) {
         List<PricingRule> rules = new ArrayList<>();
         
-        rules.addAll(pricingRuleRepository.findByProductIdAndIsActiveTrueOrderByPriorityAsc(product.getId()));
-        rules.addAll(pricingRuleRepository.findByCategoryIdAndIsActiveTrueOrderByPriorityAsc(product.getCategory().getId()));
-        rules.addAll(pricingRuleRepository.findByApplyToAllProductsTrueAndIsActiveTrueOrderByPriorityAsc());
+        List<PricingRule> productRules = pricingRuleRepository.findByProductIdAndIsActiveTrueOrderByPriorityAsc(product.getId());
+        List<PricingRule> categoryRules = pricingRuleRepository.findByCategoryIdAndIsActiveTrueOrderByPriorityAsc(product.getCategory().getId());
+        List<PricingRule> globalRules = pricingRuleRepository.findByApplyToAllProductsTrueAndIsActiveTrueOrderByPriorityAsc();
+        
+
+        
+        rules.addAll(productRules);
+        rules.addAll(categoryRules);
+        rules.addAll(globalRules);
         
         return rules.stream()
             .distinct()

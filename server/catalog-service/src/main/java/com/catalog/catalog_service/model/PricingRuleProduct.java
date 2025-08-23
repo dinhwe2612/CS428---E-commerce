@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "pricing_rule_products")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"pricingRule", "product"})
 public class PricingRuleProduct {
     
     @Id

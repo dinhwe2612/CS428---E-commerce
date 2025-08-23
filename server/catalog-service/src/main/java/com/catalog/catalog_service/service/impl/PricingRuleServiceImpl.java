@@ -82,9 +82,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         
         logger.info("Created pricing rule with id: {}", savedPricingRule.getId());
         
-        PricingRule pricingRuleWithRelationships = pricingRuleRepository.findByIdWithRelationships(savedPricingRule.getId())
-                .orElse(savedPricingRule);
-        return mapPricingRuleToDTO(pricingRuleWithRelationships);
+        return mapPricingRuleToDTO(savedPricingRule);
     }
     
     @Override
@@ -108,9 +106,7 @@ public class PricingRuleServiceImpl implements PricingRuleService {
         PricingRule savedPricingRule = pricingRuleRepository.save(pricingRule);
         logger.info("Updated pricing rule with id: {}", savedPricingRule.getId());
         
-        PricingRule pricingRuleWithRelationships = pricingRuleRepository.findByIdWithRelationships(savedPricingRule.getId())
-                .orElse(savedPricingRule);
-        return mapPricingRuleToDTO(pricingRuleWithRelationships);
+        return mapPricingRuleToDTO(savedPricingRule);
     }
     
     @Override
