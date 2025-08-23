@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "pricing_rules")
@@ -19,6 +20,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"pricingRuleProducts", "pricingRuleCategories"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class PricingRule {
     
     public enum RuleType {
@@ -42,8 +44,8 @@ public class PricingRule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
-
 
     
     @OneToMany(mappedBy = "pricingRule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -103,7 +105,7 @@ public class PricingRule {
     @Column(name = "apply_to_all_products")
     private Boolean applyToAllProducts = false;
     
-
+    
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
